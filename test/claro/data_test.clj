@@ -8,12 +8,6 @@
             [claro.data :as data]))
 
 ;; ## Fixtures
-(defrecord Person [id]
-  data/Resolvable
-  (resolve! [_ _]
-    {:id id
-     :father (Person. (* id 3))
-     :mother (Person. (* id 5))}))
 
 (defn make-engine
   [resolutions & [more-opts]]
@@ -96,3 +90,32 @@
              (is (= (class apples) (class result)))
              (is (every? #{:apple} (map :type result)))
              (is (every? #{:red :green} (map :colour result))))))))
+
+;; ## Maps
+
+(defspec t-map-value-resolution 20
+  (let [path-gen (gen/such-that seq (gen/vector gen/simple-type))]
+    (prop/for-all
+      [apple-path path-gen]
+      (let [run! (make-engine (atom []))
+            result @(run! (assoc-in {} apple-path (Apple. :red)))]
+        (and (is (map? result))
+             (is (= {:type :apple, :colour :red}
+                    (get-in result apple-path))))))))
+
+(defspec t-map-key-resolution 20
+  (let [path-gen (gen/such-that seq (gen/vector gen/simple-type))]
+    (prop/for-all
+      [apple-path path-gen]
+      (let [run! (make-engine (atom []))
+            result @(run! (assoc-in {}
+                                    apple-path
+                                    {(Apple. :red) :red
+                                     (Apple. :green) :green}))]
+        (and (is (map? result))
+             (let [m (get-in result apple-path)]
+               (and (is (= 2 (count m)))
+                    (is (= (vector
+                             [{:type :apple, :colour :green} :green]
+                             [{:type :apple, :colour :red} :red])
+                           (sort-by val m))))))))))
