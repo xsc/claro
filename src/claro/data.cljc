@@ -88,7 +88,8 @@
    chain-when-contains
    chain-keys
    chain-select-keys
-   chain]
+   chain
+   wait]
 
   [claro.data.projection
    project]

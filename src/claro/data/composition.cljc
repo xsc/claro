@@ -102,11 +102,21 @@
       #(select-keys % ks)
       #(chain-select-keys % ks))))
 
-(defn chain
-  "Wrap the given value with a processing function that gets called once the
-   value has been fully resolved. Only use this for guaranteed finite expansion."
-  [value f & fs]
-  (->> (cons f fs)
-       (reverse)
+(defn- chain*
+  [value predicate fs]
+  (->> (reverse fs)
        (apply comp)
-       (->ConditionalComposition value nil)))
+       (->ConditionalComposition value predicate)))
+
+(defn chain
+  "Wrap the given value with processing functions that get called (in-order)
+   the moment the given value is neither a `Resolvable` nor wrapped."
+  [value f & fs]
+  (chain* value (constantly true) (cons f fs)))
+
+(defn wait
+  "Wrap the given value with processing functions that get called (in-order)
+   once the value has been fully resolved. Only use this for guaranteed finite
+   expansion."
+  [value f & fs]
+  (chain* value nil (cons f fs)))
