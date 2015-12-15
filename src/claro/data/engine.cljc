@@ -68,13 +68,15 @@
 (defn- merge-resolvables
   "Merge all resolved values with the original batch."
   [batch resolved-values]
-  (when (not= (count batch) (count resolved-values))
-    (throw
-      (IllegalStateException.
-        (str "'resolve-fn' did not resolve all values - "
-             (count batch) " values were given, "
-             (count resolved-values) " were produced."))))
-  (zipmap batch resolved-values))
+  (let [batch-count (count batch)
+        resolved-values (take batch-count resolved-values)]
+    (when (< batch-count (count resolved-values))
+      (throw
+        (IllegalStateException.
+          (str "'resolve-fn' did not resolve all values - "
+               (count batch) " values were given, only "
+               (count resolved-values) " were produced."))))
+    (zipmap batch resolved-values)))
 
 (defn- resolve-batch!
   "Returns a manifold deferred representing the resolution of the given batch.
