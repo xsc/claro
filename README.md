@@ -21,6 +21,41 @@ representation of asynchronous logic. This means that `Resolvables` can return:
 - Manifold's own `deferred` values,
 - or just plain values (whose computation will block resolution, though).
 
+### Compound Resolvables
+
+Muse's `DataSource`s have to produce fully resolved values, meaning that they
+cannot generate a partial result where e.g. a single field points at another
+`DataSource`. One can work around this limitation by calling `muse.core/run!`
+within the source, but I'm not sure if this would be idiomatic use of the
+library.
+
+In claro, you can specify the following:
+
+```clojure
+(defrecord Friend [id]
+  claro.data/Resolvable
+  (resolve! [_ _]
+    {:friend id}))
+
+(defrecord Friends [id]
+  claro.data/Resolvable
+  (resolve! [_ _]
+    (future
+      (let [friend-ids [5 6 7 8]]
+        (map #(Friend. %) friend-ids)))))
+```
+
+And resolution will produce:
+
+```clojure
+(let [run! (claro.data/engine)]
+  @(run! (Friends. 1)))
+;; => ({:friend 5} {:friend 6} {:friend 7} {:friend 8})
+```
+
+Of course, this can be used to generate potentially infinite trees, which is why
+the next sections are particularly important.
+
 ### Projection (experimental)
 
 Given a potentially infinite tree and a _projection template_, we can "cut off"
