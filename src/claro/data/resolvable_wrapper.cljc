@@ -60,5 +60,5 @@
   nil
   (resolvables [_]
     nil)
-  (apply-resolved [_]
+  (apply-resolved [_ _]
     nil))
