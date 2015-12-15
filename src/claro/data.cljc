@@ -60,6 +60,8 @@
    project]
 
   [claro.data.resolvable
+   Resolvable
+   BatchedResolvable
    resolvable?
    resolve-if-possible!
    resolve!
