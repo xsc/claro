@@ -104,7 +104,7 @@
 ;; ## Engine
 
 (defn- assert-batch-count!
-  [{:keys [max-batches]} batch-count]
+  [{:keys [max-batches] :or {max-batches 256}} batch-count]
   (when (some-> max-batches (< batch-count))
     (throw
       (IllegalStateException.
