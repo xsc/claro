@@ -9,6 +9,18 @@ stuff.
 
 Don't.
 
+## Differences to Muse
+
+### Manifold
+
+Claro relies on the [manifold](https://github.com/ztellman/manifold) library for
+representation of asynchronous logic. This means that `Resolvables` can return:
+
+- Clojure's `future`, `delay`, `promise`,
+- `core.async` channels,
+- Manifold's own `deferred` values,
+- or just plain values (whose computation will block resolution, though).
+
 ### Projection (experimental)
 
 Given a potentially infinite tree and a _projection template_, we can "cut off"
