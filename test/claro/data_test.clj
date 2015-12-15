@@ -37,7 +37,7 @@
          (fn [batch]
            (swap! resolutions
                   (fnil conj [])
-                  [(class (first batch)) (count batch)] )
+                  [(class (first batch)) (count batch)])
            (f batch)))})))
 
 ;; ## Tests
@@ -51,4 +51,8 @@
       (and (is (instance? clojure.lang.IDeref basket))
            (is (= basket-size (count @basket)))
            (is (every? #{:apple} (map :type @basket)))
-           (is (every? #{:red :green} (map :colour @basket)))))))
+           (is (every? #{:red :green} (map :colour @basket)))
+           (is (= [AppleBasket 1] (first @resolutions)))
+           (is (= (when (pos? basket-size)
+                    [Apple (count (set (map :colour @basket)))])
+                  (second @resolutions)))))))
