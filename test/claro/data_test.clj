@@ -77,3 +77,22 @@
                           IllegalStateException
                           #"resolution has exceeded maximum batch count/depth"
                           @result)))))))
+
+;; ## Collections
+
+(defspec t-collection-type-maintained 100
+  (let [apple-gen (->> [(Apple. :red) (Apple. :green)]
+                       (gen/elements)
+                       (gen/vector)
+                       (gen/tuple (gen/elements [[] ()  #{}]))
+                       (gen/fmap
+                         (fn [[empty-coll apples]]
+                           (into empty-coll apples))))]
+    (prop/for-all
+      [apples apple-gen]
+      (let [run! (make-engine (atom []))
+            result @(run! apples)]
+        (and (is (= (count apples) (count result)))
+             (is (= (class apples) (class result)))
+             (is (every? #{:apple} (map :type result)))
+             (is (every? #{:red :green} (map :colour result))))))))
