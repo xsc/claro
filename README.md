@@ -8,6 +8,57 @@ So far, this is [muse][muse] with some experimental stuff.
 
 Don't.
 
+### Projection (experimental)
+
+Given a potentially infinite tree and a _projection template_, we can "cut off"
+subtrees that do not match the template.
+
+```clojure
+(require '[claro.data :as data])
+
+(defrecord Person [id]
+  data/Resolvable
+  (resolve! [_ _]
+    {:id id
+     :father (Person. (* (inc id) 3))
+     :mother (Person. (* id 5))}))
+
+(let [run! (data/tracing-engine)]
+  @(run!
+     (data/project
+       (Person. 1)
+       {:father {:mother {:id nil}}})))
+;; [user.Person] 1 of 1 elements resolved ... 0.001s
+;; [user.Person] 1 of 1 elements resolved ... 0.000s
+;; [user.Person] 1 of 1 elements resolved ... 0.000s
+;; => {:father {:mother {:id 30}}}
+```
+
+As you can see due to the (for-debug-purposes-only) tracing resolution engine,
+there were three batches of resolutions, each with only one element:
+
+- the initial person,
+- the initial person's father,
+- as well as the initial person's father's mother.
+
+Contrast this with:
+
+```clojure
+(let [run! (data/tracing-engine)]
+  @(run!
+     (data/project
+       (Person. 1)
+       {:father {:mother {:id nil}}
+        :mother {:father {:id nil}}})))
+;; [user.Person] 1 of 1 elements resolved ... 0.002s
+;; [user.Person] 2 of 2 elements resolved ... 0.000s
+;; [user.Person] 2 of 2 elements resolved ... 0.000s
+;; => {:father {:mother {:id 30}}, :mother {:father {:id 18}}}
+```
+
+We didn't change the resolution logic, just the projection template, causing
+the inclusion of the initial person's mother's data.
+
 ## License
 
 ```
