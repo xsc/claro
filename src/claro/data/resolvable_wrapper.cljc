@@ -31,13 +31,14 @@
 (extend-protocol ResolvableWrapper
   clojure.lang.IPersistentCollection
   (resolvables [coll]
-    (if (r/resolvable? coll)
-      [coll]
-      (distinct (mapcat resolvables coll))))
+    (cond (r/resolvable? coll) [coll]
+          (wrapped? coll) (resolvables coll)
+          :else (distinct (mapcat resolvables coll))))
   (apply-resolved [coll resolved-values]
-    (if (r/resolvable? coll)
-      (get resolved-values coll coll)
-      (into (empty coll) (map #(apply-resolved % resolved-values) coll))))
+    (cond (r/resolvable? coll) (get resolved-values coll coll)
+          (wrapped? coll) (apply-resolved coll resolved-values)
+          :else (into (if (record? coll) coll (empty coll))
+                      (map #(apply-resolved % resolved-values) coll))))
 
   clojure.lang.MapEntry
   (resolvables [[k v]]

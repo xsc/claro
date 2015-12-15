@@ -119,3 +119,14 @@
                              [{:type :apple, :colour :green} :green]
                              [{:type :apple, :colour :red} :red])
                            (sort-by val m))))))))))
+
+;; ## Records
+
+(defrecord Wrapper [value])
+
+(deftest t-record-resolution
+  (let [run! (make-engine (atom []))
+        value (Wrapper. (Apple. :red))
+        result @(run! value)]
+    (is (instance? Wrapper result))
+    (is (= {:type :apple, :colour :red} (:value result)))))
