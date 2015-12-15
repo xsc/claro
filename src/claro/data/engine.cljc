@@ -103,6 +103,15 @@
 
 ;; ## Engine
 
+(defn- assert-batch-count!
+  [{:keys [max-batches]} batch-count]
+  (when (some-> max-batches (< batch-count))
+    (throw
+      (IllegalStateException.
+        (format "resolution has exceeded maximum batch count/depth: %d/%d"
+                batch-count
+                max-batches)))))
+
 (defn run!
   "Run the resolution engine on the given value. `opts` is a map of:
 
@@ -117,12 +126,16 @@
      the deferred value),
    - `:apply-fn`: a function that takes the original value, as well as a map
      of resolvable -> resolved value pairs, and unifies them into a
-     now-more-resolved value for the next iteration.
+     now-more-resolved value for the next iteration,
+   - `:max-batches`: an integer describing the maximum number of batches to
+     resolve before throwing an `IllegalStateException`.
 
    Returns a manifold deferred with the resolved result."
   [opts value]
   {:pre [(every? fn? (map opts [:inspect-fn :resolve-fn :apply-fn]))]}
-  (d/loop [value value]
+  (d/loop [value       value
+           batch-count 0]
+    (assert-batch-count! opts batch-count)
     (d/let-flow [value   value
                  batches (select-resolvable-batches opts value)]
       (if (seq batches)
@@ -130,5 +143,5 @@
           batches
           #(resolve-batches! opts %)
           #(apply-resolved-batches opts value %)
-          d/recur)
+          #(d/recur % (+ batch-count (count batches))))
         (apply-resolved-batches opts value {})))))

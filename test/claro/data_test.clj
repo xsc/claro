@@ -8,18 +8,6 @@
             [claro.data :as data]))
 
 ;; ## Fixtures
-
-(defrecord Apple [colour]
-  data/Resolvable
-  (resolve! [_ _]
-    {:type :apple
-     :colour colour}))
-
-(defrecord AppleBasket [size]
-  data/Resolvable
-  (resolve! [_ {:keys [colours]}]
-    (vec (take size (repeatedly #(Apple. (rand-nth colours)))))))
-
 (defrecord Person [id]
   data/Resolvable
   (resolve! [_ _]
@@ -40,7 +28,18 @@
                   [(class (first batch)) (count batch)])
            (f batch)))})))
 
-;; ## Tests
+;; ## Simple Resolution
+
+(defrecord Apple [colour]
+  data/Resolvable
+  (resolve! [_ _]
+    {:type :apple
+     :colour colour}))
+
+(defrecord AppleBasket [size]
+  data/Resolvable
+  (resolve! [_ {:keys [colours]}]
+    (vec (take size (repeatedly #(Apple. (rand-nth colours)))))))
 
 (defspec t-simple-resolution 100
   (prop/for-all
@@ -56,3 +55,26 @@
            (is (= (when (pos? basket-size)
                     [Apple (count (set (map :colour @basket)))])
                   (second @resolutions)))))))
+
+;; ## Max Batch Limit
+
+(defrecord Nested [n max-n]
+  data/Resolvable
+  (resolve! [_ _]
+    (when (< n max-n)
+      {:nested (Nested. (inc n) max-n)})))
+
+(defspec t-max-batches 20
+  (prop/for-all
+    [max-n       gen/pos-int
+     max-batches gen/s-pos-int]
+    (let [resolutions (atom [])
+          run! (make-engine resolutions {:max-batches max-batches})
+          result (run! (Nested. 0 max-n))]
+      (cond (= max-n 0)           (is (nil? @result))
+            (< max-n max-batches) (is (map? @result))
+            :else (boolean
+                    (is (thrown-with-msg?
+                          IllegalStateException
+                          #"resolution has exceeded maximum batch count/depth"
+                          @result)))))))

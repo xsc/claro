@@ -34,10 +34,10 @@
 (defn- engine-opts
   [opts]
   (merge
+    opts
     {:resolve-fn (build-resolve-fn opts)
      :inspect-fn (build-inspect-fn opts)
-     :apply-fn   (build-apply-fn opts)}
-    (select-keys opts [:select-fn :deferred-fn])))
+     :apply-fn   (build-apply-fn opts)}))
 
 (defn engine
   "Build a resolution engine for `Resolvables` and `BatchedResolvables`."
