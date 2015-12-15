@@ -5,6 +5,7 @@
              [engine :as engine]
              composition
              projection]
+            [manifold.deferred :as d]
             [potemkin :refer [import-vars]]))
 
 ;; ## Engine
@@ -45,6 +46,38 @@
   ([opts]
    (let [opts (engine-opts opts)]
      #(engine/run! opts %))))
+
+;; ## Tracing Engine
+
+(defn- trace!
+  [batch start result]
+  (let [delta (/ (- (System/nanoTime) start) 1e9)]
+    (locking *out*
+      (printf "[%s] " (.getName (class (first batch))))
+      (if (instance? Throwable result)
+        (print "an error occured")
+        (print (count result) "of" (count batch) "elements resolved"))
+      (printf " ... %.3fs%n" delta))
+  (if (instance? Throwable result)
+    (throw result)
+    result)))
+
+(defn- wrap-trace
+  [resolver]
+  (fn [batch]
+    (let [start (System/nanoTime)]
+      (try
+        (d/chain
+          (resolver batch)
+          #(trace! batch start %))
+        (catch Throwable t
+          (trace! batch start t))))))
+
+(defn tracing-engine
+  [& [opts]]
+  (->> {:wrap-resolve wrap-trace}
+       (merge opts)
+       (engine)))
 
 ;; ## Facade
 
