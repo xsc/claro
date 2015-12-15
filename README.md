@@ -1,6 +1,7 @@
 # claro
 
-So far, this is [muse][muse] with some experimental stuff.
+So far, this replicates [muse][muse]'s functionality and adds some experimental
+stuff.
 
 [muse]: https://github.com/kachayev/muse
 
