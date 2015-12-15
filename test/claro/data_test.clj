@@ -68,8 +68,7 @@
   (prop/for-all
     [max-n       gen/pos-int
      max-batches gen/s-pos-int]
-    (let [resolutions (atom [])
-          run! (make-engine resolutions {:max-batches max-batches})
+    (let [run! (make-engine (atom []) {:max-batches max-batches})
           result (run! (Nested. 0 max-n))]
       (cond (= max-n 0)           (is (nil? @result))
             (< max-n max-batches) (is (map? @result))
