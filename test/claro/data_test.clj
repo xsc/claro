@@ -94,7 +94,7 @@
 ;; ## Maps
 
 (defspec t-map-value-resolution 20
-  (let [path-gen (gen/vector gen/simple-type-printable 1)]
+  (let [path-gen (gen/not-empty (gen/vector gen/simple-type-printable))]
     (prop/for-all
       [apple-path path-gen]
       (let [run! (make-engine (atom []))
@@ -104,7 +104,7 @@
                     (get-in result apple-path))))))))
 
 (defspec t-map-key-resolution 20
-  (let [path-gen (gen/vector gen/simple-type-printable 1)]
+  (let [path-gen (gen/not-empty (gen/vector gen/simple-type-printable))]
     (prop/for-all
       [apple-path path-gen]
       (let [run! (make-engine (atom []))
