@@ -92,18 +92,21 @@
 
 ;; ## Maps
 
-(defspec t-map-value-resolution 20
-  (let [path-gen (gen/not-empty (gen/vector gen/simple-type-printable))]
+(let [path-gen (->> gen/simple-type
+                    (gen/such-that (complement #(and (number? %) (Double/isNaN %))))
+                    (gen/vector)
+                    (gen/not-empty))]
+
+  (defspec t-map-value-resolution 20
     (prop/for-all
       [apple-path path-gen]
       (let [run! (make-engine (atom []))
             result @(run! (assoc-in {} apple-path (Apple. :red)))]
         (and (is (map? result))
              (is (= {:type :apple, :colour :red}
-                    (get-in result apple-path))))))))
+                    (get-in result apple-path)))))))
 
-(defspec t-map-key-resolution 20
-  (let [path-gen (gen/not-empty (gen/vector gen/simple-type-printable))]
+  (defspec t-map-key-resolution 20
     (prop/for-all
       [apple-path path-gen]
       (let [run! (make-engine (atom []))
