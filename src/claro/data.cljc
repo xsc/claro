@@ -1,7 +1,6 @@
 (ns claro.data
   (:require [claro.data
              resolvable
-             resolvable-wrapper
              composition
              projection]
             [potemkin :refer [import-vars]]))
@@ -24,8 +23,4 @@
    resolvable?
    resolve-if-possible!
    resolve!
-   resolve-batch!]
-
-  [claro.data.resolvable-wrapper
-   resolvables
-   apply-resolved])
+   resolve-batch!])
