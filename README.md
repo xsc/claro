@@ -9,7 +9,7 @@ stuff.
 
 Don't.
 
-## Differences to Muse
+## Differences to Muse / Rationale
 
 ### Manifold
 
@@ -48,7 +48,7 @@ In claro, you can specify the following:
 And resolution will produce:
 
 ```clojure
-(let [run! (claro.data/engine)]
+(let [run! (claro.engine/engine)]
   @(run! (Friends. 1)))
 ;; => ({:friend 5} {:friend 6} {:friend 7} {:friend 8})
 ```
@@ -62,7 +62,8 @@ Given a potentially infinite tree and a _projection template_, we can "cut off"
 subtrees that do not match the template.
 
 ```clojure
-(require '[claro.data :as data])
+(require '[claro.data :as data]
+         '[claro.engine :as engine])
 
 (defrecord Person [id]
   data/Resolvable
@@ -71,7 +72,7 @@ subtrees that do not match the template.
      :father (Person. (* (inc id) 3))
      :mother (Person. (* id 5))}))
 
-(let [run! (data/tracing-engine)]
+(let [run! (-> (engine/engine) (engine/tracing))]
   @(run!
      (data/project
        (Person. 1)
@@ -92,7 +93,7 @@ there were three batches of resolutions, each with only one element:
 Contrast this with:
 
 ```clojure
-(let [run! (data/tracing-engine)]
+(let [run! (-> (engine/engine) (engine/tracing))]
   @(run!
      (data/project
        (Person. 1)
