@@ -28,17 +28,28 @@
 
 ;; ## Default Implementations
 
+(defn- assert-non-wrapped
+  [value]
+  (when (wrapped? value)
+    (throw
+      (IllegalArgumentException.
+        (format "class '%s' implements 'WrappedResolvable' but not 'ResolvableWrapper'"
+                (.getName (class value)))))))
+
 (extend-protocol ResolvableWrapper
   clojure.lang.IPersistentCollection
   (resolvables [coll]
-    (cond (r/resolvable? coll) [coll]
-          (wrapped? coll) (resolvables coll)
-          :else (distinct (mapcat resolvables coll))))
+    (assert-non-wrapped coll)
+    (if (r/resolvable? coll)
+      [coll]
+      (distinct (mapcat resolvables coll))))
   (apply-resolved [coll resolved-values]
-    (cond (r/resolvable? coll) (get resolved-values coll coll)
-          (wrapped? coll) (apply-resolved coll resolved-values)
-          :else (into (if (record? coll) coll (empty coll))
-                      (map #(apply-resolved % resolved-values) coll))))
+    (assert-non-wrapped coll)
+    (if (r/resolvable? coll)
+      (get resolved-values coll coll)
+      (into (if (record? coll) coll (empty coll))
+            (map #(apply-resolved % resolved-values))
+            coll)))
 
   clojure.lang.MapEntry
   (resolvables [[k v]]
@@ -54,12 +65,12 @@
   Object
   (resolvables [o]
     (when (r/resolvable? o)
-      [o]))
+      #{o}))
   (apply-resolved [o resolved-values]
     (get resolved-values o o))
 
   nil
   (resolvables [_]
-    nil)
+    #{})
   (apply-resolved [_ _]
     nil))
