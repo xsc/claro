@@ -5,22 +5,21 @@
              [generators :as gen]
              [properties :as prop]]
             [clojure.test :refer :all]
-            [claro.data :as data]))
+            [claro.data :as data]
+            [claro.engine :as engine]))
 
 ;; ## Fixtures
 
 (defn make-engine
   [resolutions & [more-opts]]
-  (data/engine
-    (merge
-      more-opts
-      {:wrap-resolve
-       (fn [f]
-         (fn [batch]
-           (swap! resolutions
-                  (fnil conj [])
-                  [(class (first batch)) (count batch)])
-           (f batch)))})))
+  (engine/wrap
+    (engine/engine more-opts)
+    (fn [f]
+      (fn [batch]
+        (swap! resolutions
+               (fnil conj [])
+               [(class (first batch)) (count batch)])
+        (f batch)))))
 
 ;; ## Simple Resolution
 
