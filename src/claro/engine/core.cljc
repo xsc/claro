@@ -42,7 +42,10 @@
 
 (defn- build-apply-fn
   [_]
-  #(w/apply-resolved %1 %2))
+  (fn [value resolved-values]
+    (let [value' (w/apply-resolved value resolved-values)]
+      {:value       value'
+       :resolvables (w/resolvables value')})))
 
 (defn- engine-opts
   [opts]

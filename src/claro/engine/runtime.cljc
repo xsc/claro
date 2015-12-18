@@ -2,6 +2,13 @@
   (:refer-clojure :exclude [run!])
   (:require [manifold.deferred :as d]))
 
+;; ## Inspection
+
+(defn- inspect-resolvables
+  [{:keys [inspect-fn]} value]
+  {:pre [(fn? inspect-fn)]}
+  (inspect-fn value))
+
 ;; ## Selection
 
 (defn- assert-class-selected!
@@ -29,15 +36,13 @@
   "Use the given `select-fn` (seq of classes -> seq of classes) and
    `inspect-fn` (value -> seq of resolvables) to collect batches of
    resolvables. Returns a seq of such batches."
-  [{:keys [select-fn inspect-fn]
-    :or {select-fn identity}} value]
-  {:pre [(fn? inspect-fn)]}
-  (let [resolvables (group-by class (inspect-fn value))]
-    (some->> (seq (keys resolvables))
+  [{:keys [select-fn] :or {select-fn identity}} resolvables]
+  (let [by-class (group-by class resolvables)]
+    (some->> (seq (keys by-class))
              (select-fn)
              (assert-class-selected!)
-             (assert-classes-valid! resolvables)
-             (mapv #(get resolvables %)))))
+             (assert-classes-valid! by-class)
+             (mapv #(get by-class %)))))
 
 ;; ## Resolution
 
@@ -101,7 +106,9 @@
 
 (defn- apply-resolved-batches
   [{:keys [apply-fn]} value resolved-values]
-  (apply-fn value resolved-values))
+  (-> (apply-fn value resolved-values)
+      (merge
+        {:resolved-values resolved-values})))
 
 ;; ## Engine
 
@@ -113,6 +120,19 @@
         (format "resolution has exceeded maximum batch count/depth: %d/%d"
                 batch-count
                 max-batches)))))
+
+(defn- update-resolvables
+  [current-resolvables resolved-values new-resolvables]
+  (->> current-resolvables
+       (remove (set (keys resolved-values)))
+       (concat new-resolvables)))
+
+(defn- recur-next-step
+  [{:keys [value resolvables resolved-values]} current-resolvables batch-count]
+  (d/recur
+    value
+    (update-resolvables current-resolvables resolved-values resolvables)
+    batch-count))
 
 (defn run!
   "Run the resolution engine on the given value. `opts` is a map of:
@@ -127,8 +147,9 @@
      single resolution step (parameters are batch-to-be-resolved, as well as
      the deferred value),
    - `:apply-fn`: a function that takes the original value, as well as a map
-     of resolvable -> resolved value pairs, and unifies them into a
-     now-more-resolved value for the next iteration,
+     of resolvable -> resolved value pairs, and returns a map of `:value` and
+     `:resolvables`, where `:value` is the now-more-resolved value for the next
+     iteration and `:resolvables` the new resolvables within,
    - `:max-batches`: an integer describing the maximum number of batches to
      resolve before throwing an `IllegalStateException`.
 
@@ -136,14 +157,15 @@
   [opts value]
   {:pre [(every? fn? (map opts [:inspect-fn :resolve-fn :apply-fn]))]}
   (d/loop [value       value
+           resolvables (inspect-resolvables opts value)
            batch-count 0]
-    (assert-batch-count! opts batch-count)
-    (d/let-flow [value   value
-                 batches (select-resolvable-batches opts value)]
+    (let [batches (select-resolvable-batches opts resolvables)
+          new-batch-count (+ batch-count (count batches))]
+      (assert-batch-count! opts new-batch-count)
       (if (seq batches)
         (d/chain
           batches
           #(resolve-batches! opts %)
           #(apply-resolved-batches opts value %)
-          #(d/recur % (+ batch-count (count batches))))
-        (apply-resolved-batches opts value {})))))
+          #(recur-next-step % resolvables new-batch-count))
+        value))))
