@@ -93,14 +93,21 @@
 (defn chain-select-keys
   "Wrap the given value to select only the given keys once they are available."
   [value ks]
-  (if (empty? ks)
-    {}
-    (chain-map
-      :chain-select-keys
-      value
-      #(some (complement (set ks)) (keys %))
-      #(select-keys % ks)
-      #(chain-select-keys % ks))))
+  (cond (empty? ks)
+        {}
+
+        (apply-composition?
+          (fn [v] (every? #(contains? v %) ks))
+          value)
+        (select-keys value ks)
+
+        :else
+        (chain-map
+          :chain-select-keys
+          value
+          #(some (complement (set ks)) (keys %))
+          #(select-keys % ks)
+          #(chain-select-keys % ks))))
 
 (defn- chain*
   [value predicate fs]
