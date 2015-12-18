@@ -132,3 +132,23 @@
         result @(run! value)]
     (is (instance? Wrapper result))
     (is (= {:type :apple, :colour :red} (:value result)))))
+
+;; ## Projection
+
+(defrecord InfiniteSeq [n]
+  data/Resolvable
+  (resolve! [_ _]
+    {:value n
+     :next (InfiniteSeq. (inc n))}))
+
+(defspec t-projection 20
+  (prop/for-all
+    [start-n gen/int
+     length  gen/nat]
+    (let [run! (make-engine (atom []))
+          path (concat (repeat length :next) [:value])
+          projection-template (assoc-in {:value nil} path nil)
+          value (data/project (InfiniteSeq. start-n) projection-template)
+          result @(run! value)]
+      (and (is (= start-n (:value result)))
+           (is (= (+ start-n length) (get-in result path)))))))
