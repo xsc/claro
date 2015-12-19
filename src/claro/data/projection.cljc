@@ -1,7 +1,6 @@
 (ns claro.data.projection
   (:require [claro.data
              [resolvable :as r]
-             [resolvable-wrapper :as w]
              [composition :as composition]]
             [potemkin :refer [defprotocol+]]))
 
