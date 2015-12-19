@@ -106,9 +106,9 @@
 
 (defn- apply-resolved-batches
   [{:keys [apply-fn]} value resolved-values]
-  (-> (apply-fn value resolved-values)
-      (merge
-        {:resolved-values resolved-values})))
+  (merge
+    (apply-fn value (vals resolved-values))
+    {:resolved-values resolved-values}))
 
 ;; ## Engine
 
