@@ -1,28 +1,46 @@
 (ns claro.data.composition
   (:require [claro.data
              [resolvable :as r]
-             [resolvable-wrapper :as w]]))
+             [tree :as tree]]))
 
 ;; ## Record
 
 (defn- apply-composition?
   [predicate value]
   (and (not (r/resolvable? value))
-       (not (w/wrapped? value))
-       (or (w/resolved? value)
+       (not (tree/wrapped? value))
+       (or (tree/resolved? value)
            (when predicate
              (predicate value)))))
 
+(defrecord ConditionalResolvable [tree-resolvable predicate f]
+  tree/TreeResolvable
+  (resolvable [_]
+    (tree/resolvable tree-resolvable))
+  (set-resolved-value [this resolved-value]
+    (assoc this
+           :tree-resolvable
+           (tree/set-resolved-value tree-resolvable resolved-value)))
+  (resolve-in [this {:keys [value] :as conditional}]
+    (let [{:keys [value resolvables]} (tree/resolve-in tree-resolvable value)]
+      (if (apply-composition? predicate value)
+        (let [value' (f value)]
+          {:value       value'
+           :resolvables (tree/tree-resolvables value')})
+        {:value       (assoc conditional :value value)
+         :resolvables (map #(assoc this :tree-resolvable %) resolvables)}))))
+
 (defrecord ConditionalComposition [value predicate f]
-  w/WrappedResolvable
-  w/ResolvableWrapper
-  (resolvables [_]
-    (w/resolvables value))
-  (apply-resolved [_ resolved-values]
-    (let [value' (w/apply-resolved value resolved-values)]
-      (if (apply-composition? predicate value')
-        (f value')
-        (->ConditionalComposition value' predicate f)))))
+  tree/WrappedTree
+  (wrapped? [_] true)
+
+  tree/ResolvableTree
+  (tree-resolvables [_]
+    (map
+      #(ConditionalResolvable. % predicate f)
+      (tree/tree-resolvables value)))
+  (resolved? [_]
+    false))
 
 ;; ## Helpers
 
@@ -59,7 +77,7 @@
 
 (defn- chain-map
   [k value predicate transform re-chain]
-  (if (w/resolved? value)
+  (if (tree/resolved? value)
     (transform value)
     (chain-when
       value
