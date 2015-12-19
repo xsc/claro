@@ -18,7 +18,8 @@
       (fn [batch]
         (swap! resolutions
                (fnil conj [])
-               [(class (first batch)) (count batch)])
+               [(class (claro.data.tree/resolvable (first batch)))
+                (count (distinct (map claro.data.tree/resolvable batch)))])
         (f batch)))))
 
 ;; ## Simple Resolution
@@ -77,7 +78,7 @@
   (let [apple-gen (->> [(Apple. :red) (Apple. :green)]
                        (gen/elements)
                        (gen/vector)
-                       (gen/tuple (gen/elements [[] ()  #{}]))
+                       (gen/tuple (gen/elements [[] ()  #_{}]))
                        (gen/fmap
                          (fn [[empty-coll apples]]
                            (into empty-coll apples))))]
@@ -92,12 +93,16 @@
 
 ;; ## Maps
 
-(let [path-gen (->> gen/simple-type
-                    (gen/such-that (complement #(and (number? %) (Double/isNaN %))))
+(let [path-gen (->> [(gen/such-that
+                      (complement #(and (number? %) (Double/isNaN %)))
+                      gen/int)
+                     gen/string-ascii
+                     (gen/fmap keyword gen/string)]
+                    (gen/one-of)
                     (gen/vector)
                     (gen/not-empty))]
 
-  (defspec t-map-value-resolution 20
+  (defspec t-map-value-resolution 100
     (prop/for-all
       [apple-path path-gen]
       (let [run! (make-engine (atom []))
@@ -106,7 +111,7 @@
              (is (= {:type :apple, :colour :red}
                     (get-in result apple-path)))))))
 
-  (defspec t-map-key-resolution 20
+  #_(defspec t-map-key-resolution 20
     (prop/for-all
       [apple-path path-gen]
       (let [run! (make-engine (atom []))
@@ -141,7 +146,7 @@
     {:value n
      :next (InfiniteSeq. (inc n))}))
 
-(defspec t-projection 20
+(defspec t-projection 100
   (prop/for-all
     [start-n gen/int
      length  gen/nat]
