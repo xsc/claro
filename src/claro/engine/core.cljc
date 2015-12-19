@@ -1,7 +1,7 @@
 (ns claro.engine.core
   (:require [claro.engine.runtime :as runtime]
             [claro.data
-             [resolvable-wrapper :as w]
+             [tree :as tree]
              [resolvable :as r]]
             [manifold.deferred :as d]
             [potemkin :refer [defprotocol+]]))
@@ -33,19 +33,28 @@
 
 (defn- build-resolve-fn
   [{:keys [env] :or {env {}}}]
-  (fn [[resolvable :as batch]]
-    (r/resolve-batch! resolvable env batch)))
+  (fn [tree-resolvables]
+    (let [resolvables (map tree/resolvable tree-resolvables)
+          [resolvable :as batch] (distinct resolvables)]
+      (d/chain
+        (r/resolve-batch! resolvable env batch)
+        (fn [resolved]
+          (let [resolvable->resolved (zipmap batch resolved)]
+            (map
+              (fn [tree-resolvable]
+                (->> (tree/resolvable tree-resolvable)
+                     (resolvable->resolved)
+                     (tree/set-resolved-value tree-resolvable)))
+              tree-resolvables)))))))
 
 (defn- build-inspect-fn
   [_]
-  #(w/resolvables %))
+  #(tree/tree-resolvables %))
 
 (defn- build-apply-fn
   [_]
-  (fn [value resolved-values]
-    (let [value' (w/apply-resolved value resolved-values)]
-      {:value       value'
-       :resolvables (w/resolvables value')})))
+  (fn [value tree-resolvables]
+    (tree/resolve-all value tree-resolvables)))
 
 (defn- engine-opts
   [opts]
