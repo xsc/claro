@@ -18,8 +18,7 @@
       (fn [batch]
         (swap! resolutions
                (fnil conj [])
-               [(class (claro.data.tree/resolvable (first batch)))
-                (count (distinct (map claro.data.tree/resolvable batch)))])
+               [(class (first batch)) (count batch)])
         (f batch)))))
 
 ;; ## Simple Resolution
@@ -111,7 +110,7 @@
              (is (= {:type :apple, :colour :red}
                     (get-in result apple-path)))))))
 
-  #_(defspec t-map-key-resolution 20
+  (defspec t-map-key-resolution 100
     (prop/for-all
       [apple-path path-gen]
       (let [run! (make-engine (atom []))

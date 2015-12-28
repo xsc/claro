@@ -4,157 +4,193 @@
 
 ;; ## Protocols
 
-(defprotocol+ TreeResolvable
-  "A wrapper around a specific `Resolvable` within a specific tree."
-  (resolvable [_]
-    "Get the actual `Resolvable`.")
-  (set-resolved-value [_ resolved-value]
-    "Set the resolved value for the given `TreeResolvable`.")
-  (resolve-in [_ tree]
-    "Inject the given resolved value into the tree at the position(s), the given
-     `TreeResolvable` is bound to."))
+(defprotocol+ Tree
+  (wrap-tree [tree]
+    "Wrap the given tree for `Resolvable` processing, returning a
+     `ResolvableTree`."))
 
 (defprotocol+ ResolvableTree
-  "Protocol for trees of `Resolvables`."
-  (resolved? [_]
-    "Is this tree fully resolved?")
-  (tree-resolvables [_]
-    "Get all `TreeResolvables` from the given tree."))
+  (unwrap-tree1 [tree]
+    "Unwrap one level of the (potentially not fully-resolved) tree value.")
+  (resolved? [tree]
+    "Is the tree completely resolved?")
+  (resolvables* [tree]
+    "Return a seq of all Resolvables within the given tree.")
+  (apply-resolved-values [tree resolvable->resolved]
+    "Replace the `Resolvables` with the given resolved values, returning a
+     potentially fully resolved `ResolvableTree`."))
+
+(defn resolvables
+  [tree]
+  (into #{} (resolvables* tree)))
+
+;; ## Wrapped tree
 
 (defprotocol+ WrappedTree
-  (wrapped? [_]))
+  "Maker for wrapped trees."
+  (wrapped? [tree]))
 
-;; ## Implementations
+(defn wrapped?
+  [tree]
+  (satisfies? WrappedTree tree))
 
-;; ### Wrappers
+;; ## Resolvable Tree
 
-(extend-protocol WrappedTree
-  Object
-  (wrapped? [_] false)
-  nil
-  (wrapped? [_] false))
+;; ### Helper
 
-;; ## Resolver
+(defn- can-resolve?
+  [tree resolvable->resolved]
+  (and (not (resolved? tree))
+       ;; it seems the following check is slower than just trying to apply the
+       ;; resolution ...
+       #_(some resolvable->resolved (resolvables tree))))
 
-(defn resolve-all
-  [value tree-resolvables]
-  (loop [value       value
-         sq          tree-resolvables
-         resolvables []]
-    (if-let [[r & rst] (seq sq)]
-      (let [{value' :value, resolvables' :resolvables} (resolve-in r value)]
-        (recur value' rst (into resolvables resolvables')))
-      {:value (if value
-                (if (and (resolved? value) (instance? clojure.lang.IMeta value))
-                  (with-meta value {::resolved? true})
-                  (vary-meta value dissoc ::resolved?)))
-       :resolvables resolvables})))
+(defn- apply-resolution
+  [tree resolvable->resolved]
+  (if (can-resolve? tree resolvable->resolved)
+    (apply-resolved-values tree resolvable->resolved)
+    tree))
 
-;; ### Helpers
+(def ^:private all-resolvables-xf
+  "Transducer to collect all resolvables in a seq of `ResolvableTree`values."
+  (mapcat #(resolvables* %)))
 
-(defmacro with-resolved-check
-  [value & body]
-  `(let [v# ~value]
-     (and (not  (r/resolvable? v#))
-          (let [r# (get (meta v#) ::resolved? ::none)]
-            (if (not= r# ::resolved?)
-              r#
-              (do ~@body))))))
+(defn- merge-resolvables
+  ([trees]
+   (into [] all-resolvables-xf trees))
+  ([tree0 tree1]
+   (into (resolvables* tree0) (resolvables* tree1))))
 
 ;; ### Leaves
 
-(defrecord Leaf [value resolved-value]
-  TreeResolvable
-  (resolvable [_]
-    value)
-  (set-resolved-value [this resolved-value]
-    (assoc this :resolved-value resolved-value))
-  (resolve-in [_ tree]
-    {:value       resolved-value
-     :resolvables (tree-resolvables resolved-value)}))
+(deftype ResolvableLeaf [resolvable]
+  ResolvableTree
+  (unwrap-tree1 [this]
+    (.-resolvable this))
+  (resolved? [_]
+    false)
+  (resolvables* [this]
+    [(.-resolvable this)])
+  (apply-resolved-values [tree resolvable->resolved]
+    (get resolvable->resolved (.-resolvable tree) tree)))
+
+;; ### Map Entries
+
+(deftype ResolvableMapEntry [resolvables k v]
+  ResolvableTree
+  (unwrap-tree1 [tree]
+    [(.-k tree) (.-v tree)])
+  (resolved? [_]
+    false)
+  (resolvables* [tree]
+    (.-resolvables tree))
+  (apply-resolved-values [tree resolvable->value]
+    (let [k' (apply-resolution (.-k tree) resolvable->value)
+          v' (apply-resolution (.-v tree) resolvable->value)
+          remaining (merge-resolvables k' v')]
+      (if (empty? remaining)
+        [k' v']
+        (ResolvableMapEntry. remaining k' v')))))
+
+;; ### Inner Node
+
+(deftype ResolvableNode [resolvables prototype elements]
+  ResolvableTree
+  (unwrap-tree1 [_]
+    (prototype (map unwrap-tree1 elements)))
+  (resolved? [_]
+    false)
+  (resolvables* [tree]
+    (.-resolvables tree))
+  (apply-resolved-values [tree resolvable->value]
+    (loop [elements     (seq elements)
+           elements'    (transient [])
+           resolvables' nil]
+      (if elements
+        (let [e (first elements)
+              v (apply-resolution e resolvable->value)
+              rs (claro.data.tree/resolvables v)]
+          (recur
+            (next elements)
+            (conj! elements' v)
+            (into resolvables' rs)))
+        (if (empty? resolvables')
+          (prototype (persistent! elements'))
+          (ResolvableNode. resolvables' prototype (persistent! elements')))))))
+
+;; ### Object + Nil
 
 (extend-protocol ResolvableTree
-  nil
+  Object
+  (unwrap-tree1 [tree]
+    tree)
   (resolved? [_]
     true)
-  (tree-resolvables [_]
+  (resolvables* [_]
     nil)
+  (apply-resolved-values [tree _]
+    tree)
 
+  nil
+  (unwrap-tree1 [_]
+    nil)
+  (resolved? [_]
+    true)
+  (resolvables* [_]
+    nil)
+  (apply-resolved-values [_ _]
+    nil))
+
+;; ## Wrappers
+
+(defn- map-entry?
+  [e]
+  (instance? java.util.Map$Entry e))
+
+(defn- ->leaf
+  [tree]
+  (when (r/resolvable? tree)
+    (ResolvableLeaf. tree)))
+
+(defn- ->map-entry
+  [e]
+  (when (instance? java.util.Map$Entry e)
+    (let [k (wrap-tree (key e))
+          v (wrap-tree (val e))
+          resolvables (merge-resolvables k v)]
+      (if (empty? resolvables)
+        e
+        (ResolvableMapEntry. resolvables k v)))))
+
+(defn- ->node-prototype
+  [coll]
+  (if (record? coll)
+    #(into coll %)
+    (let [empty-coll (empty coll)]
+      (if (list? coll)
+        #(into empty-coll (reverse %))
+        #(into empty-coll %)))))
+
+(defn- ->node
+  [coll]
+  (when (coll? coll)
+    (let [elements (map wrap-tree coll)
+          resolvables (into [] all-resolvables-xf elements)]
+      (if (empty? resolvables)
+        coll
+        (ResolvableNode.
+          resolvables
+          (->node-prototype coll)
+          elements)))))
+
+(extend-protocol Tree
   Object
-  (resolved? [this]
-    (not (r/resolvable? this)))
-  (tree-resolvables [this]
-    (if (r/resolvable? this)
-      [(->Leaf this nil)]
-      nil)))
+  (wrap-tree [tree]
+    (or (->leaf tree)
+        (->map-entry tree)
+        (->node tree)
+        tree))
 
-;; ### Collections
-
-(defrecord MapValueResolvable [tree-resolvable k]
-  TreeResolvable
-  (resolvable [_]
-    (resolvable tree-resolvable))
-  (set-resolved-value [this resolved-value]
-    (assoc this
-           :tree-resolvable
-           (set-resolved-value tree-resolvable resolved-value)))
-  (resolve-in [this tree]
-    (let [v (get tree k)
-          {:keys [value resolvables]} (resolve-in tree-resolvable v)]
-      {:value
-       (assoc tree k value),
-       :resolvables
-       (map #(assoc this :tree-resolvable %) resolvables)})))
-
-(defrecord SequentialResolvable [tree-resolvable index]
-  TreeResolvable
-  (resolvable [_]
-    (resolvable tree-resolvable))
-  (set-resolved-value [this resolved-value]
-    (assoc this
-           :tree-resolvable
-           (set-resolved-value tree-resolvable resolved-value)))
-  (resolve-in [this tree]
-    (let [postproc (if (list? tree) reverse identity)]
-      (loop [new-value (empty tree)
-             tree      tree
-             i         0]
-        (cond (empty? tree)
-              (throw (IllegalStateException.))
-
-              (= i index)
-              (let [v (first tree)
-                    {:keys [value resolvables]} (resolve-in tree-resolvable v)]
-                {:value
-                 (postproc (into (conj new-value value) (next tree)))
-                 :resolvables
-                 (map #(assoc this :tree-resolvable %) resolvables)})
-
-              :else
-              (recur (conj new-value (first tree)) (next tree) (inc i)))))))
-
-(extend-protocol ResolvableTree
-  clojure.lang.IPersistentCollection
-  (resolved? [this]
-    (with-resolved-check this
-      (if (map? this)
-        (every? resolved? (vals this))
-        (every? resolved? this))))
-  (tree-resolvables [this]
-    (cond (r/resolvable? this)
-          [(->Leaf this nil)]
-
-          (map? this)
-          (for [[k v] this
-                tree-resolvable (tree-resolvables v)]
-            (MapValueResolvable. tree-resolvable k))
-
-          (sequential? this)
-          (->> (map-indexed
-                 (fn [index e]
-                   (->> (tree-resolvables e)
-                        (map #(SequentialResolvable. % index))))
-                 (vec this))
-               (reduce into []))
-
-          :else nil)))
+  nil
+  (wrap-tree [_]
+    nil))
