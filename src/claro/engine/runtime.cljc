@@ -105,10 +105,8 @@
 ;; ## Application
 
 (defn- apply-resolved-batches
-  [{:keys [apply-fn]} value resolved-values]
-  (merge
-    (apply-fn value (vals resolved-values))
-    {:resolved-values resolved-values}))
+  [{:keys [apply-fn]} value resolvable->value]
+  (apply-fn value resolvable->value))
 
 ;; ## Engine
 
@@ -120,19 +118,6 @@
         (format "resolution has exceeded maximum batch count/depth: %d/%d"
                 batch-count
                 max-batches)))))
-
-(defn- update-resolvables
-  [current-resolvables resolved-values new-resolvables]
-  (->> current-resolvables
-       (remove (set (keys resolved-values)))
-       (concat new-resolvables)))
-
-(defn- recur-next-step
-  [{:keys [value resolvables resolved-values]} current-resolvables batch-count]
-  (d/recur
-    value
-    (update-resolvables current-resolvables resolved-values resolvables)
-    batch-count))
 
 (defn run!
   "Run the resolution engine on the given value. `opts` is a map of:
@@ -156,16 +141,17 @@
    Returns a manifold deferred with the resolved result."
   [opts value]
   {:pre [(every? fn? (map opts [:inspect-fn :resolve-fn :apply-fn]))]}
-  (d/loop [value       value
-           resolvables (inspect-resolvables opts value)
-           batch-count 0]
-    (let [batches (select-resolvable-batches opts resolvables)
-          new-batch-count (+ batch-count (count batches))]
-      (assert-batch-count! opts new-batch-count)
-      (if (seq batches)
-        (d/chain
-          batches
-          #(resolve-batches! opts %)
-          #(apply-resolved-batches opts value %)
-          #(recur-next-step % resolvables new-batch-count))
-        value))))
+  (d/loop [value value, batch-count 0]
+    (let [resolvables (inspect-resolvables opts value)]
+      (if (empty? resolvables)
+        value
+        (let [batches (select-resolvable-batches opts resolvables)
+              new-batch-count (+ batch-count (count batches))]
+          (assert-batch-count! opts new-batch-count)
+          (if (seq batches)
+            (d/chain
+              batches
+              #(resolve-batches! opts %)
+              #(apply-resolved-batches opts value %)
+              #(d/recur % new-batch-count))
+            value))))))

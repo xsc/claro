@@ -24,7 +24,7 @@
 
   clojure.lang.IFn
   (invoke [_ resolvable]
-    (runtime/run! opts resolvable)))
+    (runtime/run! opts (tree/wrap-tree resolvable))))
 
 (alter-meta! #'map->Engine assoc :private true)
 (alter-meta! #'->Engine assoc :private true)
@@ -33,28 +33,19 @@
 
 (defn- build-resolve-fn
   [{:keys [env] :or {env {}}}]
-  (fn [tree-resolvables]
-    (let [resolvables (map tree/resolvable tree-resolvables)
-          [resolvable :as batch] (distinct resolvables)]
-      (d/chain
-        (r/resolve-batch! resolvable env batch)
-        (fn [resolved]
-          (let [resolvable->resolved (zipmap batch resolved)]
-            (map
-              (fn [tree-resolvable]
-                (->> (tree/resolvable tree-resolvable)
-                     (resolvable->resolved)
-                     (tree/set-resolved-value tree-resolvable)))
-              tree-resolvables)))))))
+  (fn [batch]
+    (d/chain
+      (r/resolve-batch! (first batch) env batch)
+      #(map tree/wrap-tree %))))
 
 (defn- build-inspect-fn
   [_]
-  #(tree/tree-resolvables %))
+  #(tree/resolvables %))
 
 (defn- build-apply-fn
   [_]
-  (fn [value tree-resolvables]
-    (tree/resolve-all value tree-resolvables)))
+  (fn [tree resolvable->value]
+    (tree/apply-resolved-values tree resolvable->value)))
 
 (defn- engine-opts
   [opts]

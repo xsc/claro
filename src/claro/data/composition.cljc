@@ -5,42 +5,29 @@
 
 ;; ## Record
 
-(defn- apply-composition?
-  [predicate value]
-  (and (not (r/resolvable? value))
-       (not (tree/wrapped? value))
-       (or (tree/resolved? value)
-           (when predicate
-             (predicate value)))))
-
-(defrecord ConditionalResolvable [tree-resolvable predicate f]
-  tree/TreeResolvable
-  (resolvable [_]
-    (tree/resolvable tree-resolvable))
-  (set-resolved-value [this resolved-value]
-    (assoc this
-           :tree-resolvable
-           (tree/set-resolved-value tree-resolvable resolved-value)))
-  (resolve-in [this {:keys [value] :as conditional}]
-    (let [{:keys [value resolvables]} (tree/resolve-in tree-resolvable value)]
-      (if (apply-composition? predicate value)
-        (let [value' (f value)]
-          {:value       value'
-           :resolvables (tree/tree-resolvables value')})
-        {:value       (assoc conditional :value value)
-         :resolvables (map #(assoc this :tree-resolvable %) resolvables)}))))
-
-(defrecord ConditionalComposition [value predicate f]
+(deftype ConditionalComposition [tree predicate f]
   tree/WrappedTree
-  (wrapped? [_] true)
+
+  tree/Tree
+  (wrap-tree [this]
+    (ConditionalComposition. (tree/wrap-tree tree) predicate f))
 
   tree/ResolvableTree
-  (tree-resolvables [_]
-    (map
-      #(ConditionalResolvable. % predicate f)
-      (tree/tree-resolvables value)))
+  (unwrap-tree1 [this]
+    (ConditionalComposition. (tree/unwrap-tree1 tree) predicate f))
   (resolved? [_]
-    false))
+    false)
+  (resolvables* [_]
+    (tree/resolvables* tree))
+  (apply-resolved-values [this resolvable->value]
+    (let [tree' (tree/apply-resolved-values tree resolvable->value)]
+      (cond (= tree tree') this
+            (tree/resolved? tree') (-> tree' f tree/wrap-tree)
+            (tree/wrapped? tree') (ConditionalComposition. tree' predicate f)
+            :else (let [value (tree/unwrap-tree1 tree')]
+                    (if (and predicate (predicate value))
+                      (-> value f tree/wrap-tree)
+                      (ConditionalComposition. tree' predicate f)))))))
 
 ;; ## Helpers
 
@@ -60,9 +47,7 @@
   "Wrap the given value with a processing function that gets called the
    moment the given predicate is fulfilled."
   [value predicate f]
-  (if (apply-composition? predicate value)
-    (f value)
-    (->ConditionalComposition value predicate f)))
+  (->ConditionalComposition value predicate f))
 
 (defn chain-when-contains
   "Wrap the given value with a processing function that gets called once
@@ -77,14 +62,12 @@
 
 (defn- chain-map
   [k value predicate transform re-chain]
-  (if (tree/resolved? value)
-    (transform value)
-    (chain-when
-      value
-      (wrap-assert-map
-        predicate
-        (format "can only run '%s' on map, given:" (name k)))
-      #(re-chain (transform %)))))
+  (chain-when
+    value
+    (wrap-assert-map
+      predicate
+      (format "can only run '%s' on map, given:" (name k)))
+    #(re-chain (transform %))))
 
 (defn- update-keys
   [value fs]
@@ -114,9 +97,12 @@
   (cond (empty? ks)
         {}
 
-        (apply-composition?
-          (fn [v] (every? #(contains? v %) ks))
-          value)
+        (tree/resolved? value)
+        (select-keys value ks)
+
+        (and (not (tree/wrapped? value))
+             (let [v (tree/unwrap-tree1 value)]
+               (every? #(contains? v %) ks)))
         (select-keys value ks)
 
         :else
