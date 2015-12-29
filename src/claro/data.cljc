@@ -1,8 +1,5 @@
 (ns claro.data
-  (:require [claro.data
-             resolvable
-             composition
-             projection]
+  (:require [claro.data protocols composition projection]
             [potemkin :refer [import-vars]]))
 
 (import-vars
@@ -17,10 +14,10 @@
   [claro.data.projection
    project]
 
-  [claro.data.resolvable
+  [claro.data.protocols
    Resolvable
    BatchedResolvable
    resolvable?
-   resolve-if-possible!
    resolve!
-   resolve-batch!])
+   resolve-batch!
+   resolve-if-possible!])

@@ -1,8 +1,7 @@
 (ns claro.engine.core
   (:require [claro.engine.runtime :as runtime]
-            [claro.data
-             [tree :as tree]
-             [resolvable :as r]]
+            [claro.data.protocols :as p]
+            [claro.data.tree :as tree]
             [manifold.deferred :as d]
             [potemkin :refer [defprotocol+]]))
 
@@ -35,17 +34,17 @@
   [{:keys [env] :or {env {}}}]
   (fn [batch]
     (d/chain
-      (r/resolve-batch! (first batch) env batch)
+      (p/resolve-batch! (first batch) env batch)
       #(map tree/wrap-tree %))))
 
 (defn- build-inspect-fn
   [_]
-  #(tree/resolvables %))
+  #(p/resolvables %))
 
 (defn- build-apply-fn
   [_]
   (fn [tree resolvable->value]
-    (tree/apply-resolved-values tree resolvable->value)))
+    (p/apply-resolved-values tree resolvable->value)))
 
 (defn- engine-opts
   [opts]

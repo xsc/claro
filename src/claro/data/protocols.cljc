@@ -1,8 +1,8 @@
-(ns claro.data.resolvable
+(ns claro.data.protocols
   (:require [manifold.deferred :as d]
-            [potemkin :refer [defprotocol+]]))
+            [potemkin :refer [defprotocol+ definterface+]]))
 
-;; ## Protocols
+;; ## Resolvables
 
 (defprotocol+ Resolvable
   "Protocol for resolvable values."
@@ -17,8 +17,6 @@
     "Resolve `all-resolvables` (which is a seq including `resolvable`), returning
      a manifold deferrable containing a seq with resolved values in-order."))
 
-;; ## Derived Functions
-
 (defn resolvable?
   "Check whether the given value implements the `Resolvable` protocol."
   [value]
@@ -32,8 +30,6 @@
     (resolve! value env)
     value))
 
-;; ## Default Implementations
-
 (extend-protocol Resolvable
   manifold.deferred.Deferred
   (resolve! [deferred _]
@@ -43,3 +39,26 @@
   Object
   (resolve-batch! [_ env all-resolvables]
     (apply d/zip (map #(resolve-if-possible! % env) all-resolvables))))
+
+;; ## Trees
+
+(defprotocol+ ResolvableTree
+  (unwrap-tree1 [tree]
+    "Unwrap one level of the (potentially not fully-resolved) tree value.")
+  (resolved? [tree]
+    "Is the tree completely resolved?")
+  (resolvables* [tree]
+    "Return a seq of all Resolvables within the given tree.")
+  (apply-resolved-values [tree resolvable->resolved]
+    "Replace the `Resolvables` with the given resolved values, returning a
+     potentially fully resolved `ResolvableTree`."))
+
+(definterface+ WrappedTree)
+
+(defn wrapped?
+  [tree]
+  (instance? WrappedTree tree))
+
+(defn resolvables
+  [tree]
+  (into #{} (resolvables* tree)))

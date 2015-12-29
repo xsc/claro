@@ -6,13 +6,13 @@
              [properties :as prop]]
             [clojure.test :refer :all]
             [clojure.set :as set]
-            [claro.data.resolvable :as r]
+            [claro.data.protocols :as p]
             [claro.data.tree :as tree]))
 
 ;; ## Generator
 
 (defrecord R [x]
-  r/Resolvable)
+  p/Resolvable)
 
 (def gen-resolvables
   (gen/fmap
@@ -41,26 +41,54 @@
          (fn [[rs tree]]
            [rs (tree/wrap-tree tree)]))))
 
-;; ## Test
+(def gen-collection
+  (->> (gen/elements [[] () #{}])
+       (gen/tuple gen-resolvables)
+       (gen/fmap
+         (fn [[rs empty-coll]]
+           [rs (into empty-coll rs)]))))
+
+;; ## Helper
+
+(defn- ->resolution
+  [resolvables]
+  (into {} (map (juxt identity :x) resolvables)))
+
+(defn- ->partial-resolution
+  [resolvables ratio]
+  (->> #(rand-nth (seq resolvables))
+       (repeatedly (Math/floor (* (count resolvables) ratio)))
+       (->resolution)))
+
+;; ## Resolution
 
 (defn- attempt-resolution
   [tree resolvables]
   (or (empty? resolvables)
-      (let [resolvable->resolved (->> #(rand-nth (seq resolvables))
-                                      (repeatedly (quot (count resolvables) 2))
-                                      (map (juxt identity :x))
-                                      (into {}))
+      (let [resolvable->resolved (->partial-resolution resolvables 0.5)
             resolved (set (keys resolvable->resolved))
-            tree' (tree/apply-resolved-values tree resolvable->resolved)
-            rs (tree/resolvables tree')]
+            tree' (p/apply-resolved-values tree resolvable->resolved)
+            rs (p/resolvables tree')]
         (and (is (not-any? resolved rs))
              (is (= rs (set/difference resolvables resolved)))))))
 
 (defspec t-tree 200
   (prop/for-all
     [[available-resolvables tree] gen-tree]
-    (let [rs (tree/resolvables tree)]
+    (let [rs (p/resolvables tree)]
       (and (is (or (set? rs) (nil? rs)))
-           (is (every? r/resolvable? rs))
+           (is (every? p/resolvable? rs))
            (is (every? #(contains? available-resolvables %) rs))
            (attempt-resolution tree rs)))))
+
+;; ## Collections
+
+(defspec t-collections 100
+  (prop/for-all
+    [[available-resolvables coll] gen-collection]
+    (let [resolvable->value (->resolution available-resolvables)
+          coll-tree (tree/wrap-tree coll)
+          result (p/apply-resolved-values coll-tree resolvable->value)]
+      (and (is (p/resolved? result))
+           (is (= (class coll) (class result)))
+           (or (not (sequential? coll)) (is (= (map :x coll) result)))))))

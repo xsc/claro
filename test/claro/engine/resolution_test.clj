@@ -1,4 +1,4 @@
-(ns claro.engine-test
+(ns claro.engine.resolution-test
   (:require [clojure.test.check :as tc]
             [clojure.test.check
              [clojure-test :refer [defspec]]
@@ -6,20 +6,7 @@
              [properties :as prop]]
             [clojure.test :refer :all]
             [claro.data :as data]
-            [claro.engine :as engine]))
-
-;; ## Fixtures
-
-(defn make-engine
-  [resolutions & [more-opts]]
-  (engine/wrap
-    (engine/engine more-opts)
-    (fn [f]
-      (fn [batch]
-        (swap! resolutions
-               (fnil conj [])
-               [(class (first batch)) (count batch)])
-        (f batch)))))
+            [claro.engine.fixtures :refer [make-engine]]))
 
 ;; ## Simple Resolution
 
@@ -49,35 +36,13 @@
                     [Apple (count (set (map :colour @basket)))])
                   (second @resolutions)))))))
 
-;; ## Max Batch Limit
-
-(defrecord Nested [n max-n]
-  data/Resolvable
-  (resolve! [_ _]
-    (when (< n max-n)
-      {:nested (Nested. (inc n) max-n)})))
-
-(defspec t-max-batches 20
-  (prop/for-all
-    [max-n       gen/pos-int
-     max-batches gen/s-pos-int]
-    (let [run! (make-engine (atom []) {:max-batches max-batches})
-          result (run! (Nested. 0 max-n))]
-      (cond (= max-n 0)           (is (nil? @result))
-            (< max-n max-batches) (is (map? @result))
-            :else (boolean
-                    (is (thrown-with-msg?
-                          IllegalStateException
-                          #"resolution has exceeded maximum batch count/depth"
-                          @result)))))))
-
 ;; ## Collections
 
 (defspec t-collection-type-maintained 100
   (let [apple-gen (->> [(Apple. :red) (Apple. :green)]
                        (gen/elements)
                        (gen/vector)
-                       (gen/tuple (gen/elements [[] ()  #{}]))
+                       (gen/tuple (gen/elements [[] () #{}]))
                        (gen/fmap
                          (fn [[empty-coll apples]]
                            (into empty-coll apples))))]
@@ -136,23 +101,3 @@
         result @(run! value)]
     (is (instance? Wrapper result))
     (is (= {:type :apple, :colour :red} (:value result)))))
-
-;; ## Projection
-
-(defrecord InfiniteSeq [n]
-  data/Resolvable
-  (resolve! [_ _]
-    {:value n
-     :next (InfiniteSeq. (inc n))}))
-
-(defspec t-projection 100
-  (prop/for-all
-    [start-n gen/int
-     length  gen/nat]
-    (let [run! (make-engine (atom []))
-          path (concat (repeat length :next) [:value])
-          projection-template (assoc-in {:value nil} path nil)
-          value (data/project (InfiniteSeq. start-n) projection-template)
-          result @(run! value)]
-      (and (is (= start-n (:value result)))
-           (is (= (+ start-n length) (get-in result path)))))))

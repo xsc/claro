@@ -1,30 +1,26 @@
 (ns claro.data.composition
   (:require [claro.data
-             [resolvable :as r]
-             [tree :as tree]]))
+             [protocols :as p]
+             [tree :as tree]])
+  (:import [claro.data.protocols ResolvableTree WrappedTree]))
 
 ;; ## Record
 
 (deftype ConditionalComposition [tree predicate f]
-  tree/WrappedTree
-
-  tree/Tree
-  (wrap-tree [this]
-    (ConditionalComposition. (tree/wrap-tree tree) predicate f))
-
-  tree/ResolvableTree
+  WrappedTree
+  ResolvableTree
   (unwrap-tree1 [this]
-    (ConditionalComposition. (tree/unwrap-tree1 tree) predicate f))
+    this)
   (resolved? [_]
     false)
   (resolvables* [_]
-    (tree/resolvables* tree))
+    (p/resolvables* tree))
   (apply-resolved-values [this resolvable->value]
-    (let [tree' (tree/apply-resolved-values tree resolvable->value)]
+    (let [tree' (p/apply-resolved-values tree resolvable->value)]
       (cond (= tree tree') this
-            (tree/resolved? tree') (-> tree' f tree/wrap-tree)
-            (tree/wrapped? tree') (ConditionalComposition. tree' predicate f)
-            :else (let [value (tree/unwrap-tree1 tree')]
+            (p/resolved? tree') (-> tree' f tree/wrap-tree)
+            (p/wrapped? tree') (ConditionalComposition. tree' predicate f)
+            :else (let [value (p/unwrap-tree1 tree')]
                     (if (and predicate (predicate value))
                       (-> value f tree/wrap-tree)
                       (ConditionalComposition. tree' predicate f)))))))
@@ -47,7 +43,7 @@
   "Wrap the given value with a processing function that gets called the
    moment the given predicate is fulfilled."
   [value predicate f]
-  (->ConditionalComposition value predicate f))
+  (ConditionalComposition. (tree/wrap-tree value) predicate f))
 
 (defn chain-when-contains
   "Wrap the given value with a processing function that gets called once
@@ -97,11 +93,11 @@
   (cond (empty? ks)
         {}
 
-        (tree/resolved? value)
+        (p/resolved? value)
         (select-keys value ks)
 
-        (and (not (tree/wrapped? value))
-             (let [v (tree/unwrap-tree1 value)]
+        (and (not (p/wrapped? value))
+             (let [v (p/unwrap-tree1 value)]
                (every? #(contains? v %) ks)))
         (select-keys value ks)
 
@@ -117,7 +113,7 @@
   [value predicate fs]
   (->> (reverse fs)
        (apply comp)
-       (->ConditionalComposition value predicate)))
+       (ConditionalComposition. (tree/wrap-tree value) predicate)))
 
 (defn chain
   "Wrap the given value with processing functions that get called (in-order)
