@@ -18,7 +18,7 @@
   (when (empty? classes)
     (throw
       (IllegalStateException.
-        "resolvables were available but 'select-fn' did not choose any.")))
+        "resolvables were available but 'selector' did not choose any.")))
   classes)
 
 (defn- assert-classes-valid!
@@ -29,17 +29,17 @@
     (when-not (contains? resolvables class)
       (throw
         (IllegalStateException.
-          (str "'select-fn' chose an unknown resolvable class:" class)))))
+          (str "'selector' chose an unknown resolvable class:" class)))))
   classes)
 
 (defn- select-resolvable-batches
-  "Use the given `select-fn` (seq of classes -> seq of classes) and
+  "Use the given `selector` (seq of classes -> seq of classes) and
    `inspect-fn` (value -> seq of resolvables) to collect batches of
    resolvables. Returns a seq of such batches."
-  [{:keys [select-fn] :or {select-fn identity}} resolvables]
+  [{:keys [selector] :or {selector identity}} resolvables]
   (let [by-class (group-by class resolvables)]
     (some->> (seq (keys by-class))
-             (select-fn)
+             (selector)
              (assert-class-selected!)
              (assert-classes-valid! by-class)
              (mapv #(get by-class %)))))
@@ -124,7 +124,7 @@
 
    - `:inspect-fn`: a function that, given a value, returns a seq of all
       available resolvables within that value,
-   - `:select-fn`: a function that, given a seq of resolvable classes returns
+   - `:selector`: a function that, given a seq of resolvable classes returns
      those to resolve during the next step,
    - `:resolve-fn`: a function that given a seq of resolvables of the same class
      returns a manifold deferred with resolved values in-order,
