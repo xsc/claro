@@ -14,7 +14,7 @@
     {:value n
      :next (InfiniteSeq. (inc n))}))
 
-(defspec t-projection 100
+(defspec t-map-projection 100
   (prop/for-all
     [start-n gen/int
      length  gen/nat]

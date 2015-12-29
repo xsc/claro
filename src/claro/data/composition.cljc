@@ -43,7 +43,14 @@
   "Wrap the given value with a processing function that gets called the
    moment the given predicate is fulfilled."
   [value predicate f]
-  (ConditionalComposition. (tree/wrap-tree value) predicate f))
+  (if (and (not (p/resolvable? value)) (p/resolved? value))
+    (if (predicate value)
+      (-> value f tree/wrap-tree)
+      (throw
+        (IllegalStateException.
+          (format "'predicate' does not hold for fully resolved: %s"
+                  (pr-str value)))))
+    (ConditionalComposition. (tree/wrap-tree value) predicate f)))
 
 (defn chain-when-contains
   "Wrap the given value with a processing function that gets called once
@@ -90,24 +97,20 @@
 (defn chain-select-keys
   "Wrap the given value to select only the given keys once they are available."
   [value ks]
-  (cond (empty? ks)
-        {}
-
-        (p/resolved? value)
-        (select-keys value ks)
-
-        (and (not (p/wrapped? value))
-             (let [v (p/unwrap-tree1 value)]
-               (every? #(contains? v %) ks)))
-        (select-keys value ks)
-
-        :else
+  (if (empty? ks)
+    {}
+    (or (when (p/resolved? value)
+          (select-keys value ks))
+        (when-not (p/wrapped? value)
+          (let [v (p/unwrap-tree1 value)]
+            (when (every? #(contains? v %) ks)
+              (tree/wrap-tree (select-keys v ks)))))
         (chain-map
           :chain-select-keys
           value
           #(some (complement (set ks)) (keys %))
           #(select-keys % ks)
-          #(chain-select-keys % ks))))
+          #(chain-select-keys % ks)))))
 
 (defn- chain*
   [value predicate fs]

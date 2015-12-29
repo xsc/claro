@@ -23,7 +23,8 @@
         #(and (coll? %) (not (map? %)))
         (fn [result-sq]
           (into (empty result-sq)
-                (map #(project* template %) result-sq ))))
+                (map #(project* template %))
+                result-sq)))
       (composition/chain-select-keys value sq))))
 
 ;; ### Map
