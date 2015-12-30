@@ -17,7 +17,6 @@ Claro relies on the [manifold](https://github.com/ztellman/manifold) library for
 representation of asynchronous logic. This means that `Resolvables` can return:
 
 - Clojure's `future`, `delay`, `promise`,
-- `core.async` channels,
 - Manifold's own `deferred` values,
 - `java.util.concurrent.Future`s (e.g. from `ExecutorService.submit()`),
 - or just plain values (whose computation will block resolution, though).
