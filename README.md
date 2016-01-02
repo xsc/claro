@@ -23,14 +23,14 @@ logic, allowing composition of resolvables in a concise manner:
 (require '[claro.data :as data]
          '[manifold.deferred :as d]))
 
-(def fetch-color! (constantly {:name "white"}))
+(def fetch-colour! (constantly {:name "white"}))
 (def fetch-house! (constantly {:colour_id 3, :street "221B Baker Street"}))
 
 (defrecord ColourString [id]
   data/Resolvable
   (resolve! [_ env]
     (d/future
-      (-> id (fetch-color! env) :name))))
+      (-> id (fetch-colour! env) :name))))
 
 (defrecord House [id]
   data/Resolvable
@@ -125,7 +125,7 @@ as much as possible.
 (-> (ColourString. 0)
     (data/wait
       (fn [colour-name]
-        {:name colour-name, :count (count color-name)}))
+        {:name colour-name, :count (count colour-name)}))
     (engine/run!!))
 ;; => {:name "white", :count 5}
 ```
