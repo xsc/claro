@@ -1,7 +1,10 @@
 # claro
 
-So far, this replicates [muse][muse]'s functionality and adds some experimental
-stuff.
+__claro__ is a library for simple, efficient and elegant access to remote data
+sources focusing on usability, testability and overall fn.
+
+It is inspired by [muse][muse] which is awesome in its own right and will be a
+better fit for some applications - just as claro will be for others.
 
 [muse]: https://github.com/kachayev/muse
 
@@ -9,7 +12,74 @@ stuff.
 
 Don't.
 
-## Differences to Muse / Rationale
+## Overview
+
+### Resolvables
+
+In claro, you define `Resolvable`s that encapsulate I/O and transformation
+logic, allowing composition of resolvables in a concise manner:
+
+```clojure
+(require '[claro.data :as data]
+         '[manifold.deferred :as d]))
+
+(def fetch-color! (constantly {:name "white"}))
+(def fetch-house! (constantly {:colour_id 3, :street "221B Baker Street"}))
+
+(defrecord ColourString [id]
+  data/Resolvable
+  (resolve! [_ env]
+    (d/future
+      (-> id (fetch-color! env) :name))))
+
+(defrecord House [id]
+  data/Resolvable
+  (resolve! [_ env]
+    (d/future
+      (let [{:keys [colour_id street]} (fetch-house! id env)]
+        {:id     id
+         :colour (ColourString. colour_id)
+         :street street}))))
+```
+
+Note that `House` contains a `ColourString` resolvable to reference its colour's
+name. See [Resolvable Capabilities](#resolvable-capabilities) for a detailed
+overview of what you get if you buy into them.
+
+### Resolution Engine
+
+To resolve a value, one has to employ a _resolution engine_ - which is basically
+just a function taking a `Resolvable` and producing a deferred value. It is also
+(optionally) bound to an environment (see the `env` parameter above):
+
+```clojure
+(require '[claro.engine :as engine])
+
+(def resolve!
+   (engine/engine
+     {:env {:db {:host ...}}}))
+```
+
+Application of the function (+ dereferencing) yields the resolved value:
+
+```clojure
+@(resolve! (ColourString. 3)) ;; => "white"
+@(resolve! (House. 221))      ;; => {:id 221, :colour "white", ...}
+```
+
+Note that the input to an engine does not have to be a resolvable but can be
+any value built upon one or more of them:
+
+```clojure
+@(resolve! {:sherlock (House. 221), :watson (House. 221)})
+;; => {:sherlock {:id 221, ...}, :watson   {:id 221, ...}}
+```
+
+Resolution engines also allow for customization through middlewares - something
+that will be outlined, together with more details, in
+[Engine Capabilities](#engine-capabilities).
+
+## Resolvable Capabilities
 
 ### Manifold
 
@@ -21,99 +91,100 @@ representation of asynchronous logic. This means that `Resolvables` can return:
 - `java.util.concurrent.Future`s (e.g. from `ExecutorService.submit()`),
 - or just plain values (whose computation will block resolution, though).
 
-### Compound Resolvables
+### Batched Resolvables
 
-Muse's `DataSource`s have to produce fully resolved values, meaning that they
-cannot generate a partial result where e.g. a single field points at another
-`DataSource`. One can work around this limitation by calling `muse.core/run!`
-within the source, but I'm not sure if this would be idiomatic use of the
-library.
-
-In claro, you can specify the following:
+Optimizing for the resolution of multiple values of the same class, you can
+declare batchwise resolution logic by implementing the `BatchedResolvable`
+protocol (in addition to `Resolvable`, mind):
 
 ```clojure
-(defrecord Friend [id]
-  claro.data/Resolvable
-  (resolve! [_ _]
-    {:friend id}))
-
-(defrecord Friends [id]
-  claro.data/Resolvable
-  (resolve! [_ _]
-    (future
-      (let [friend-ids [5 6 7 8]]
-        (map #(Friend. %) friend-ids)))))
+(defrecord ColourString [id]
+  data/Resolvable
+  data/BatchedResolvable
+  (resolve-batch! [_ env colours]
+    (d/future
+      (mapv (comp :name #(fetch-colour! % env) :id) colours))))
 ```
 
-And resolution will produce:
+`resolve-batch!` has to return a seq (or a deferred with a seq) with resolution
+results matching the input order. It must contain at least as many elements as
+requested, but may return more - even infinitely so.
+
+### Composition
+
+To transform resolvables, you can wrap them using claro's composition functions.
+
+#### Blocking Composition (`wait`)
+
+`claro.data/wait` will apply one or more functions to a __fully-resolved__
+value, meaning that it should not be used on potentially infinite resolvable
+trees (see next section). Which, in turn, means that its use should be avoided
+as much as possible.
 
 ```clojure
-(let [run! (claro.engine/engine)]
-  @(run! (Friends. 1)))
-;; => ({:friend 5} {:friend 6} {:friend 7} {:friend 8})
+(-> (ColourString. 0)
+    (data/wait
+      (fn [colour-name]
+        {:name colour-name, :count (count color-name)}))
+    (engine/run!!))
+;; => {:name "white", :count 5}
 ```
 
-Of course, this can be used to generate potentially infinite trees, which is why
-the next sections are particularly important.
+(Note: `engine/run!!` is resolution + dereferencing using the default engine.)
 
-### Projection (experimental)
+#### Conditional Composition (`chain`, `chain-*`)
 
-Given a potentially infinite tree and a _projection template_, we can "cut off"
-subtrees that do not match the template.
+TODO
+
+### Infinite Trees + Projection
+
+Since resolvables may directly reference other resolvables, one can build
+potentially infinite trees, usually either triggering the engine's maximum depth
+protection or a `StackOverflowError`. Using a _projection template_ one can "cut
+off" those parts of the tree that there is no interest in.
 
 ```clojure
-(require '[claro.data :as data]
-         '[claro.engine :as engine])
-
-(defrecord Person [id]
+(defrecord InfiniteSeq [n]
   data/Resolvable
   (resolve! [_ _]
-    {:id id
-     :father (Person. (* (inc id) 3))
-     :mother (Person. (* id 5))}))
+    {:head n, :tail (InfiniteSeq. (inc n))}))
 
-(let [run! (-> (engine/engine) (engine/tracing))]
-  @(run!
-     (data/project
-       (Person. 1)
-       {:father {:mother {:id nil}}})))
-;; [user.Person] 1 of 1 elements resolved ... 0.001s
-;; [user.Person] 1 of 1 elements resolved ... 0.000s
-;; [user.Person] 1 of 1 elements resolved ... 0.000s
-;; => {:father {:mother {:id 30}}}
+(engine/run!! (InfiniteSeq. 0)) ;; => IllegalStateException
 ```
 
-As you can see due to the (for-debug-purposes-only) tracing resolution engine,
-there were three batches of resolutions, each with only one element:
-
-- the initial person,
-- the initial person's father,
-- as well as the initial person's father's mother.
-
-Contrast this with:
+Let's see what the `:head` of the initial `:tail` is:
 
 ```clojure
-(let [run! (-> (engine/engine) (engine/tracing))]
-  @(run!
-     (data/project
-       (Person. 1)
-       {:father {:mother {:id nil}}
-        :mother {:father {:id nil}}})))
-;; [user.Person] 1 of 1 elements resolved ... 0.002s
-;; [user.Person] 2 of 2 elements resolved ... 0.000s
-;; [user.Person] 2 of 2 elements resolved ... 0.000s
-;; => {:father {:mother {:id 30}}, :mother {:father {:id 18}}}
+(engine/run!!
+  (data/project
+    (InfiniteSeq. 0)
+    {:tail {:head nil}}))
+;; => {:tail {:head 1}}
 ```
 
-We didn't change the resolution logic, just the projection template, causing
-the inclusion of the initial person's mother's data.
+Or one level deeper:
+
+```clojure
+(engine/run!!
+  (data/project
+    (InfiniteSeq. 0)
+    {:tail {:tail {:head nil}}}))
+;; => {:tail {:tail {:head 2}}}
+```
+
+Note that projection is an experimental feature and might yield unexpected
+results in some cases.
+
+## Engine Capabilities
+
+TODO.
 
 ## License
 
 ```
 The MIT License (MIT)
 
-Copyright (c) 2015 Yannick Scherer
+Copyright (c) 2015-2016 Yannick Scherer
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
