@@ -1,6 +1,5 @@
 (ns claro.data.protocols
-  (:require [manifold.deferred :as d]
-            [potemkin :refer [defprotocol+ definterface+]]))
+  (:require [potemkin :refer [defprotocol+ definterface+]]))
 
 ;; ## Resolvables
 
@@ -21,24 +20,6 @@
   "Check whether the given value implements the `Resolvable` protocol."
   [value]
   (satisfies? Resolvable value))
-
-(defn resolve-if-possible!
-  "Resolve the given value within the given environment iff it implements
-   the `Resolvable` protocol, otherwise just return it."
-  [value env]
-  (if (resolvable? value)
-    (resolve! value env)
-    value))
-
-(extend-protocol Resolvable
-  manifold.deferred.Deferred
-  (resolve! [deferred _]
-    deferred))
-
-(extend-protocol BatchedResolvable
-  Object
-  (resolve-batch! [_ env all-resolvables]
-    (apply d/zip (map #(resolve-if-possible! % env) all-resolvables))))
 
 ;; ## Trees
 

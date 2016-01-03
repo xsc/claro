@@ -32,13 +32,27 @@
 (alter-meta! #'map->Engine assoc :private true)
 (alter-meta! #'->Engine assoc :private true)
 
+;; ## Resolution Logic
+
+(defn- resolve-them-all!
+  [[head :as batch] env]
+  (cond (satisfies? p/BatchedResolvable head)
+        (p/resolve-batch! head env batch)
+
+        (next batch)
+        (let [deferreds (mapv #(p/resolve! % env) batch)]
+          (apply d/zip deferreds))
+
+        :else
+        (d/chain (p/resolve! head env) vector)))
+
 ;; ## Options
 
 (defn- build-resolve-fn
   [{:keys [env] :or {env {}}}]
   (fn [batch]
     (d/chain
-      (p/resolve-batch! (first batch) env batch)
+      (resolve-them-all! batch env)
       #(map tree/wrap-tree %))))
 
 (defn- build-inspect-fn

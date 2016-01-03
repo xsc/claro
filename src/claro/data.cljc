@@ -19,5 +19,4 @@
    BatchedResolvable
    resolvable?
    resolve!
-   resolve-batch!
-   resolve-if-possible!])
+   resolve-batch!])
