@@ -14,7 +14,11 @@ better fit for some applications - just as claro will be for others.
 
 Don't.
 
-[![Clojars Project](https://img.shields.io/clojars/v/claro.svg)](https://clojars.org/claro)
+__Leiningen__ ([via Clojars][clojars])
+
+[![Clojars Project](https://img.shields.io/clojars/v/claro.svg)][clojars]
+
+[clojars]: https://clojars.org/claro
 
 ## Overview
 
