@@ -12,6 +12,7 @@
   :profiles {:dev {:dependencies [[org.clojure/test.check "0.9.0"]]
                    :plugins [[perforate "0.3.4"]]
                    :source-paths ["benchmarks"]
+                   :global-vars {*warn-on-reflection* true}
                    :perforate
                    {:environments
                     [{:name :resolution-benchmarks

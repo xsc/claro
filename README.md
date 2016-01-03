@@ -18,6 +18,8 @@ __Leiningen__ ([via Clojars][clojars])
 
 [![Clojars Project](https://img.shields.io/clojars/v/claro.svg)][clojars]
 
+This library requires Clojure >= 1.7.0.
+
 [clojars]: https://clojars.org/claro
 
 ## Overview
