@@ -7,7 +7,7 @@
          (make-engine (atom []) v)
          (make-engine v nil)))
   ([resolutions more-opts]
-   (engine/wrap
+   (engine/wrap-resolver
      (engine/create more-opts)
      (fn [f]
        (fn [batch]

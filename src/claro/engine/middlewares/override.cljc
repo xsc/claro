@@ -10,4 +10,4 @@
              (d/success-deferred
                (mapv single-resolve-fn batch))
              (resolver batch))))
-       (engine/wrap engine)))
+       (engine/wrap-resolver engine)))

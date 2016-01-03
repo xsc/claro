@@ -10,16 +10,20 @@
 (defprotocol+ WrappableEngine
   "Protocol for a Resolution engine that supports wrapping of the
    batchwise-resolution fn."
-  (wrap [engine wrap-fn]
+  (wrap-resolver [engine wrap-fn]
     "Wrap the given engine's batchwise resolution fn using the given
-     `wrap-fn`."))
+     `wrap-fn`.")
+  (wrap-selector [engine wrap-fn]
+    "Wrap the given engine's selector function using the given `wrap-fn`."))
 
 ;; ## Engine
 
 (defrecord Engine [opts]
   WrappableEngine
-  (wrap [engine wrap-fn]
+  (wrap-resolver [engine wrap-fn]
     (update-in engine [:opts :resolve-fn] wrap-fn))
+  (wrap-selector [engine wrap-fn]
+    (update-in engine [:opts :selector] #(wrap-fn (or % identity))))
 
   clojure.lang.IFn
   (invoke [_ resolvable]

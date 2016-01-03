@@ -26,7 +26,7 @@
 ;; ## Generators
 
 (defn gen-resolver
-  [executor-service]
+  [^ExecutorService executor-service]
   (gen/elements
     {:d/future      #(d/future %)
      :d/future-with #(d/future-with executor-service %)

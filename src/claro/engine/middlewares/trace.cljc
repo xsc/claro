@@ -32,4 +32,4 @@
                  #(trace! batch start %))
                (catch Throwable t
                  (trace! batch start t))))))
-       (engine/wrap engine)))
+       (engine/wrap-resolver engine)))

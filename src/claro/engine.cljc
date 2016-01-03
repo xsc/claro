@@ -24,7 +24,7 @@
    the engine will throw an `IllegalStateException` (default: `256`).
 
    The resulting value's resolution behaviour can be wrapped using
-   `claro.engine/wrap`."
+   `claro.engine/wrap-resolver` & co."
   ([] default-engine)
   ([opts]
    (if (empty? opts)
