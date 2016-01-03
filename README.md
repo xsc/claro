@@ -3,6 +3,8 @@
 __claro__ is a library for simple, efficient and elegant access to remote data
 sources focusing on usability, testability and overall fn.
 
+[![Build Status](https://travis-ci.org/xsc/claro.svg?branch=master)](https://travis-ci.org/xsc/claro)
+
 It is inspired by [muse][muse] which is awesome in its own right and will be a
 better fit for some applications - just as claro will be for others.
 
@@ -11,6 +13,8 @@ better fit for some applications - just as claro will be for others.
 ## Usage
 
 Don't.
+
+[![Clojars Project](https://img.shields.io/clojars/v/claro.svg)](https://clojars.org/claro)
 
 ## Overview
 
