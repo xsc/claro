@@ -15,5 +15,6 @@
                    :perforate
                    {:environments
                     [{:name :resolution-benchmarks
-                      :namespaces [claro.simple-resolution-bench]}]}}}
+                      :namespaces [claro.simple-resolution-bench
+                                   claro.projection-bench]}]}}}
   :pedantic? :abort)
