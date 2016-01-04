@@ -49,7 +49,8 @@
 
 (import-vars
   [claro.engine.core
-   wrap]
+   wrap-resolver
+   wrap-selector]
   [claro.engine.middlewares.override
    override]
   [claro.engine.middlewares.trace
