@@ -9,6 +9,8 @@
 (defgoal projection
   "Resolution of a projected Resolvable.")
 
+;; ## Projection
+
 (defrecord InfiniteSeq [n]
   data/Resolvable
   (resolve! [_ _]
@@ -28,3 +30,25 @@
 (defcase projection :deep-projection
   []
   (run!! (infinite-seq 255)))
+
+;; ## Expansion
+
+(defrecord ExpandedSeq [n max-n]
+  data/Resolvable
+  (resolve! [_ _]
+    (d/future
+      (if (< n max-n)
+        {:tail (ExpandedSeq. (inc n) max-n)}
+        {:head n}))))
+
+(defn expanded-seq
+  [max-n]
+  (ExpandedSeq. 0 max-n))
+
+(defcase projection :shallow-expansion
+  []
+  (run!! (expanded-seq 16)))
+
+(defcase projection :deep-expansion
+  []
+  (run!! (expanded-seq 255)))
