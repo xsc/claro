@@ -1,10 +1,10 @@
-(ns claro.simple-resolution
+(ns claro.simple-resolution-bench
   (:require [perforate.core :refer [defgoal defcase]]
             [claro.data :as data]
             [claro.engine :as engine]
             [claro.resolvables :as rs]))
 
-(def run!! (engine/engine))
+(def run!! engine/run!!)
 
 (defgoal simple-resolution
   "Resolution of simple (non-batched) Resolvables")
