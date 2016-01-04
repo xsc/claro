@@ -4,14 +4,19 @@
 ;; ## Resolvables
 
 (defprotocol+ Resolvable
-  "Protocol for resolvable values."
+  "Interface for resolvable values.
+
+   Do not use with `extend-type` or `extend-protocol`!"
   (resolve! [resolvable env]
     "Resolve the given value within the given environment, returning a manifold
      deferrable representing the resolution result. This might yield a structure
      containing more `Resolvable`s."))
 
 (defprotocol+ BatchedResolvable
-  "Protocol for resolution of multiple values at once."
+  "Interface for values that can be resolved in batches. These must also implement
+   the `Resolvable` interface.
+
+   Do not use with `extend-type` or `extend-protocol`!"
   (resolve-batch! [resolvable env all-resolvables]
     "Resolve `all-resolvables` (which is a seq including `resolvable`), returning
      a manifold deferrable containing a seq with resolved values in-order."))
@@ -19,7 +24,7 @@
 (defn resolvable?
   "Check whether the given value implements the `Resolvable` protocol."
   [value]
-  (satisfies? Resolvable value))
+  (instance? claro.data.protocols.Resolvable value))
 
 ;; ## Trees
 
