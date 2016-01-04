@@ -8,7 +8,15 @@
              [utils :as u]]
             [potemkin :refer [defprotocol+]]))
 
-(declare wrap-tree)
+(declare wrap-tree ->map-entry)
+
+;; ## Transducers
+
+(def ^:private map-entry-xf
+  (map #(->map-entry %)))
+
+(def ^:private tree-xf
+  (map #(wrap-tree %)))
 
 ;; ## Helper
 
@@ -33,23 +41,23 @@
 
 (defn- map->tree
   [m]
-  (resolvable-collection (map ->map-entry) m))
+  (resolvable-collection map-entry-xf m))
 
 ;; ## Collections
 
 (defn- list->tree
   [l]
-  (resolvable-collection (map wrap-tree) (reverse l)))
+  (resolvable-collection tree-xf (reverse l)))
 
 (defn- collection->tree
   [coll]
-  (resolvable-collection (map wrap-tree) coll))
+  (resolvable-collection tree-xf coll))
 
 ;; ## Records
 
 (defn- record->tree
   [record]
-  (let [elements (into [] (map ->map-entry) record)
+  (let [elements (into [] map-entry-xf record)
         resolvables (into [] u/all-resolvables-xf elements)]
     (if (empty? resolvables)
       record
