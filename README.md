@@ -31,7 +31,7 @@ logic, allowing composition of resolvables in a concise manner:
 
 ```clojure
 (require '[claro.data :as data]
-         '[manifold.deferred :as d]))
+         '[manifold.deferred :as d])
 
 (def fetch-colour! (constantly {:name "white"}))
 (def fetch-house! (constantly {:colour_id 3, :street "221B Baker Street"}))
