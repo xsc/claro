@@ -9,7 +9,8 @@
                  [potemkin "0.4.2"]
                  [manifold "0.1.1"]
                  [prismatic/schema "1.0.4"]]
-  :profiles {:dev {:dependencies [[org.clojure/test.check "0.9.0"]]
+  :profiles {:dev {:dependencies [[org.clojure/test.check "0.9.0"]
+                                  [org.clojure/core.async "0.2.374"]]
                    :plugins [[perforate "0.3.4"]]
                    :source-paths ["benchmarks"]
                    :perforate
