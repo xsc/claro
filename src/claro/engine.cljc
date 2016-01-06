@@ -7,6 +7,7 @@
              [override :as override]
              [trace :as trace]]
             #?(:clj [claro.runtime.impl.manifold :as default])
+            #?(:cljs [claro.runtime.impl.core-async :as default])
             [potemkin :refer [import-vars]]))
 
 ;; ## Engine Constructors/Runners
