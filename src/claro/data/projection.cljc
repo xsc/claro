@@ -1,5 +1,6 @@
 (ns claro.data.projection
-  (:require [claro.data.composition :as composition]
+  (:require [claro.data.ops :as ops]
+            [claro.data.tree :as tree]
             [potemkin :refer [defprotocol+]]))
 
 ;; ## Protocol
@@ -18,14 +19,14 @@
   (project* [[template :as sq] value]
     {:pre [(= (count sq) 1)]}
     (if (and (= (count sq) 1) (satisfies? ProjectionTemplate template))
-      (composition/chain-when
+      (tree/chain-when
         value
         #(and (coll? %) (not (map? %)))
         (fn [result-sq]
           (into (empty result-sq)
                 (map #(project* template %))
                 result-sq)))
-      (composition/chain-select-keys value sq))))
+      (ops/select-keys value sq))))
 
 ;; ### Map
 
@@ -34,7 +35,7 @@
   (->> (for [[k template] templates]
          [k #(project* template %)])
        (into {})
-       (composition/chain-keys value)))
+       (ops/update-keys value)))
 
 (extend-protocol ProjectionTemplate
   clojure.lang.IPersistentMap
@@ -42,7 +43,7 @@
     (let [ks (keys templates)]
       (-> value
           (project-keys* templates)
-          (composition/chain-select-keys ks)))))
+          (ops/select-keys ks)))))
 
 ;; ### Values
 
