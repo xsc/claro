@@ -1,6 +1,6 @@
 (ns claro.engine.middlewares.trace
-  (:require [claro.engine.core :as engine]
-            [manifold.deferred :as d]))
+  (:require [claro.engine.protocols :as engine]
+            [claro.runtime.impl :as impl]))
 
 ;; ## Helper
 
@@ -27,7 +27,8 @@
          (fn [batch]
            (let [start (System/nanoTime)]
              (try
-               (d/chain
+               (impl/chain
+                 (engine/impl engine)
                  (resolver batch)
                  #(trace! batch start %))
                (catch Throwable t

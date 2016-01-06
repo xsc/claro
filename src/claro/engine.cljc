@@ -1,16 +1,19 @@
 (ns claro.engine
   (:refer-clojure :exclude [run!])
-  (:require [claro.engine.core :as engine]
+  (:require [claro.engine
+             [builder :as builder]
+             [protocols :as p]]
             [claro.engine.middlewares
              [override :as override]
              [trace :as trace]]
+            #?(:clj [claro.runtime.impl.manifold :as default])
             [potemkin :refer [import-vars]]))
 
 ;; ## Engine Constructors/Runners
 
 (def ^:private default-engine
   "The pre-prepared default engine."
-  (engine/create {}))
+  (builder/build default/impl {}))
 
 (defn engine
   "Create a new resolution engine, based on the following options:
@@ -29,11 +32,13 @@
   ([opts]
    (if (empty? opts)
      default-engine
-     (engine/create opts))))
+     (builder/build default/impl opts)))
+  ([impl opts]
+   (builder/build impl opts)))
 
 (defn run!
   "Resolve the given value using an engine created on-the-fly. See
-   `claro.engine/engine` for available options. Immediately returns a manifold
+   `claro.engine/engine` for available options. Immediately returns a
    deferred."
   ([value] (default-engine value))
   ([opts value] ((engine opts) value)))
@@ -48,7 +53,7 @@
 ;; ## Middlewares
 
 (import-vars
-  [claro.engine.core
+  [claro.engine.protocols
    wrap-resolver
    wrap-selector]
   [claro.engine.middlewares.override
