@@ -90,21 +90,19 @@
 
 ;; ## Generic Operations
 
-(defn- chain*
-  [value predicate fs]
-  (->> (reverse fs)
-       (apply comp)
-       (tree/chain-when value predicate)))
-
 (defn chain
   "Wrap the given value with processing functions that get called (in-order)
    the moment the given value is neither a `Resolvable` nor wrapped."
   [value f & fs]
-  (chain* value (constantly true) (cons f fs)))
+  (->> (reverse (cons f fs))
+       (apply comp)
+       (tree/chain-when value (constantly true))))
 
-(defn wait
+(defn then
   "Wrap the given value with processing functions that get called (in-order)
    once the value has been fully resolved. Only use this for guaranteed finite
    expansion."
   [value f & fs]
-  (chain* value nil (cons f fs)))
+  (->> (reverse (cons f fs))
+       (apply comp)
+       (tree/chain-blocking value)))

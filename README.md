@@ -124,16 +124,16 @@ requested, but may return more - even infinitely so.
 
 To transform resolvables, you can wrap them using claro's composition functions.
 
-#### Blocking Composition (`wait`)
+#### Blocking Composition (`then`)
 
-`claro.data/wait` will apply one or more functions to a __fully-resolved__
+`claro.data/then` will apply one or more functions to a __fully-resolved__
 value, meaning that it should not be used on potentially infinite resolvable
 trees (see next section). Which, in turn, means that its use should be avoided
 as much as possible.
 
 ```clojure
 (-> (ColourString. 0)
-    (data/wait
+    (data/then
       (fn [colour-name]
         {:name colour-name, :count (count colour-name)}))
     (engine/run!!))

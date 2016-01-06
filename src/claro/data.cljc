@@ -13,7 +13,7 @@
    select-keys
    update-keys
    chain
-   wait]
+   then]
 
   [claro.data.projection
    project]
