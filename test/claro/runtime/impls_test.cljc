@@ -2,6 +2,7 @@
   (:require [clojure.test :refer :all]
             [claro.runtime.impl :as impl]
             [claro.runtime.impl
+             [core-async :as core-async]
              #?(:clj [manifold :as manifold])]))
 
 ;; ## Test Harness
@@ -56,3 +57,7 @@
 #?(:clj
     (deftest t-manifold
       (test-impl manifold/impl)))
+
+;; ## Tests (Clojure + ClojureScript)
+(deftest t-core-async
+  (test-impl core-async/impl))
