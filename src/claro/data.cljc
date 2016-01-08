@@ -1,10 +1,10 @@
 (ns claro.data
   (:refer-clojure :exclude [update update-in select-keys])
-  (:require [claro.data protocols ops projection tree]
+  (:require [claro.data protocols chain ops projection tree]
             [potemkin :refer [import-vars]]))
 
 (import-vars
-  [claro.data.tree
+  [claro.data.chain
    chain-when]
 
   [claro.data.ops
@@ -12,8 +12,8 @@
    update-in
    select-keys
    update-keys
-   chain
-   then]
+   then
+   then!]
 
   [claro.data.projection
    project]

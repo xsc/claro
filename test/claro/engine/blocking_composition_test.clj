@@ -21,5 +21,5 @@
      n  gen/s-pos-int]
     (let [run! (make-engine (atom []))
           base (nth (iterate #(Identity. %) v0) n)
-          value (data/then base #(op % v1))]
+          value (data/then! base #(op % v1))]
       (= (op v0 v1) @(run! value)))))

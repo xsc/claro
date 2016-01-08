@@ -124,7 +124,7 @@ requested, but may return more - even infinitely so.
 
 To transform resolvables, you can wrap them using claro's composition functions.
 
-#### Blocking Composition (`then`)
+#### Blocking Composition (`then!`)
 
 `claro.data/then` will apply one or more functions to a __fully-resolved__
 value, meaning that it should not be used on potentially infinite resolvable
@@ -133,7 +133,7 @@ as much as possible.
 
 ```clojure
 (-> (ColourString. 0)
-    (data/then
+    (data/then!
       (fn [colour-name]
         {:name colour-name, :count (count colour-name)}))
     (engine/run!!))
@@ -142,7 +142,7 @@ as much as possible.
 
 (Note: `engine/run!!` is resolution + dereferencing using the default engine.)
 
-#### Conditional Composition (`chain`, `chain-*`)
+#### Conditional Composition (`then`)
 
 TODO
 

@@ -5,7 +5,7 @@
   Object
   (unwrap-tree1 [tree]
     tree)
-  (resolved? [_]
+  (resolved? [tree]
     true)
   (resolvables* [_]
     nil)

@@ -1,6 +1,6 @@
 (ns claro.data.projection
   (:require [claro.data.ops :as ops]
-            [claro.data.tree :as tree]
+            [claro.data.chain :refer [chain-when]]
             [potemkin :refer [defprotocol+]]))
 
 ;; ## Protocol
@@ -19,7 +19,7 @@
   (project* [[template :as sq] value]
     {:pre [(= (count sq) 1)]}
     (if (and (= (count sq) 1) (satisfies? ProjectionTemplate template))
-      (tree/chain-when
+      (chain-when
         value
         #(and (coll? %) (not (map? %)))
         (fn [result-sq]

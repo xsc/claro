@@ -1,6 +1,7 @@
 (ns claro.data.ops
   (:refer-clojure :exclude [select-keys update update-in])
   (:require [clojure.core :as core]
+            [claro.data.chain :as chain]
             [claro.data.tree :as tree]
             [claro.data.protocols :as p]))
 
@@ -20,7 +21,7 @@
 
 (defn- chain-map
   [k value predicate transform re-chain]
-  (tree/chain-when
+  (chain/chain-when
     value
     (wrap-assert-map
       predicate
@@ -48,7 +49,7 @@
 (defn update
   "Wrap the given value to perform an update on a key once it's available."
   [value k f & args]
-  (tree/chain-when
+  (chain/chain-when
     value
     (wrap-assert-map
       #(contains? % k)
@@ -59,7 +60,7 @@
   [value [k & rst] f & args]
   (if (empty? rst)
     (update value k #(apply f % args))
-    (tree/chain-when
+    (chain/chain-when
       value
       (wrap-assert-map
         #(contains? % k)
@@ -90,19 +91,16 @@
 
 ;; ## Generic Operations
 
-(defn chain
-  "Wrap the given value with processing functions that get called (in-order)
-   the moment the given value is neither a `Resolvable` nor wrapped."
-  [value f & fs]
-  (->> (reverse (cons f fs))
-       (apply comp)
-       (tree/chain-when value (constantly true))))
-
 (defn then
-  "Wrap the given value with processing functions that get called (in-order)
-   once the value has been fully resolved. Only use this for guaranteed finite
-   expansion."
-  [value f & fs]
-  (->> (reverse (cons f fs))
-       (apply comp)
-       (tree/chain-blocking value)))
+  "Wrap the given value with a processing function that gets called the moment
+   the given value is neither a `Resolvable` nor wrapped."
+  [value f & args]
+  (chain/chain-eager value #(apply f % args)))
+
+(defn then!
+  "Wrap the given value with a processing function that gets called once the
+   value has been fully resolved.
+
+   Only use this for guaranteed finite expansion!"
+  [value f & args]
+  (chain/chain-blocking value #(apply f % args)))
