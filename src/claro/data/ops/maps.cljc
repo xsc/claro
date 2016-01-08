@@ -55,7 +55,9 @@
   [value k f & args]
   (chain/chain-eager
     value
-    #(core/update % k (fn [v] (apply f v args)))))
+    (wrap-assert-map
+      #(core/update % k (fn [v] (apply f v args)))
+      "can only apply 'update' to resolvables producing maps, given:")))
 
 (defn update-in
   [value [k & rst] f & args]
@@ -63,7 +65,9 @@
     (update value k #(apply f % args))
     (chain/chain-eager
       value
-      #(core/update % k update-in rst (fn [v] (apply f v args))))))
+      (wrap-assert-map
+        #(core/update % k update-in rst (fn [v] (apply f v args)))
+        "can only apply 'update-in' to resolvables producing maps, given:"))))
 
 (defn- perform-update
   [value fs]
