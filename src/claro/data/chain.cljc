@@ -10,7 +10,7 @@
    once `predicate` is fulfilled."
   [value predicate f]
   (let [f' (comp wrap-tree f)]
-    (if (and (p/resolved? value) (not (p/resolvable? value)))
+    (if (p/resolved? value)
       (if (or (not predicate) (predicate value))
         (f' value)
         (throw
@@ -23,7 +23,7 @@
   "Apply the given function once `value` is fully resolved."
   [value f]
   (let [f' (comp wrap-tree f)]
-    (if (and (p/resolved? value) (not (p/resolvable? value)))
+    (if (p/resolved? value)
       (f' value)
       (->BlockingComposition (wrap-tree value) f'))))
 
