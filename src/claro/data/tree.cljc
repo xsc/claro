@@ -66,9 +66,10 @@
 
 (defn wrap-tree
   [value]
-  (cond (p/resolvable? value) (->ResolvableLeaf value)
-        (record? value) (record->tree value)
-        (map? value) (map->tree value)
-        (list? value) (list->tree value)
-        (coll? value) (collection->tree value)
-        :else value))
+  (let [value (cond-> value (p/wrapped? value) p/unwrap)]
+    (cond (p/resolvable? value) (->ResolvableLeaf value)
+          (record? value) (record->tree value)
+          (map? value) (map->tree value)
+          (list? value) (list->tree value)
+          (coll? value) (collection->tree value)
+          :else value)))

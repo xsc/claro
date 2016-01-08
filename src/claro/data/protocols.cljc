@@ -39,7 +39,8 @@
     "Replace the `Resolvables` with the given resolved values, returning a
      potentially fully resolved `ResolvableTree`."))
 
-(definterface+ WrappedTree)
+(definterface+ WrappedTree
+  (unwrap [this]))
 
 (defn wrapped?
   [tree]

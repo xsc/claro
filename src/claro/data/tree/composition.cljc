@@ -4,6 +4,9 @@
 
 (deftype ResolvableComposition [tree predicate f]
   WrappedTree
+  (unwrap [this]
+    this)
+
   ResolvableTree
   (unwrap-tree1 [this]
     this)
