@@ -14,6 +14,11 @@
        (or (not predicate)
            (predicate value))))
 
+(deftype ResolvedComposition [value f]
+  claro.data.protocols.WrappedTree
+  (unwrap [_]
+    (f value)))
+
 ;; ## Chains
 
 (defn chain-when
@@ -28,7 +33,7 @@
           (->ResolvableComposition value predicate f')
 
           (matches? value predicate)
-          (f' value)
+          (->ResolvedComposition value f')
 
           :else
           (let [tree (wrap-tree value)]
@@ -47,7 +52,7 @@
       (->BlockingComposition (->ResolvableLeaf value) f')
       (let [tree (wrap-tree value)]
         (if (p/resolved? tree)
-          (f' tree)
+          (->ResolvedComposition tree f')
           (->BlockingComposition tree f'))))))
 
 (defn chain-eager
