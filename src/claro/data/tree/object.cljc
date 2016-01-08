@@ -6,7 +6,7 @@
   (unwrap-tree1 [tree]
     tree)
   (resolved? [tree]
-    (not (p/resolvable? tree)))
+    true)
   (resolvables* [_]
     nil)
   (apply-resolved-values [tree _]

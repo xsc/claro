@@ -1,6 +1,6 @@
 (ns claro.data.projection
-  (:require [claro.data.ops :as ops]
-            [claro.data.chain :refer [chain-when]]
+  (:require [claro.data.ops.maps :as ops]
+            [claro.data.ops.chain :refer [chain-when]]
             [potemkin :refer [defprotocol+]]))
 
 ;; ## Protocol

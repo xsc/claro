@@ -1,9 +1,9 @@
-(ns claro.data.ops
+(ns claro.data.ops.maps
   (:refer-clojure :exclude [select-keys update update-in])
-  (:require [clojure.core :as core]
-            [claro.data.chain :as chain]
-            [claro.data.tree :as tree]
-            [claro.data.protocols :as p]))
+  (:require [claro.data.protocols :as p]
+            [claro.data.tree :refer [wrap-tree]]
+            [claro.data.ops.chain :as chain]
+            [clojure.core :as core]))
 
 ;; ## Helpers
 
@@ -17,8 +17,6 @@
     (assert-map value msg)
     (f value)))
 
-;; ## Map Operations
-
 (defn- chain-map
   [k value predicate transform re-chain]
   (chain/chain-when
@@ -27,6 +25,10 @@
       predicate
       (format "can only run '%s' on map, given:" (name k)))
     #(re-chain (transform %))))
+
+;; ## Map Operations
+
+;; ### Selection
 
 (defn select-keys
   "Wrap the given value to select only the given keys once they are available."
@@ -38,7 +40,7 @@
         (when-not (p/wrapped? value)
           (let [v (p/unwrap-tree1 value)]
             (when (every? #(contains? v %) ks)
-              (tree/wrap-tree (core/select-keys v ks)))))
+              (wrap-tree (core/select-keys v ks)))))
         (chain-map
           :select-keys
           value
@@ -46,25 +48,21 @@
           #(core/select-keys % ks)
           #(select-keys % ks)))))
 
+;; ### Update
+
 (defn update
   "Wrap the given value to perform an update on a key once it's available."
   [value k f & args]
-  (chain/chain-when
+  (chain/chain-eager
     value
-    (wrap-assert-map
-      #(contains? % k)
-      "can only run 'update' on map, given:")
     #(core/update % k (fn [v] (apply f v args)))))
 
 (defn update-in
   [value [k & rst] f & args]
   (if (empty? rst)
     (update value k #(apply f % args))
-    (chain/chain-when
+    (chain/chain-eager
       value
-      (wrap-assert-map
-        #(contains? % k)
-        "can only run 'update-in' on map, given:")
       #(core/update % k update-in rst (fn [v] (apply f v args))))))
 
 (defn- perform-update
@@ -88,19 +86,3 @@
       #(some (fn [k] (contains? % k)) (keys fs))
       #(perform-update % fs)
       #(update-keys % (apply dissoc fs (keys %))))))
-
-;; ## Generic Operations
-
-(defn then
-  "Wrap the given value with a processing function that gets called the moment
-   the given value is neither a `Resolvable` nor wrapped."
-  [value f & args]
-  (chain/chain-eager value #(apply f % args)))
-
-(defn then!
-  "Wrap the given value with a processing function that gets called once the
-   value has been fully resolved.
-
-   Only use this for guaranteed finite expansion!"
-  [value f & args]
-  (chain/chain-blocking value #(apply f % args)))
