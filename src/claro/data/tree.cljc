@@ -78,12 +78,17 @@
 
 ;; ## Base Compositions
 
+(defn- fully-resolved?
+  [value]
+  (and (p/resolved? value)
+       (not (p/resolvable? value))))
+
 (defn chain-when
   "Apply the given function to the (potentially not fully-resolved) value
    once `predicate` is fulfilled."
   [value predicate f]
   (let [f' (comp wrap-tree f)]
-    (if (and (not (p/resolvable? value)) (p/resolved? value))
+    (if (fully-resolved? value)
       (if (predicate value)
         (f' value)
         (throw
@@ -96,6 +101,6 @@
   "Apply the given function once `value` is fully resolved."
   [value f]
   (let [f' (comp wrap-tree f)]
-    (if (p/resolved? value)
+    (if (fully-resolved? value)
       (f' value)
       (->BlockingComposition (wrap-tree value) f'))))
