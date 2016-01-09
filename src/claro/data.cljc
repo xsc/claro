@@ -4,16 +4,13 @@
              protocols
              projection]
             [claro.data.ops
-             chain
              maps
              then]
             [potemkin :refer [import-vars]]))
 
 (import-vars
-  [claro.data.ops.chain
-   chain-when]
-
   [claro.data.ops.then
+   on
    then
    then!]
 
