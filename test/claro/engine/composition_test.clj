@@ -65,3 +65,16 @@
                 @(run! value))))
         (is (= [(:v resolvable0) (:v resolvable1)]
                @(run! value)))))))
+
+(deftest t-composition
+  (let [resolvable (->Identity "string")
+        c (count (:v resolvable))
+        run! (make-engine)]
+    (testing "blocking composition."
+      (is (= {:x c} @(run! (data/then! {:x resolvable} update :x count)))))
+    (testing "eager composition."
+      (is (= {:x 1} @(run! (data/then {:x resolvable} update :x count)))))
+    (testing "conditional composition."
+      (is (= {:x c} @(run! (data/on {:x resolvable} #(-> % :x string?) update :x count)))))
+    (testing "built-in update."
+      (is (= {:x c} @(run! (data/update {:x resolvable} :x count)))))))
