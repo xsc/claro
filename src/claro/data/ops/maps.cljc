@@ -17,14 +17,11 @@
     (assert-map value msg)
     (f value)))
 
-(defn- chain-map
-  [k value predicate transform re-chain]
-  (chain/chain-when
-    value
-    (wrap-assert-map
-      predicate
-      (format "can only run '%s' on map, given:" (name k)))
-    #(re-chain (transform %))))
+(defn- rechain
+  [value f]
+  (if (or (p/wrapped? value) (p/resolvable? value))
+    (chain/chain-eager value f)
+    (f value)))
 
 ;; ## Map Operations
 
@@ -44,21 +41,23 @@
 (defn update
   "Wrap the given value to perform an update on a key once it's available."
   [value k f & args]
-  (chain/chain-eager
-    value
-    (wrap-assert-map
-      #(core/update % k (fn [v] (apply f v args)))
-      "can only apply 'update' to resolvables producing maps, given:")))
-
-(defn update-in
-  [value [k & rst] f & args]
-  (if (empty? rst)
-    (update value k #(apply f % args))
+  (let [f #(apply f % args)]
     (chain/chain-eager
       value
       (wrap-assert-map
-        #(core/update % k update-in rst (fn [v] (apply f v args)))
-        "can only apply 'update-in' to resolvables producing maps, given:"))))
+        #(core/update % k rechain f)
+        "can only apply 'update' to resolvables producing maps, given:"))))
+
+(defn update-in
+  [value [k & rst] f & args]
+  (let [f #(apply f % args)]
+    (if (empty? rst)
+      (update value k f)
+      (chain/chain-eager
+        value
+        (wrap-assert-map
+          #(core/update % k update-in rst f)
+          "can only apply 'update-in' to resolvables producing maps, given:")))))
 
 (defn update-keys
   "Wrap the given value with per-key processing functions (given as a map), where
@@ -68,5 +67,5 @@
     value
     #(reduce
        (fn [v [k f]]
-         (core/update v k f))
+         (core/update v k rechain f))
        % fs)))
