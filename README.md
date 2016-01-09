@@ -188,7 +188,35 @@ not-yet be resolved). For example, the following might not behave as expected:
 
 #### Conditional Composition (`on`)
 
-TODO
+As seen in the previous section, eager composition might make it hard to reason
+about the structure of data one is operating on. Claro tries to mitigate this
+problem by offering a way to _guard_ transformations with a predicate.
+
+`claro.data/on` will only run a transformation if the predicate is fulfilled and
+_throw an exception_ if a value was fully resolved without triggering the
+transformation.
+
+```clojure
+(-> {:name (ColourString. 0)}
+    (data/on #(-> % :name string?) update :name count)
+    (engine/run!!))
+;; => {:name 5}
+
+(-> {:name [(ColourString. 0)]}
+    (data/on #(-> % :name string?) update :name count)
+    (engine/run!!))
+;; => IllegalStateException: predicate ... does not hold for fully resolved: {:name ["white"]}
+```
+
+Note that in this case, the preferred solution would be to use claro's built in
+[collection functions](#collection-operations), e.g.: `claro.data/update`:
+
+```clojure
+(-> {:name (ColourString. 0)}
+    (data/update :name count)
+    (engine/run!!))
+;; => {:name 5}
+```
 
 ### Infinite Trees + Projection
 
