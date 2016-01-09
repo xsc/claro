@@ -33,20 +33,11 @@
 (defn select-keys
   "Wrap the given value to select only the given keys once they are available."
   [value ks]
-  (if (empty? ks)
-    {}
-    (or (when (p/resolved? value)
-          (core/select-keys value ks))
-        (when-not (p/wrapped? value)
-          (let [v (p/unwrap-tree1 value)]
-            (when (every? #(contains? v %) ks)
-              (wrap-tree (core/select-keys v ks)))))
-        (chain-map
-          :select-keys
-          value
-          #(some (complement (set ks)) (keys %))
-          #(core/select-keys % ks)
-          #(select-keys % ks)))))
+  (chain/chain-eager
+    value
+    (wrap-assert-map
+      #(core/select-keys % ks)
+      "can only apply 'select-keys' to resolvables producing maps, given:")))
 
 ;; ### Update
 
@@ -69,24 +60,13 @@
         #(core/update % k update-in rst (fn [v] (apply f v args)))
         "can only apply 'update-in' to resolvables producing maps, given:"))))
 
-(defn- perform-update
-  [value fs]
-  (let [ks (keys fs)
-        found-ks (filter #(contains? value %) ks)]
-    (reduce
-      (fn [value k]
-        (core/update value k (get fs k)))
-      value found-ks)))
-
 (defn update-keys
   "Wrap the given value with per-key processing functions (given as a map), where
    each one gets called once the key is available in the given value."
   [value fs]
-  (if (empty? fs)
+  (chain/chain-eager
     value
-    (chain-map
-      :update-keys
-      value
-      #(some (fn [k] (contains? % k)) (keys fs))
-      #(perform-update % fs)
-      #(update-keys % (apply dissoc fs (keys %))))))
+    #(reduce
+       (fn [v [k f]]
+         (core/update v k f))
+       % fs)))
