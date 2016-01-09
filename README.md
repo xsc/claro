@@ -128,27 +128,65 @@ requested, but may return more - even infinitely so.
 
 ### Composition
 
-To transform resolvables, you can wrap them using claro's composition functions.
+To transform resolvables, you can wrap them using claro's low-level composition
+functions. There is also a set of collection manipulation facilities that
+are described in [Collection Operations](#collection-operations).
 
 #### Blocking Composition (`then!`)
 
-`claro.data/then` will apply one or more functions to a __fully-resolved__
+`claro.data/then!` will apply a transformation to a __fully-resolved__
 value, meaning that it should not be used on potentially infinite resolvable
 trees (see next section). Which, in turn, means that its use should be avoided
 as much as possible.
 
 ```clojure
-(-> (ColourString. 0)
+(-> {:name (ColourString. 0)}
     (data/then!
-      (fn [colour-name]
-        {:name colour-name, :count (count colour-name)}))
+      (fn [{:keys [name]}]
+        {:name name, :class (class name)}))
     (engine/run!!))
-;; => {:name "white", :count 5}
+;; => {:name "white", :class java.lang.String}
 ```
 
 (Note: `engine/run!!` is resolution + dereferencing using the default engine.)
 
-#### Conditional Composition (`then`)
+#### Eager Composition (`then`)
+
+Most of the time, transformations can be applied before a value is fully
+resolved. For example, to get the first element of a seq of resolvables, it
+doesn't matter (result-wise) whether you call `first` on the original seq or
+the resolved one - and actually, removing elements whose resolution results will
+never be used sounds like a good idea, doesn't it?
+
+`claro.data/then` will apply a transformation to any partially resolved value,
+i.e. one that is neither a `Resolvable` nor wrapped inside another composition.
+
+```clojure
+(-> {:name (ColourString. 0)}
+    (data/then
+      (fn [{:keys [name]}]
+        {:name name, :class (class name)}))
+    (engine/run!!))
+;; => {:name "white", :class user.ColourString}
+```
+
+As you can see, the function was called on the `ColourString` value, as opposed
+to the resolved `java.lang.String` from the previous example.
+
+`then` should only perform top-level transformation functions (i.e. add/remove a
+key, wrap a value, ...) and avoid operations on nested values (since they might
+not-yet be resolved). For example, the following might not behave as expected:
+
+```clojure
+(-> {:name (ColourString. 0)}
+    (data/then update :name count)
+    (engine/run!!))
+;; => {:name 1}
+```
+
+`count` was called on the `ColourString` record, not its resolved value.
+
+#### Conditional Composition (`on`)
 
 TODO
 
@@ -190,6 +228,10 @@ Or one level deeper:
 
 Note that projection is an experimental feature and might yield unexpected
 results in some cases.
+
+### Collection Operations
+
+TODO
 
 ## Engine Capabilities
 
