@@ -2,17 +2,12 @@
   (:require [claro.data.protocols :as p]
             [claro.data.tree
              [blocking-composition :refer [->BlockingComposition]]
-             [composition :refer [->ResolvableComposition]]
+             [composition
+              :refer [->ResolvableComposition matches? tree-matches?]]
              [leaf :refer [->ResolvableLeaf]]]
             [claro.data.tree :refer [wrap-tree]]))
 
-;; ## Helpers
-
-(defn- matches?
-  [value predicate]
-  (and (p/resolved? value)
-       (or (not predicate)
-           (predicate value))))
+;; ## Resolved Node
 
 (deftype ResolvedComposition [value f]
   claro.data.protocols.WrappedTree
@@ -37,11 +32,8 @@
 
           :else
           (let [tree (wrap-tree value)]
-            (if (p/resolved? tree)
-              (throw
-                (IllegalStateException.
-                  (format "'predicate' does not hold for fully resolved: %s"
-                          (pr-str value))))
+            (if (tree-matches? tree predicate)
+              (->ResolvedComposition value f')
               (->ResolvableComposition tree predicate f'))))))
 
 (defn chain-blocking
