@@ -93,13 +93,19 @@ that will be outlined, together with more details, in
 
 ### Manifold
 
-Claro relies on the [manifold](https://github.com/ztellman/manifold) library for
-representation of asynchronous logic. This means that `Resolvables` can return:
+Claro, by default, relies on the [manifold][manifold] library for representation
+of asynchronous logic. This means that `Resolvables` can return:
 
 - Clojure's `future`, `delay`, `promise`,
 - Manifold's own `deferred` values,
 - `java.util.concurrent.Future`s (e.g. from `ExecutorService.submit()`),
 - or just plain values (whose computation will block resolution, though).
+
+Note that claro lets you [plug in any deferred
+implementation](#pluggable-deferred-implementation) you desire (e.g.
+`core.async` channels).
+
+[manifold]: https://github.com/ztellman/manifold
 
 ### Batched Resolvables
 
@@ -187,7 +193,36 @@ results in some cases.
 
 ## Engine Capabilities
 
-TODO.
+### Pluggable Deferred Implementation
+
+Claro's runtime is independent of the actual deferred implementation, allowing
+you to plug in any one you desire. A full-fledged implementation for [core.async
+channels][core-async] is already included and can be passed to
+`claro.engine/engine` for it to be used:
+
+```clojure
+(require '[claro.runtime.impl.core-async :as core-async]
+         '[claro.engine :as engine]
+         '[claro.data :as data]
+         '[clojure.core.async :refer [go timeout <! <!!]])
+
+(def resolve! (engine/engine core-async/impl {:env {}}))
+
+(defrecord ChannelResolvable [timeout-ms x]
+  data/Resolvable
+  (resolve! [_ _]
+    (go
+      (<! (timeout timeout-ms))
+      x)))
+
+(<!! (resolve! (ChannelResolvable. 100 :x)))
+;; => :x
+```
+
+Note that you have to explicitly include the [core.async][core-async]
+dependency.
+
+[core-async]: https://github.com/clojure/core.async
 
 ## License
 
