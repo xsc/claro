@@ -37,6 +37,7 @@
             (tree-matches? tree' predicate) (f tree')
             (p/wrapped? tree') (ResolvableComposition. tree' predicate f)
             :else (let [value (p/unwrap-tree1 tree')]
-                    (if (or (not predicate) (predicate value))
+                    (if (and (p/processable? value)
+                             (or (not predicate) (predicate value)))
                       (f value)
                       (ResolvableComposition. tree' predicate f)))))))
