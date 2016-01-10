@@ -78,3 +78,15 @@
       (is (= {:x c} @(run! (data/on {:x resolvable} #(-> % :x string?) update :x count)))))
     (testing "built-in update."
       (is (= {:x c} @(run! (data/update {:x resolvable} :x count)))))))
+
+(defspec t-nested-composition 100
+  (prop/for-all
+    [resolvable gen-resolvable
+     nesting-level gen/nat
+     chain-fn (gen/elements [data/then data/then!])]
+    (let [run! (make-engine)
+          value (chain-fn
+                  (nth (iterate ->Identity resolvable) nesting-level)
+                  pr-str)
+          result @(run! value)]
+      (is (= (pr-str (:v resolvable)) result)))))

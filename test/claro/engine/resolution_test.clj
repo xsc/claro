@@ -108,6 +108,22 @@
                              [{:type :apple, :colour :red} :red])
                            (sort-by val m))))))))))
 
+;; ## Nested
+
+(defrecord Nested [value]
+  data/Resolvable
+  (resolve! [_ _]
+    value))
+
+(defspec t-nested-resolution 100
+  (prop/for-all
+    [nesting-level gen/nat
+     nested-value  gen/simple-type]
+    (let [run! (make-engine)
+          value (nth (iterate ->Nested (->Nested nested-value)) nesting-level)
+          result @(run! value)]
+      (= nested-value result))))
+
 ;; ## Records
 
 (defrecord Wrapper [value])
