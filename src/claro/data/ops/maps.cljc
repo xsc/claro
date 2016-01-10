@@ -17,12 +17,6 @@
     (assert-map value msg)
     (f value)))
 
-(defn- rechain
-  [value f]
-  (if (or (p/wrapped? value) (p/resolvable? value))
-    (chain/chain-eager value f)
-    (f value)))
-
 ;; ## Map Operations
 
 ;; ### Selection
@@ -45,7 +39,7 @@
     (chain/chain-eager
       value
       (wrap-assert-map
-        #(core/update % k rechain f)
+        #(core/update % k chain/rechain-eager f)
         "can only apply 'update' to resolvables producing maps, given:"))))
 
 (defn update-in
@@ -67,5 +61,5 @@
     value
     #(reduce
        (fn [v [k f]]
-         (core/update v k rechain f))
+         (core/update v k chain/rechain-eager f))
        % fs)))

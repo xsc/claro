@@ -52,3 +52,9 @@
    wrapped."
   [value f]
   (chain-when value nil f))
+
+(defn rechain-eager
+  [value f]
+  (if (p/processable? value)
+    (f value)
+    (chain-eager value f)))

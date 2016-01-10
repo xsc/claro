@@ -49,3 +49,7 @@
 (defn resolvables
   [tree]
   (into #{} (resolvables* tree)))
+
+(defn processable?
+  [value]
+  (not (or (resolvable? value) (wrapped? value))))
