@@ -62,12 +62,15 @@
   (let [->resolvable #(reify data/Resolvable (resolve! [_ _] %))]
     (prop/for-all
       [values (gen/vector gen/int)
-       f (gen/elements [#(map + % (repeat 1)) #(map inc %)])]
+       f (gen/elements
+           [#(map + % (repeat 1))
+            #(map inc %)
+            identity])]
       (let [run! (make-engine)
-            value (data/then! (map ->resolvable values) identity)
+            value (data/then! (map ->resolvable values) f)
             result @(run! value)]
         (and (is (= (count values) (count result)))
-             (is (= values result)))))))
+             (is (= (f values) result)))))))
 
 ;; ## Maps
 
