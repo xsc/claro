@@ -58,6 +58,17 @@
              (or (not (sequential? apples))
                  (is (= colours (map :colour result)))))))))
 
+(defspec t-seq-order-maintained 100
+  (let [->resolvable #(reify data/Resolvable (resolve! [_ _] %))]
+    (prop/for-all
+      [values (gen/vector gen/int)
+       f (gen/elements [#(map + % (repeat 1)) #(map inc %)])]
+      (let [run! (make-engine)
+            value (data/then! (map ->resolvable values) identity)
+            result @(run! value)]
+        (and (is (= (count values) (count result)))
+             (is (= values result)))))))
+
 ;; ## Maps
 
 (let [path-gen (->> [(gen/such-that
