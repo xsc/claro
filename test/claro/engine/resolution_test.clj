@@ -48,12 +48,15 @@
                            (into empty-coll apples))))]
     (prop/for-all
       [apples apple-gen]
-      (let [run! (make-engine (atom []))
-            result @(run! apples)]
+      (let [run! (make-engine)
+            result @(run! apples)
+            colours (map :colour apples)]
         (and (is (= (count apples) (count result)))
              (is (= (class apples) (class result)))
              (is (every? #{:apple} (map :type result)))
-             (is (every? #{:red :green} (map :colour result))))))))
+             (is (every? (set colours) (map :colour result)))
+             (or (not (sequential? apples))
+                 (is (= colours (map :colour result)))))))))
 
 ;; ## Maps
 
