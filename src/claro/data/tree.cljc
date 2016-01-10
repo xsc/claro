@@ -20,12 +20,14 @@
 ;; ## Helper
 
 (defn- resolvable-collection
-  [xf original]
-  (let [elements (into [] xf original)
-        resolvables (into [] u/all-resolvables-xf elements)]
-    (if (empty? resolvables)
-      original
-      (->ResolvableCollection resolvables (empty original) elements))))
+  ([xf original]
+   (resolvable-collection xf original original))
+  ([xf original elements]
+   (let [elements (into [] xf elements)
+         resolvables (into [] u/all-resolvables-xf elements)]
+     (if (empty? resolvables)
+       original
+       (->ResolvableCollection resolvables (empty original) elements)))))
 
 ;; ## Maps
 
@@ -46,7 +48,7 @@
 
 (defn- list->tree
   [l]
-  (resolvable-collection tree-xf (reverse l)))
+  (resolvable-collection tree-xf l (reverse l)))
 
 (defn- collection->tree
   [coll]
@@ -71,5 +73,6 @@
           (record? value) (record->tree value)
           (map? value) (map->tree value)
           (list? value) (list->tree value)
+          (seq? value) (list->tree value)
           (coll? value) (collection->tree value)
           :else value)))
