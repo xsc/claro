@@ -6,7 +6,8 @@
 
 (defn matches?
   [value predicate]
-  (and (p/resolved? value)
+  (and (not (p/wrapped? value))
+       (p/resolved? value)
        (or (not predicate)
            (predicate value))))
 
@@ -24,6 +25,10 @@
 ;; ## Resolvable Node
 
 (deftype ResolvableComposition [tree predicate f]
+  WrappedTree
+  (unwrap [this]
+    this)
+
   ResolvableTree
   (unwrap-tree1 [this]
     this)
@@ -34,8 +39,8 @@
   (apply-resolved-values [this resolvable->value]
     (let [tree' (p/apply-resolved-values tree resolvable->value)]
       (cond (identical? tree tree') this
-            (tree-matches? tree' predicate) (f tree')
             (p/wrapped? tree') (ResolvableComposition. tree' predicate f)
+            (tree-matches? tree' predicate) (f tree')
             :else (let [value (p/unwrap-tree1 tree')]
                     (if (and (p/processable? value)
                              (or (not predicate) (predicate value)))

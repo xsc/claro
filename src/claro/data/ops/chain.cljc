@@ -24,9 +24,6 @@
     (cond (p/resolvable? value)
           (->ResolvableComposition (->ResolvableLeaf value) predicate f')
 
-          (p/wrapped? value)
-          (->ResolvableComposition value predicate f')
-
           (matches? value predicate)
           (->ResolvedComposition value f')
 
