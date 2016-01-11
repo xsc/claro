@@ -25,19 +25,14 @@
 
 ;; ### Map
 
-(defn- project-keys*
-  [value templates]
-  (->> (for [[k template] templates]
-         [k #(project* template %)])
-       (into {})
-       (m/update-keys value)))
-
 (extend-protocol ProjectionTemplate
   clojure.lang.IPersistentMap
   (project* [templates value]
     (let [ks (keys templates)]
-      (-> value
-          (project-keys* templates)
+      (-> (reduce
+            (fn [value [k template]]
+              (m/update value k #(project* template %)))
+            value templates)
           (m/select-keys ks)))))
 
 ;; ### Values
