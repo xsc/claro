@@ -53,5 +53,11 @@
 (defn rechain-eager
   [value f]
   (if (p/processable? value)
+      (f value)
+      (chain-eager value f)))
+
+(defn rechain-when
+  [value predicate f]
+  (if (matches? value predicate)
     (f value)
-    (chain-eager value f)))
+    (chain-when value predicate f)))
