@@ -48,6 +48,12 @@
   [tree]
   (instance? WrappedTree tree))
 
+(defn unwrap-all
+  [value]
+  (if (wrapped? value)
+    (recur (unwrap value))
+    value))
+
 (defn resolvables
   "Return a set of resolvables from the given tree."
   [tree]

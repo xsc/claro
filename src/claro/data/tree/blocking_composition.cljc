@@ -3,10 +3,6 @@
   (:import [claro.data.protocols ResolvableTree WrappedTree]))
 
 (deftype BlockingComposition [tree f]
-  WrappedTree
-  (unwrap [this]
-    this)
-
   ResolvableTree
   (unwrap-tree1 [this]
     this)
