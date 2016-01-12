@@ -19,6 +19,10 @@
 
 ;; ## Helper
 
+(defn- reassemble-collection
+  [original elements]
+  (into (empty original) elements))
+
 (defn- resolvable-collection
   ([xf original]
    (resolvable-collection xf original original))
@@ -26,19 +30,27 @@
    (let [elements (into [] xf elements)
          resolvables (into [] u/all-resolvables-xf elements)]
      (if (empty? resolvables)
-       original
+       (reassemble-collection original elements)
        (->ResolvableCollection resolvables (empty original) elements)))))
 
 ;; ## Maps
 
+(defn- reassemble-map-entry
+  [e old-k old-v new-k new-v]
+  (if (or (not= old-k new-k) (not= old-v new-v))
+    [new-k new-v]
+    e))
+
 (defn- ->map-entry
   [e]
-  (let [k (wrap-tree (key e))
-        v (wrap-tree (val e))
-        resolvables (u/merge-resolvables k v)]
+  (let [k (key e)
+        v (val e)
+        k' (wrap-tree k)
+        v' (wrap-tree v)
+        resolvables (u/merge-resolvables k' v')]
     (if (empty? resolvables)
-      e
-      (->ResolvableMapEntry resolvables k v))))
+      (reassemble-map-entry e k v k' v')
+      (->ResolvableMapEntry resolvables k' v'))))
 
 (defn- map->tree
   [m]
@@ -56,12 +68,16 @@
 
 ;; ## Records
 
+(defn- reassemble-record
+  [record elements]
+  (into record elements))
+
 (defn- record->tree
   [record]
   (let [elements (into [] map-entry-xf record)
         resolvables (into [] u/all-resolvables-xf elements)]
     (if (empty? resolvables)
-      record
+      (reassemble-record record elements)
       (->ResolvableCollection resolvables record elements))))
 
 ;; ## Wrappers
