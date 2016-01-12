@@ -40,16 +40,20 @@
      potentially fully resolved `ResolvableTree`."))
 
 (definterface+ WrappedTree
-  (unwrap [this]))
+  (unwrap [this]
+    "Unwrap the given value to produce the actual tree element."))
 
 (defn wrapped?
+  "Check whether the given value is wrapped."
   [tree]
   (instance? WrappedTree tree))
 
 (defn resolvables
+  "Return a set of resolvables from the given tree."
   [tree]
   (into #{} (resolvables* tree)))
 
 (defn processable?
+  "Check whether the given value is neither wrapped, nor resolvable."
   [value]
   (not (or (resolvable? value) (wrapped? value))))
