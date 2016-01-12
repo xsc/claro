@@ -63,3 +63,15 @@
   "Check whether the given value is neither wrapped, nor resolvable."
   [value]
   (not (or (resolvable? value) (wrapped? value))))
+
+;; ## Projection
+
+(defprotocol+ Projection
+  "Protocol for projection templates."
+  (project-template [template value]
+    "Use the given template to ensure the shape of the given value."))
+
+(defn project
+  "Project the given value using the given template."
+  [value template]
+  (project-template template value))
