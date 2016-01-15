@@ -35,6 +35,10 @@
 
 ;; ## Maps
 
+(defn- map-entry?
+  [value]
+  (instance? java.util.Map$Entry value))
+
 (defn- reassemble-map-entry
   [e old-k old-v new-k new-v]
   (if (or (not= old-k new-k) (not= old-v new-v))
@@ -86,6 +90,7 @@
   [value]
   (let [value (p/unwrap-all value)]
     (cond (p/resolvable? value) (->ResolvableLeaf value)
+          (map-entry? value) (->map-entry value)
           (record? value) (record->tree value)
           (map? value) (map->tree value)
           (list? value) (list->tree value)

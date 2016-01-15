@@ -1,5 +1,7 @@
 (ns claro.data
-  (:refer-clojure :exclude [update update-in select-keys map])
+  (:refer-clojure
+    :exclude [assoc assoc-in drop first map nth
+              select-keys take update update-in])
   (:require [claro.data
              protocols]
             [claro.data.ops
@@ -14,13 +16,18 @@
 
 (import-vars
   [claro.data.ops.collections
-   map]
+   drop
+   first
+   map
+   nth
+   take]
 
   [claro.data.ops.maps
-   update
-   update-in
+   assoc
+   assoc-in
    select-keys
-   update-keys]
+   update
+   update-in]
 
   [claro.data.ops.then
    on

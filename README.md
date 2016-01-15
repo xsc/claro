@@ -82,7 +82,7 @@ any value built upon one or more of them:
 
 ```clojure
 @(resolve! {:sherlock (House. 221), :watson (House. 221)})
-;; => {:sherlock {:id 221, ...}, :watson   {:id 221, ...}}
+;; => {:sherlock {:id 221, ...}, :watson {:id 221, ...}}
 ```
 
 Resolution engines also allow for customization through middlewares - something
@@ -259,7 +259,28 @@ results in some cases.
 
 ### Collection Operations
 
-TODO
+The namespace `claro.data` contains operations mirroring their standard Clojure
+counterparts but handling eager/conditional composition in a way that lets them
+be used with potentially infinite trees and thus projection (outlined above).
+
+__Sequence Operations__
+
+- `drop`
+- `first`
+- `map`
+- `nth`
+- `take`
+
+__Map Operations__
+
+- `assoc`
+- `assoc-in`
+- `select-keys`
+- `update`
+- `update-in`
+
+Mot of the time, when only manipulating the top-level structure of values, a
+combination of `then` and the desired operation will be enough.
 
 ## Engine Capabilities
 
@@ -293,6 +314,8 @@ Note that you have to explicitly include the [core.async][core-async]
 dependency.
 
 [core-async]: https://github.com/clojure/core.async
+
+
 
 ## License
 

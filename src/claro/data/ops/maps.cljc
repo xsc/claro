@@ -1,5 +1,6 @@
 (ns claro.data.ops.maps
-  (:refer-clojure :exclude [select-keys update update-in])
+  (:refer-clojure :exclude [select-keys update update-in
+                            assoc assoc-in])
   (:require [claro.data.protocols :as p]
             [claro.data.tree :refer [wrap-tree]]
             [claro.data.ops.chain :as chain]
@@ -9,7 +10,7 @@
 
 (defn- assert-map
   [value msg]
-  (assert (map? value) (str msg "\n" (pr-str value))))
+  (assert (or (nil? value) (map? value)) (str msg "\n" (pr-str value))))
 
 (defn- wrap-assert-map
   [f msg]
@@ -43,6 +44,8 @@
         "can only apply 'update' to resolvables producing maps, given:"))))
 
 (defn update-in
+  "Wrap the given value to perform an update on a nested key once it's
+   available."
   [value [k & rst] f & args]
   (let [f #(apply f % args)]
     (if (empty? rst)
@@ -53,13 +56,24 @@
           #(core/update % k update-in rst f)
           "can only apply 'update-in' to resolvables producing maps, given:")))))
 
-(defn update-keys
-  "Wrap the given value with per-key processing functions (given as a map), where
-   each one gets called once the key is available in the given value."
-  [value fs]
+;; ### Assoc
+
+(defn assoc
+  "Assoc the given value into the given resolvable once it was resolved to a
+   map."
+  [value k v]
   (chain/chain-eager
     value
-    #(reduce
-       (fn [v [k f]]
-         (core/update v k chain/rechain-eager f))
-       % fs)))
+    (wrap-assert-map
+      #(core/assoc % k v)
+      "can only apply 'assoc' to resolvables producing maps, given:")))
+
+(defn assoc-in
+  "Assoc the given value into the given resolvable, once the value at
+   the given path was resolved to a map."
+  [value ks v]
+  (if (next ks)
+    (let [path (butlast ks)
+          k (last ks)]
+      (update-in value path #(assoc % k v)))
+    (assoc value (first ks) v)))
