@@ -317,7 +317,7 @@ __Map Operations__
 - `update`
 - `update-in`
 
-Mot of the time, when only manipulating the top-level structure of values, a
+Most of the time, when only manipulating the top-level structure of values, a
 combination of `then` and the desired operation will be enough.
 
 ## Engine Capabilities
