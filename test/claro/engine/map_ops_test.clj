@@ -61,7 +61,7 @@
 
 ;; ## Tests
 
-(defspec t-map-ops 250
+(defspec t-map-ops 100
   (prop/for-all
     [actions gen-actions
      unresolved-value gen-nested-map]
