@@ -12,7 +12,7 @@
 (deftype ResolvedComposition [value f]
   claro.data.protocols.WrappedTree
   (unwrap [_]
-    (f value)))
+    (f (p/unwrap-all value))))
 
 ;; ## Helpers
 
