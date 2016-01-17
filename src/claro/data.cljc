@@ -25,6 +25,7 @@
 
   [claro.data.ops.fmap
    fmap
+   fmap-on
    fmap!]
 
   [claro.data.ops.maps
