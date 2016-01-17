@@ -1,6 +1,6 @@
 (ns claro.data.ops.maps
   (:refer-clojure :exclude [select-keys update update-in
-                            assoc assoc-in])
+                            assoc assoc-in get get-in])
   (:require [claro.data.protocols :as p]
             [claro.data.tree :refer [wrap-tree]]
             [claro.data.ops.chain :as chain]
@@ -79,3 +79,27 @@
           k (last ks)]
       (update-in value path #(assoc % k v)))
     (assoc value (first ks) v)))
+
+;; ## Get
+
+(defn get
+  ([value k] (get value k nil))
+  ([value k default]
+   (chain/chain-eager
+     value
+     (wrap-assert-map
+       #(core/get % k default)
+       "can only apply 'get' to resolvables producing maps, given:"))))
+
+(defn get-in
+  ([value ks] (get-in value ks nil))
+  ([value ks default]
+   {:pre [(seq ks)]}
+   (let [k (first ks)]
+     (if-let [ks' (next ks)]
+       (chain/chain-eager
+         value
+         (wrap-assert-map
+           #(get-in (get % k) ks' default)
+           "can only apply 'get-in' to resolvables producing maps, given:"))
+       (get value k default)))))

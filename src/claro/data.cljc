@@ -1,6 +1,6 @@
 (ns claro.data
   (:refer-clojure
-    :exclude [assoc assoc-in drop first map nth
+    :exclude [assoc assoc-in drop first get get-in map nth
               select-keys take update update-in])
   (:require [claro.data
              protocols]
@@ -31,6 +31,8 @@
   [claro.data.ops.maps
    assoc
    assoc-in
+   get
+   get-in
    select-keys
    update
    update-in]

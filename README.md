@@ -311,6 +311,8 @@ __Map Operations__
 
 - `assoc`
 - `assoc-in`
+- `get`
+- `get-in`
 - `select-keys`
 - `update`
 - `update-in`
