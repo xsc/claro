@@ -218,6 +218,42 @@ Note that in this case, the preferred solution would be to use claro's built in
 ;; => {:name 5}
 ```
 
+#### Combination (`fmap`, `fmap!`, `fmap-on`)
+
+To apply a function to one or more potentially resolvable values, use
+`claro.data/fmap`.
+
+```clojure
+(engine/run!! (data/fmap str (ColourString. 0) " == " (ColourString. 1)))
+;; => "white == white"
+```
+
+Just as before, eager resolution might mean that the function is applied before
+the data has reached the shape it might expect:
+
+```clojure
+(engine/run!! (data/fmap (comp count :name) {:name (ColourString. 0)}))
+;; => 1
+```
+
+`fmap-on` will guard execution using a given condition:
+
+```clojure
+(engine/run!!
+  (data/fmap-on
+    #(-> % :name string?)
+    (comp count :name)
+    {:name (ColourString. 0)}))
+;; => 5
+```
+
+And finally, `fmap!` will wait for all parameters to be fully resolved:
+
+```clojure
+(engine/run!! (data/fmap! (comp count :name) {:name (ColourString. 0)}))
+;; => 5
+```
+
 ### Infinite Trees + Projection
 
 Since resolvables may directly reference other resolvables, one can build
