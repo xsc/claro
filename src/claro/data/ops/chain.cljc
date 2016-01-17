@@ -14,6 +14,13 @@
   (unwrap [_]
     (f value)))
 
+;; ## Helpers
+
+(defn every-processable?
+  "Check whether every value in the given collection is processable."
+  [sq]
+  (every? p/processable? sq))
+
 ;; ## Chains
 
 (defn chain-when
@@ -49,15 +56,3 @@
    wrapped."
   [value f]
   (chain-when value nil f))
-
-(defn rechain-eager
-  [value f]
-  (if (p/processable? value)
-      (f value)
-      (chain-eager value f)))
-
-(defn rechain-when
-  [value predicate f]
-  (if (matches? value predicate)
-    (f value)
-    (chain-when value predicate f)))

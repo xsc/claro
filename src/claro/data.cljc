@@ -6,6 +6,7 @@
              protocols]
             [claro.data.ops
              collections
+             fmap
              maps
              then]
             [claro.data.projection
@@ -21,6 +22,10 @@
    map
    nth
    take]
+
+  [claro.data.ops.fmap
+   fmap
+   fmap!]
 
   [claro.data.ops.maps
    assoc

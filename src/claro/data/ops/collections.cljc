@@ -1,15 +1,11 @@
 (ns claro.data.ops.collections
   (:refer-clojure :exclude [drop first map nth take])
   (:require [claro.data.ops.chain :as chain]
+            [claro.data.ops.fmap :refer [fmap*]]
             [claro.data.protocols :as p]
             [clojure.core :as core]))
 
 ;; ## Helper
-
-(defn- every-processable?
-  "Check whether every value in the given collection is processable."
-  [sq]
-  (every? p/processable? sq))
 
 (defn- assert-coll
   [value msg pred]
@@ -27,22 +23,15 @@
 
 ;; ## Map
 
-(defn- rechain-map
-  [f values]
-  (chain/rechain-when
-    values
-    every-processable?
-    #(core/apply f %)))
-
 (defn map
   "Iterate the given function over every element of the given, potentially
    partially resolved value."
   [f & sq]
-  (let [rechain #(rechain-map f %&)]
+  (let [rechain #(fmap* f %&)]
     (chain/chain-when
       (vec sq)
       (wrap-assert-coll
-        every-processable?
+        chain/every-processable?
         "can only apply 'map' to collections, given:")
       #(core/apply core/map rechain %))))
 
@@ -62,7 +51,7 @@
   [value n]
   (chain/chain-when
     [value n]
-    every-processable?
+    chain/every-processable?
     (wrap-assert-coll
       (fn [[v n]]
         (core/nth v n))
@@ -76,7 +65,7 @@
   [n value]
   (chain/chain-when
     [value n]
-    every-processable?
+    chain/every-processable?
     (wrap-assert-coll
       (fn [[v n]]
         (core/take n v))
@@ -87,7 +76,7 @@
   [n value]
   (chain/chain-when
     [value n]
-    every-processable?
+    chain/every-processable?
     (wrap-assert-coll
       (fn [[v n]]
         (core/drop n v))
