@@ -5,7 +5,7 @@
             :url "http://opensource.org/licenses/MIT"
             :year 2015
             :key "mit"}
-  :dependencies [[org.clojure/clojure "1.7.0"]
+  :dependencies [[org.clojure/clojure "1.8.0"]
                  [potemkin "0.4.2"]
                  [manifold "0.1.1"]
                  [prismatic/schema "1.0.4"]]

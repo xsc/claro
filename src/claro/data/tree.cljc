@@ -1,4 +1,5 @@
 (ns claro.data.tree
+  (:refer-clojure :exclude [map-entry?])
   (:require [claro.data.protocols :as p]
             [claro.data.tree
              [collection :refer [->ResolvableCollection]]
