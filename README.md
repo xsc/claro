@@ -322,6 +322,50 @@ combination of `then` and the desired operation will be enough.
 
 ## Engine Capabilities
 
+### Custom Middlewares
+
+When running the engine on a value, it repeatedly performs the following steps:
+
+1. __Inspection__: Collect all remaining `Resolvable` values.
+2. __Selection__: Select the `Resolvable` class(es) to resolve in this
+   iteration (default: all of them).
+3. __Resolution__: Resolve the selected batches by calling the respective
+   `Resolvable` protocol functions.
+4. __Application__: Insert the resolved values into the original tree.
+
+Inspection and application is handled by claro's internal tree representation,
+but selection and resolution are customizable.
+
+The selector takes and returns a seq of classes and can be wrapped using
+`claro.engine/wrap-selector` - to e.g. only select `n` different `Resolvable`
+classes per iteration:
+
+```clojure
+(defn wrap-max-selection
+  [engine n]
+  (engine/wrap-selector
+    engine
+    #(comp (partial take n) %)))
+```
+
+The resolver takes a seq of `Resolvable` values and has to return another,
+in-order seq of (at least) the same length. It can be wrapped using
+`claro.engine/wrap-resolver` - to e.g. collect some resolution stats in an atom:
+
+```clojure
+(defn wrap-stats
+  [engine stats-atom]
+  (engine/wrap-resolver
+    engine
+    (fn [resolver]
+      (fn [[v :as batch]]
+        (swap! stats-atom update (class v) (fnil + 0) (count batch))
+        (resolver batch)))))
+```
+
+claro thus allows you to easily hook into _what_ will be resolved and _how_ the
+eventual resolution will be performed.
+
 ### Pluggable Deferred Implementation
 
 Claro's runtime is independent of the actual deferred implementation, allowing
@@ -352,8 +396,6 @@ Note that you have to explicitly include the [core.async][core-async]
 dependency.
 
 [core-async]: https://github.com/clojure/core.async
-
-
 
 ## License
 
