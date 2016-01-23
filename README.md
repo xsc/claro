@@ -322,6 +322,21 @@ combination of `then` and the desired operation will be enough.
 
 ## Engine Capabilities
 
+### Testing
+
+Resolution of a single `Resolvable` class can be mocked using
+`claro.engine/override`, which takes a class and a single-arity resolution
+function:
+
+```clojure
+(def resolve!
+  (-> (engine/engine)
+      (engine/override ColourString (constantly "red"))))
+
+@(resolve! (House. 221))
+;; => {:id 221, :colour "red", :street "221B Baker Street"}
+```
+
 ### Tracing Middleware
 
 For debugging purposes, you can let the engine print out each resolution step,
