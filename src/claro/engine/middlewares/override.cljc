@@ -7,8 +7,10 @@
   (->> (fn [resolver]
          (fn [[resolvable :as batch]]
            (if (instance? resolvable-class resolvable)
-             (impl/->deferred
-               (engine/impl engine)
-               (mapv single-resolve-fn batch))
+             (let [impl (engine/impl engine)
+                   result (mapv single-resolve-fn batch)]
+               (if (impl/deferrable? impl result)
+                 (impl/->deferred impl result)
+                 (impl/chain1 impl result identity)))
              (resolver batch))))
        (engine/wrap-resolver engine)))
