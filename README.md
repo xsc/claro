@@ -322,6 +322,20 @@ combination of `then` and the desired operation will be enough.
 
 ## Engine Capabilities
 
+### Tracing Middleware
+
+For debugging purposes, you can let the engine print out each resolution step,
+which lets you analyze how much of what gets resolved in which order:
+
+```clojure
+(def resolve! (-> (engine/engine) (engine/tracing)))
+
+@(resolve! (House. 221))
+;; [user.House] 1 of 1 elements resolved ... 0.006s
+;; [user.ColourString] 1 of 1 elements resolved ... 0.001s
+;; => {:id 221, :colour "white", :street "221B Baker Street"}
+```
+
 ### Custom Middlewares
 
 When running the engine on a value, it repeatedly performs the following steps:
