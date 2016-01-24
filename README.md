@@ -377,6 +377,9 @@ function:
 ;; => {:id 221, :colour "red", :street "221B Baker Street"}
 ```
 
+`claro.engine/overrides` can be used to add overrides based on a class/resolver
+map.
+
 ### Tracing Middleware
 
 For debugging purposes, you can let the engine print out each resolution step,

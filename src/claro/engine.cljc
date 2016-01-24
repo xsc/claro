@@ -58,6 +58,7 @@
    wrap-resolver
    wrap-selector]
   [claro.engine.middlewares.override
-   override]
+   override
+   overrides]
   [claro.engine.middlewares.trace
    tracing])
