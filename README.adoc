@@ -149,7 +149,7 @@ To transform resolvables, you can wrap them using claro's low-level composition
 functions. There is also a set of collection manipulation facilities that are
 described in link:#collection-operations[Collection Operations].
 
-[[blocking-composition-then]]
+[[blocking-composition]]
 ==== Blocking Composition (`then!`)
 
 `claro.data/then!` will apply a transformation to a *fully-resolved* value,
@@ -169,7 +169,7 @@ much as possible.
 
 (Note: `engine/run!!` is resolution + dereferencing using the default engine.)
 
-[[eager-composition-then]]
+[[eager-composition]]
 ==== Eager Composition (`then`)
 
 Most of the time, transformations can be applied before a value is fully
@@ -209,7 +209,7 @@ expected:
 
 `count` was called on the `ColourString` record, not its resolved value.
 
-[[conditional-composition-on]]
+[[conditional-composition]]
 ==== Conditional Composition (`on`)
 
 As seen in the previous section, eager composition might make it hard to reason
@@ -244,7 +244,7 @@ link:#collection-operations[collection functions], e.g.: `claro.data/update`:
 ;; => {:name 5}
 ----
 
-[[combination-fmap-fmap-fmap-on]]
+[[combination]]
 ==== Combination (`fmap`, `fmap!`, `fmap-on`)
 
 To apply a function to one or more potentially resolvable values, use
