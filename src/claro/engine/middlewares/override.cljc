@@ -5,12 +5,12 @@
 (defn override
   [engine resolvable-class single-resolve-fn]
   (->> (fn [resolver]
-         (fn [[resolvable :as batch]]
+         (fn [env [resolvable :as batch]]
            (if (instance? resolvable-class resolvable)
              (let [impl (engine/impl engine)
                    result (mapv single-resolve-fn batch)]
                (if (impl/deferrable? impl result)
                  (impl/->deferred impl result)
                  (impl/chain1 impl result identity)))
-             (resolver batch))))
+             (resolver env batch))))
        (engine/wrap-resolver engine)))

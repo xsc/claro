@@ -32,7 +32,7 @@
 ;; ### Resolution
 
 (defn- resolve-them-all!
-  [{:keys [env impl] :or {env {}}} [head :as batch]]
+  [{:keys [impl]} env [head :as batch]]
   (cond (data/batched-resolvable? head)
         (data/resolve-batch! head env batch)
 
@@ -45,10 +45,10 @@
 
 (defn- build-resolve-fn
   [{:keys [impl] :as opts}]
-  (fn [batch]
+  (fn [env batch]
     (impl/chain
       impl
-      (resolve-them-all! opts batch)
+      (resolve-them-all! opts env batch)
       #(map wrap-tree %))))
 
 ;; ### Inspection

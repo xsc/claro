@@ -24,12 +24,12 @@
   "Wrap the given Engine to produce trace output after each resoltion."
   [engine]
   (->> (fn [resolver]
-         (fn [batch]
+         (fn [env batch]
            (let [start (System/nanoTime)]
              (try
                (impl/chain
                  (engine/impl engine)
-                 (resolver batch)
+                 (resolver env batch)
                  #(trace! batch start %))
                (catch Throwable t
                  (trace! batch start t))))))

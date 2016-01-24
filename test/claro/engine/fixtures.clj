@@ -10,8 +10,8 @@
    (engine/wrap-resolver
      (engine/engine more-opts)
      (fn [f]
-       (fn [batch]
+       (fn [env batch]
          (swap! resolutions
                 (fnil conj [])
                 [(class (first batch)) (count batch)])
-         (f batch))))))
+         (f env batch))))))

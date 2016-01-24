@@ -377,9 +377,10 @@ classes per iteration:
     #(comp (partial take n) %)))
 ```
 
-The resolver takes a seq of `Resolvable` values and has to return another,
-in-order seq of (at least) the same length. It can be wrapped using
-`claro.engine/wrap-resolver` - to e.g. collect some resolution stats in an atom:
+The resolver takes the environment value and a seq of `Resolvable`s and has to
+return another, in-order seq of (at least) the same length. It can be wrapped
+using `claro.engine/wrap-resolver` - to e.g. collect some resolution stats in an
+atom:
 
 ```clojure
 (defn wrap-stats
@@ -387,9 +388,9 @@ in-order seq of (at least) the same length. It can be wrapped using
   (engine/wrap-resolver
     engine
     (fn [resolver]
-      (fn [[v :as batch]]
+      (fn [env [v :as batch]]
         (swap! stats-atom update (class v) (fnil + 0) (count batch))
-        (resolver batch)))))
+        (resolver env batch)))))
 ```
 
 claro thus allows you to easily hook into _what_ will be resolved and _how_ the

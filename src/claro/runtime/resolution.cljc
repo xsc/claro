@@ -17,9 +17,9 @@
 (defn- generate-deferred
   "Create a function that takes batch of resolvables and generates a deferred
    containing the in-order results."
-  [{:keys [resolve-fn impl] :as opts} batch]
+  [{:keys [resolve-fn env impl] :as opts} batch]
   (some->> batch
-           resolve-fn
+           (resolve-fn env)
            (assert-deferrable opts batch)
            (impl/->deferred impl)))
 
