@@ -35,7 +35,7 @@ toc::[]
 [[resolvables]]
 === Resolvables
 
-In claro, you define ++Resolvable++s that encapsulate I/O and transformation
+In claro, you define `Resolvable` values that encapsulate I/O and transformation
 logic, allowing composition of resolvables in a concise manner:
 
 [source,clojure]
@@ -116,7 +116,7 @@ can return:
 
 * Clojure's `future`, `delay`, `promise`,
 * Manifold's own `deferred` values,
-* ++java.util.concurrent.Future++s (e.g. from `ExecutorService.submit()`),
+* `java.util.concurrent.Future` (e.g. from `ExecutorService.submit()`),
 * or just plain values (whose computation will block resolution, though).
 
 Note that claro lets you link:#pluggable-deferred-implementation[plug in any
@@ -364,8 +364,8 @@ combination of `then` and the desired operation will be enough.
 === Environment
 
 Meaningful data access without configuration pointing at a datasource is rare,
-so it is necessary for ++Resolvable++s to be aware of said configuration.  There
-are multiple possibilities:
+so it is necessary for `Resolvable` values to be aware of said configuration.
+There are multiple possibilities:
 
 * store it in global vars,
 * store it in dynamic vars and use `binding` around the resolution call,
@@ -481,10 +481,10 @@ classes per iteration:
     #(comp (partial take n) %)))
 ----
 
-The resolver takes the environment value and a seq of ++Resolvable++s and has to
-return another, in-order seq of (at least) the same length. It can be wrapped
-using `claro.engine/wrap-resolver` - to e.g. collect some resolution stats in
-an atom:
+The resolver takes the environment value and a seq of `Resolvable` values and
+has to return another, in-order seq of (at least) the same length. It can be
+wrapped using `claro.engine/wrap-resolver` - to e.g. collect some resolution
+stats in an atom:
 
 [source,clojure]
 ----
