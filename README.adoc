@@ -2,6 +2,7 @@
 = claro
 :toc: macro
 :toc-title:
+:toclevels: 3
 
 *claro* is a library for simple, efficient and elegant access to remote data
 sources focusing on usability, testability and overall fn.
