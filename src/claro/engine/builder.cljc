@@ -19,7 +19,11 @@
 
   clojure.lang.IFn
   (invoke [_ resolvable]
-    (runtime/run! opts (wrap-tree resolvable))))
+    (runtime/run! opts (wrap-tree resolvable)))
+  (invoke [_ resolvable {:keys [env]}]
+    (runtime/run!
+      (update opts :env merge env)
+      (wrap-tree resolvable))))
 
 (alter-meta! #'->Engine assoc :private true)
 
