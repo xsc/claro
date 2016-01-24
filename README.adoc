@@ -551,8 +551,8 @@ won't be affected by them.
 === Interface vs. Protocol Implementation
 
 claro will only work with values implementing the `Resolvable` *interface* -
-which is automatically donne when `claro.data/Resolvable` is used with
-`defrecord`, `deftype` and `reify`.  This means that values that get their
+which is automatically done when `claro.data/Resolvable` is used with
+`defrecord`, `deftype` or `reify`.  This means that values that "earn" their
 resolvability via `extend-type` or `extend-protocol` will not be picked up.
 
 The reason for this is a huge performance gap between `satisfies?` (which has to
