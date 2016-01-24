@@ -2,7 +2,7 @@
   (:require [claro.engine.protocols :as engine]
             [claro.runtime.impl :as impl]))
 
-;; ## Helper
+;; ## General Stats
 
 (defn- trace-stats!
   [batch start result]
@@ -18,8 +18,6 @@
     (throw result)
     result)))
 
-;; ## Middleware
-
 (defn trace-stats
   "Wrap the given Engine to produce trace output after each resolution."
   [engine]
@@ -34,3 +32,30 @@
                (catch Throwable t
                  (trace-stats! batch start t))))))
        (engine/wrap-resolver engine)))
+
+;; ## Trace Results
+
+(defn trace
+  "Wrap the given Engine to trace actual inputs/ouputs of resolutions.
+   `classes-to-trace` can be any collection of classes or a single one."
+  [engine classes-to-trace]
+  (let [trace? (comp
+                 (if (coll? classes-to-trace)
+                   (set classes-to-trace)
+                   #{classes-to-trace})
+                 class)
+        impl (engine/impl engine)]
+    (->> (fn [resolver]
+           (fn [env [head :as batch]]
+             (if (trace? head)
+               (impl/chain
+                 impl
+                 (resolver env batch)
+                 (fn [result]
+                   (doseq [[in out] (map vector batch result)]
+                     (locking *out*
+                       (printf "! %s --> %s%n" (pr-str in) (pr-str out))))
+                   (flush)
+                   result))
+               (resolver env batch))))
+         (engine/wrap-resolver engine))))

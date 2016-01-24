@@ -394,6 +394,17 @@ which lets you analyze how much of what gets resolved in which order:
 ;; => {:id 221, :colour "white", :street "221B Baker Street"}
 ```
 
+`claro.engine/trace` can be used to actually observe inputs and outputs for
+certain `Resolvable` classes:
+
+```clojure
+(def resolve! (-> (engine/engine) (engine/trace ColourString)))
+
+@(resolve! (House. 221))
+;; ! #user.ColourString{:id 3} --> "white"
+;; => {:id 221, :colour "white", :street "221B Baker Street"}
+```
+
 ### Custom Middlewares
 
 When running the engine on a value, it repeatedly performs the following steps:
