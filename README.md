@@ -386,7 +386,7 @@ For debugging purposes, you can let the engine print out each resolution step,
 which lets you analyze how much of what gets resolved in which order:
 
 ```clojure
-(def resolve! (-> (engine/engine) (engine/tracing)))
+(def resolve! (-> (engine/engine) (engine/trace-stats)))
 
 @(resolve! (House. 221))
 ;; [user.House] 1 of 1 elements resolved ... 0.006s

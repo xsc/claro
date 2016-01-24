@@ -4,7 +4,7 @@
 
 ;; ## Helper
 
-(defn- trace!
+(defn- trace-stats!
   [batch start result]
   (let [delta (/ (- (System/nanoTime) start) 1e9)]
     (locking *out*
@@ -20,8 +20,8 @@
 
 ;; ## Middleware
 
-(defn tracing
-  "Wrap the given Engine to produce trace output after each resoltion."
+(defn trace-stats
+  "Wrap the given Engine to produce trace output after each resolution."
   [engine]
   (->> (fn [resolver]
          (fn [env batch]
@@ -30,7 +30,7 @@
                (impl/chain
                  (engine/impl engine)
                  (resolver env batch)
-                 #(trace! batch start %))
+                 #(trace-stats! batch start %))
                (catch Throwable t
-                 (trace! batch start t))))))
+                 (trace-stats! batch start t))))))
        (engine/wrap-resolver engine)))

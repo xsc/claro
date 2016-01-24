@@ -61,4 +61,4 @@
    override
    overrides]
   [claro.engine.middlewares.trace
-   tracing])
+   trace-stats])
