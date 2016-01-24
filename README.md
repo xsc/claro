@@ -360,7 +360,7 @@ You can extend/override the environment when calling the engine:
 ```
 
 This lets you pass dynamic information, e.g. authentication/authorization
-information to the engine, without having to create a new instance.
+data to the engine, without having to create a new instance.
 
 ### Testing
 
