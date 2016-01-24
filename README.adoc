@@ -6,8 +6,7 @@
 *claro* is a library for simple, efficient and elegant access to remote data
 sources focusing on usability, testability and overall fn.
 
-https://travis-ci.org/xsc/claro[image:https://travis-ci.org/xsc/claro.svg?branch=master[Build
-Status]]
+https://travis-ci.org/xsc/claro[image:https://travis-ci.org/xsc/claro.svg?branch=master[Build Status]]
 
 It is inspired by https://github.com/kachayev/muse[muse] which is awesome in
 its own right and will be a better fit for some applications - just as claro
@@ -20,8 +19,7 @@ Don't.
 
 *Leiningen* (https://clojars.org/claro[via Clojars])
 
-https://clojars.org/claro[image:https://img.shields.io/clojars/v/claro.svg[Clojars
-Project]]
+https://clojars.org/claro[image:https://img.shields.io/clojars/v/claro.svg[Clojars Project]]
 
 This library requires Clojure >= 1.7.0.
 
@@ -531,6 +529,36 @@ and can be passed to `claro.engine/engine` for it to be used:
 
 Note that you have to explicitly include the
 https://github.com/clojure/core.async[core.async] dependency.
+
+[[notes]]
+== Notes
+
+=== Deeply Nested Structures
+
+Before any resolution happens, claro will analyze the value it was given to
+collect the initial set of resolvables. This means that the whole tree will be
+traversed recursively, resulting in the following points of note regarding very
+large trees:
+
+- the stack might overflow during inspection,
+- initial inspection, as well as subsequent application steps might show
+  degrading performance.
+
+Real-world data should not exhibit excessive nesting, especially not before
+resolution, so while users should keep these points in mind, they most probably
+won't be affected by them.
+
+=== Interface vs. Protocol Implementation
+
+claro will only work with values implementing the `Resolvable` *interface* -
+which is automatically donne when `claro.data/Resolvable` is used with
+`defrecord`, `deftype` and `reify`.  This means that values that get their
+resolvability via `extend-type` or `extend-protocol` will not be picked up.
+
+The reason for this is a huge performance gap between `satisfies?` (which has to
+create a list of all superclasses for a given value, then intersect it with all
+classes implementing a protocol) and `instance?` (which boils down to a simple
+reflection call).
 
 [[license]]
 == License
