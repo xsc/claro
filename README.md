@@ -322,6 +322,46 @@ combination of `then` and the desired operation will be enough.
 
 ## Engine Capabilities
 
+### Environment
+
+Meaningful data access without configuration pointing at a datasource is rare,
+so it is necessary for `Resolvable`s to be aware of said configuration. There
+are multiple possibilities:
+
+- store it in global vars,
+- store it in dynamic vars and use `binding` around the resolution call,
+- store it in the `Resolvable` record.
+
+These are viable options for claro, too, but the preferred way would be to bind
+an engine to your environment, using the `:env` key:
+
+```clojure
+(def resolve! (engine/engine {:env {:global-constant 0}}))
+```
+
+This value will be passed as-is to your `Resolvables` and could contain anything
+ranging from DB clients to some in-memory caching atom:
+
+```clojure
+(defrecord FromEnv [k]
+  data/Resolvable
+  (resolve! [_ env]
+    (get env k)))
+
+@(resolve! (FromEnv. :global-constant))
+;; => 0
+```
+
+You can extend/override the environment when calling the engine:
+
+```clojure
+@(resolve! (FromEnv. :global-constant) {:env {:global-constant 1}})
+;; => 1
+```
+
+This lets you pass dynamic information, e.g. authentication/authorization
+information to the engine, without having to create a new instance.
+
 ### Testing
 
 Resolution of a single `Resolvable` class can be mocked using
