@@ -29,7 +29,7 @@
 
 (defn- resolve-them-all!
   [{:keys [env impl] :or {env {}}} [head :as batch]]
-  (cond (instance? claro.data.protocols.BatchedResolvable head)
+  (cond (data/batched-resolvable? head)
         (data/resolve-batch! head env batch)
 
         (next batch)

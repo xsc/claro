@@ -26,6 +26,11 @@
   [value]
   (instance? claro.data.protocols.Resolvable value))
 
+(defn batched-resolvable?
+  "Check whether the given value implements the `Resolvable` protocol."
+  [value]
+  (instance? claro.data.protocols.BatchedResolvable value))
+
 ;; ## Trees
 
 (defprotocol+ ResolvableTree
