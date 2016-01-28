@@ -46,10 +46,29 @@
     (generate-deferred opts batch)
     #(merge-resolvables batch %)))
 
+(defn- resolve-batches-with-cache!
+  [opts cache batches]
+  (reduce
+    (fn [result batch]
+      (loop [batch  batch
+             result result
+             uncached []]
+        (cond (seq batch)
+              (let [[h & rst] batch]
+                (if-let [v (get cache h)]
+                  (recur rst (assoc-in result [:cached h] v) uncached)
+                  (recur rst result (conj uncached h))))
+              (seq uncached)
+              (update result :ds conj (resolve-batch! opts uncached))
+              :else
+              result)))
+    {:cached {}, :ds []}
+    batches))
+
 (defn resolve-batches!
   "Resolve the given batches, returning a deferred with a map of
    original value -> resolved value pairs."
-  [{:keys [impl] :as opts} batches]
-  (let [ds (mapv #(resolve-batch! opts %) batches)
+  [{:keys [impl] :as opts} cache batches]
+  (let [{:keys [cached ds]} (resolve-batches-with-cache! opts cache batches)
         zipped (impl/zip impl ds)]
-    (impl/chain1 impl zipped #(into {} %))))
+    (impl/chain1 impl zipped #(into cached %))))

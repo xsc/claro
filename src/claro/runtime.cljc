@@ -1,6 +1,7 @@
 (ns claro.runtime
   (:require [claro.runtime
              [application :refer [apply-resolved-batches]]
+             [caching :as caching]
              [impl :as impl]
              [inspection :refer [inspect-resolvables]]
              [selection :refer [select-resolvable-batches]]
@@ -22,18 +23,20 @@
 
 (defn- apply-and-recur!
   [{:keys [impl] :as opts}
-   {:keys [value] :as state}
+   {:keys [value cache] :as state}
    new-batch-count
    resolvable->value]
-  (let [value (apply-resolved-batches opts value resolvable->value)]
+  (let [value (apply-resolved-batches opts value resolvable->value)
+        cache (caching/update-cache opts cache resolvable->value)]
     (impl/recur
       impl
       (assoc! state
               :value       value
+              :cache       cache
               :batch-count new-batch-count))))
 
 (defn- run-step!
-  [{:keys [impl] :as opts} {:keys [value batch-count] :as state}]
+  [{:keys [impl] :as opts} {:keys [value cache batch-count] :as state}]
   (let [resolvables (inspect-resolvables opts value)]
     (if (empty? resolvables)
       value
@@ -43,7 +46,7 @@
         (if (seq batches)
           (impl/chain1
             impl
-            (resolve-batches! opts batches)
+            (resolve-batches! opts cache batches)
             #(apply-and-recur! opts state new-batch-count %))
           value)))))
 
@@ -74,4 +77,5 @@
     #(run-step! opts %)
     (transient
       {:value value
-       :batch-count 0})))
+       :batch-count 0
+       :cache (caching/init-cache opts)})))
