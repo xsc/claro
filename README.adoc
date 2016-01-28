@@ -28,6 +28,38 @@ This library requires Clojure >= 1.7.0.
 
 toc::[]
 
+[[quick-overview]]
+== The Quickest Overview
+
+[source,clojure]
+----
+(require '[claro.data :as data]
+         '[claro.engine :as engine]
+         '[manifold.deferred :as d])
+
+(def log #(locking *out* (apply println %&)))
+
+(defrecord Person [id]
+  data/Resolvable
+  (resolve! [_ {:keys [db]}]
+    (d/future
+      (log "-> fetching person" id "from" (pr-str (:host db)) "...")
+      (Thread/sleep (rand-int 1000))
+      (log "<- person" id "fetched.")
+      {:id id, :name (str "person " id)})))
+
+(engine/run!!
+   {:env {:db {:host "local"}}}
+   (-> {:alice (Person. :alice), :bob (Person. :bob)}
+       (data/assoc-in [:alice :idol] (Person. :tesla))
+       (data/assoc-in [:bob :idol] (Person. :alice))
+       (data/then assoc :timestamp (System/currentTimeMillis))))
+;; -> fetching person :bob from "local" ...
+;; -> fetching person :alice from "local" ...
+;; ...
+;; => {:alice {:id :alice, ...}, ...}
+----
+
 [[overview]]
 == Overview
 
