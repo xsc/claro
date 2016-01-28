@@ -20,8 +20,20 @@
 
 ;; ## Runtime Logic
 
+(defn- apply-and-recur!
+  [{:keys [impl] :as opts}
+   {:keys [value] :as state}
+   new-batch-count
+   resolvable->value]
+  (let [value (apply-resolved-batches opts value resolvable->value)]
+    (impl/recur
+      impl
+      (assoc! state
+              :value       value
+              :batch-count new-batch-count))))
+
 (defn- run-step!
-  [{:keys [impl] :as opts} {:keys [value batch-count]}]
+  [{:keys [impl] :as opts} {:keys [value batch-count] :as state}]
   (let [resolvables (inspect-resolvables opts value)]
     (if (empty? resolvables)
       value
@@ -29,12 +41,10 @@
             new-batch-count (+ batch-count (count batches))]
         (assert-batch-count! opts new-batch-count)
         (if (seq batches)
-          (impl/chain
+          (impl/chain1
             impl
-            batches
-            #(resolve-batches! opts %)
-            #(apply-resolved-batches opts value %)
-            #(impl/recur impl {:value %, :batch-count new-batch-count}))
+            (resolve-batches! opts batches)
+            #(apply-and-recur! opts state new-batch-count %))
           value)))))
 
 (defn run!
@@ -62,4 +72,6 @@
   (impl/loop
     impl
     #(run-step! opts %)
-    {:value value, :batch-count 0}))
+    (transient
+      {:value value
+       :batch-count 0})))
