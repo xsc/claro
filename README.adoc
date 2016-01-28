@@ -46,13 +46,15 @@ toc::[]
       (log "-> fetching person" id "from" (pr-str (:host db)) "...")
       (Thread/sleep (rand-int 1000))
       (log "<- person" id "fetched.")
-      {:id id, :name (str "person " id)})))
+      {:id id
+       :name (str "person " id)
+       :idol (rand-nth [:tesla :edison :alice :bob])})))
 
 (engine/run!!
    {:env {:db {:host "local"}}}
-   (-> {:alice (Person. :alice), :bob (Person. :bob)}
-       (data/assoc-in [:alice :idol] (Person. :tesla))
-       (data/assoc-in [:bob :idol] (Person. :alice))
+   (-> {:alice (->Person :alice), :bob (->Person :bob)}
+       (data/update-in [:alice :idol] ->Person)
+       (data/update-in [:bob :idol] ->Person)
        (data/then assoc :timestamp (System/currentTimeMillis))))
 ;; -> fetching person :bob from "local" ...
 ;; -> fetching person :alice from "local" ...
