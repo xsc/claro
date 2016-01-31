@@ -4,7 +4,11 @@
 
 (deftype ResolvableLeaf [resolvable]
   ResolvableTree
-  (unwrap-tree1 [this]
+  (wrapped? [_]
+    false)
+  (unwrap-tree [this]
+    this)
+  (partial-value [this _]
     (.-resolvable this))
   (resolved? [_]
     false)

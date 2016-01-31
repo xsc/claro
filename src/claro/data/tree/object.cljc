@@ -3,7 +3,11 @@
 
 (extend-protocol p/ResolvableTree
   Object
-  (unwrap-tree1 [tree]
+  (wrapped? [_]
+    false)
+  (unwrap-tree [this]
+    this)
+  (partial-value [tree _]
     tree)
   (resolved? [tree]
     true)
@@ -13,7 +17,11 @@
     tree)
 
   nil
-  (unwrap-tree1 [_]
+  (wrapped? [_]
+    false)
+  (unwrap-tree [_]
+    nil)
+  (partial-value [_ _]
     nil)
   (resolved? [_]
     true)

@@ -5,7 +5,11 @@
 
 (deftype ResolvableMapEntry [resolvables k v]
   ResolvableTree
-  (unwrap-tree1 [tree]
+  (wrapped? [_]
+    false)
+  (unwrap-tree [tree]
+    tree)
+  (partial-value [tree _]
     [(.-k tree) (.-v tree)])
   (resolved? [_]
     false)

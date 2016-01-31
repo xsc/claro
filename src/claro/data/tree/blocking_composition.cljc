@@ -1,11 +1,15 @@
 (ns claro.data.tree.blocking-composition
   (:require [claro.data.protocols :as p])
-  (:import [claro.data.protocols ResolvableTree WrappedTree]))
+  (:import [claro.data.protocols ResolvableTree ]))
 
 (deftype BlockingComposition [tree f]
   ResolvableTree
-  (unwrap-tree1 [this]
+  (wrapped? [this]
+    true)
+  (unwrap-tree [this]
     this)
+  (partial-value [_ no-partial]
+    no-partial)
   (resolved? [_]
     false)
   (resolvables* [_]

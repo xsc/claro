@@ -89,7 +89,7 @@
 
 (defn wrap-tree
   [value]
-  (let [value (p/unwrap-all value)]
+  (let [value (p/unwrap-tree value)]
     (cond (p/resolvable? value) (->ResolvableLeaf value)
           (map-entry? value) (->map-entry value)
           (record? value) (record->tree value)

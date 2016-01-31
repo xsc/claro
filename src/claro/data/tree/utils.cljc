@@ -20,7 +20,7 @@
 
 (def all-unwrap-xf
   "Transducer to unwrap a collection of elements."
-  (map #(p/unwrap-tree1 %)))
+  (map #(p/partial-value % ::this-should-not-happen)))
 
 (defn merge-resolvables
   ([trees]

@@ -1,6 +1,6 @@
 (ns claro.data.tree.composition
   (:require [claro.data.protocols :as p])
-  (:import [claro.data.protocols ResolvableTree WrappedTree]))
+  (:import [claro.data.protocols ResolvableTree]))
 
 ;; ## Helper
 
@@ -26,8 +26,12 @@
 
 (deftype ResolvableComposition [tree predicate f]
   ResolvableTree
-  (unwrap-tree1 [this]
+  (wrapped? [this]
+    true)
+  (unwrap-tree [this]
     this)
+  (partial-value [_ no-partial]
+    no-partial)
   (resolved? [_]
     false)
   (resolvables* [_]
@@ -37,8 +41,9 @@
       (cond (identical? tree tree') this
             (p/wrapped? tree') (ResolvableComposition. tree' predicate f)
             (tree-matches? tree' predicate) (f tree')
-            :else (let [value (p/unwrap-tree1 tree')]
-                    (if (and (p/processable? value)
+            :else (let [value (p/partial-value tree' ::none)]
+                    (if (and (not= value ::none)
+                             (p/processable? value)
                              (or (not predicate) (predicate value)))
                       (f value)
                       (ResolvableComposition. tree' predicate f)))))))

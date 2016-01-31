@@ -5,7 +5,11 @@
 
 (deftype ResolvableCollection [resolvables prototype elements]
   ResolvableTree
-  (unwrap-tree1 [_]
+  (wrapped? [_]
+    false)
+  (unwrap-tree [tree]
+    tree)
+  (partial-value [_ _]
     (into prototype u/all-unwrap-xf elements))
   (resolved? [_]
     false)

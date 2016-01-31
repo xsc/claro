@@ -10,9 +10,11 @@
 ;; ## Resolved Node
 
 (deftype ResolvedComposition [value f]
-  claro.data.protocols.WrappedTree
-  (unwrap [_]
-    (f (p/unwrap-all value))))
+  p/ResolvableTree
+  (wrapped? [_]
+    true)
+  (unwrap-tree [_]
+    (f (p/unwrap-tree value))))
 
 ;; ## Helpers
 

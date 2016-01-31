@@ -34,8 +34,13 @@
 ;; ## Trees
 
 (defprotocol+ ResolvableTree
-  (unwrap-tree1 [tree]
-    "Unwrap one level of the (potentially not fully-resolved) tree value.")
+  (wrapped? [tree]
+    "Check whether the given tree is wrapped.")
+  (unwrap-tree [tree]
+    "Unwrap the given tree as far as possible.")
+  (partial-value [tree no-partial]
+    "Retrieve the potentially not fully-resolved value for this tree. Returns
+     `no-partial` if this tree has not partial representation.")
   (resolved? [tree]
     "Is the tree completely resolved?")
   (resolvables* [tree]
@@ -43,21 +48,6 @@
   (apply-resolved-values [tree resolvable->resolved]
     "Replace the `Resolvables` with the given resolved values, returning a
      potentially fully resolved `ResolvableTree`."))
-
-(definterface+ WrappedTree
-  (unwrap [this]
-    "Unwrap the given value to produce the actual tree element."))
-
-(defn wrapped?
-  "Check whether the given value is wrapped."
-  [tree]
-  (instance? WrappedTree tree))
-
-(defn unwrap-all
-  [value]
-  (if (wrapped? value)
-    (recur (unwrap value))
-    value))
 
 (defn resolvables
   "Return a set of resolvables from the given tree."
