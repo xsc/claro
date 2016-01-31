@@ -27,7 +27,7 @@
             :action #(apply claro-op % values)}))))
 
 (let [k  gen/string-ascii
-      ks (gen/vector k)
+      ks (gen/vector k 1 10)
       v  (gen/return {})]
   (def ^:private gen-actions
     (gen/vector
@@ -36,7 +36,9 @@
          (action-gen 'assoc-in assoc-in data/assoc-in ks v)
          (action-gen 'update update data/update k (gen/fmap constantly v))
          (action-gen 'update-in update-in data/update-in ks (gen/fmap constantly v))
-         (action-gen 'select-keys select-keys data/select-keys ks)])
+         (action-gen 'select-keys select-keys data/select-keys ks)
+         (action-gen 'get get data/get k)
+         (action-gen 'get-in get-in data/get-in ks)])
       1 20)))
 
 ;; ## Application
