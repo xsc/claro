@@ -322,49 +322,6 @@ And finally, `fmap!` will wait for all parameters to be fully resolved:
 ;; => 5
 ----
 
-[[infinite-trees-projection]]
-=== Infinite Trees + Projection
-
-Since resolvables may directly reference other resolvables, one can build
-potentially infinite trees, usually either triggering the engine's maximum
-depth protection or a `StackOverflowError`. Using a _projection template_ one
-can "cut off" those parts of the tree that there is no interest in.
-
-[source,clojure]
-----
-(defrecord InfiniteSeq [n]
-  data/Resolvable
-  (resolve! [_ _]
-    {:head n, :tail (InfiniteSeq. (inc n))}))
-
-(engine/run!! (InfiniteSeq. 0)) ;; => IllegalStateException
-----
-
-Let's see what the `:head` of the initial `:tail` is:
-
-[source,clojure]
-----
-(engine/run!!
-  (data/project
-    (InfiniteSeq. 0)
-    {:tail {:head nil}}))
-;; => {:tail {:head 1}}
-----
-
-Or one level deeper:
-
-[source,clojure]
-----
-(engine/run!!
-  (data/project
-    (InfiniteSeq. 0)
-    {:tail {:tail {:head nil}}}))
-;; => {:tail {:tail {:head 2}}}
-----
-
-Note that projection is an experimental feature and might yield unexpected
-results in some cases.
-
 [[collection-operations]]
 === Collection Operations
 
@@ -392,6 +349,75 @@ be used with potentially infinite trees and thus projection (outlined above).
 
 Most of the time, when only manipulating the top-level structure of values, a
 combination of `then` and the desired operation will be enough.
+
+[[infinite-trees]]
+=== Infinite Trees
+
+Since resolvables may directly reference other resolvables, one can build
+potentially infinite trees, usually either triggering the engine's maximum
+depth protection or a `StackOverflowError`:
+
+[source,clojure]
+----
+(defrecord InfiniteSeq [n]
+  data/Resolvable
+  (resolve! [_ _]
+    {:head n, :tail (InfiniteSeq. (inc n))}))
+
+(engine/run!! (InfiniteSeq. 0)) ;; => IllegalStateException
+----
+
+claro offers ways of handling these (based on eager/conditional composition) -
+just be aware that the moment one `Resolvable` is infinite, potentially all of
+them are.
+
+==== Transformations
+
+claro's collection operations will not wait until a tree is fully resolved but
+transform it the moment they can. This means that e.g. the following can be used
+to access and increment one of the nested elements of above's `InfiniteSeq`:
+
+[source,clojure]
+----
+(engine/run!!
+  (-> (InfiniteSeq. 0)
+      (data/get-in [:tail :tail :tail :tail])
+      (data/update :head inc)
+      (data/get :head)))
+----
+
+==== Projection
+
+_This API is still in flux and might change at a moment's notice._
+
+Using a _projection template_ claro can cut off those subtrees that should not
+be part of the resolved result. The template itself is basically just a map
+representing the final structure, using `nil` as a placeholder for leaf values.
+
+This makes it possible to access different elements of above's `InfiniteSeq`:
+
+[source,clojure]
+----
+(engine/run!!
+  (data/project
+    (InfiniteSeq. 0)
+    {:tail {:tail {:tail {:tail {:head nil}}}}}))
+;; => {:tail {:tail {:tail {:tail {:head 4}}}}}
+----
+
+Or:
+
+[source,clojure]
+----
+(engine/run!!
+  (data/project
+    (InfiniteSeq. 0)
+    {:tail {:tail {:head nil}}}))
+;; => {:tail {:tail {:head 2}}}
+----
+
+Note that projection is an experimental feature and might yield unexpected
+results in some cases.
 
 [[engine-capabilities]]
 == Engine Capabilities
