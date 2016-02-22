@@ -31,6 +31,22 @@
   [value]
   (instance? claro.data.protocols.BatchedResolvable value))
 
+;; ## Mutations
+
+(defprotocol+ Mutation
+  "Marker interface for mutations, applying the following constraints on
+   resolution:
+
+   - only resolve on top-level (i.e. `resolve!` cannot return a mutation),
+   - only resolve one mutation per run,
+   - run mutation before any other resolvables.
+
+   Do not use with `extend-type` or `extend-protocol`.")
+
+(defn mutation?
+  [value]
+  (instance? claro.data.protocols.Mutation value))
+
 ;; ## Trees
 
 (defprotocol+ ResolvableTree
@@ -50,9 +66,9 @@
      potentially fully resolved `ResolvableTree`."))
 
 (defn resolvables
-  "Return a set of resolvables from the given tree."
+  "Return a seq of resolvables from the given tree."
   [tree]
-  (into #{} (resolvables* tree)))
+  (resolvables* tree))
 
 (defn processable?
   "Check whether the given value is neither wrapped, nor resolvable."

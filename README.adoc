@@ -179,6 +179,58 @@ protocol (in addition to `Resolvable`, mind):
 results matching the input order. It must contain at least as many elements as
 requested, but may return more - even infinitely so.
 
+[[mutations]]
+=== Mutations
+
+Nothing prevents you from performing side-effects in `resolve!` or
+`resolve-batch!` but letting them run wild can produce unexpected results due
+to execution order, caching, etc...
+
+claro encourages you to mark your mutations using the `claro.data/Mutation`
+interface, imposing the following restrictions on their resolution:
+
+- `Mutation` values can only be resolved at the top-level, i.e. they cannot be
+  returned in `resolve!` or `resolve-batch!`,
+- there can only be one mutation per engine call to make execution order a
+  responsibility of the caller,
+- the `Mutation` will be run before any non-mutation `Resolvable`.
+
+This should make it easier to reason about mutations and prevent unpleasant
+surprises.
+
+[source,clojure]
+----
+(defrecord Increment [n]
+  data/Mutation
+  data/Resolvable
+  (resolve! [_ {:keys [counter]}]
+    (swap! counter + n)))
+
+(defrecord Return [v]
+  data/Resolvable
+  (resolve! [_ _]
+    v))
+
+(def resolve! (engine/engine {:env {:counter (atom 0)}}))
+
+@(resolve! (->Increment 1))                       ;; => 1
+@(resolve! (->Increment 1))                       ;; => 2
+@(resolve! {:v (->Increment 1)})                  ;; => {:v 3}
+@(resolve! {:a (->Increment 1), :b (->Return 2)}) ;; => {:a 4, :b 2}
+
+@(resolve! (->Return (->Increment 1)))
+;; => IllegalStateException: can only resolve mutations on the top-level.
+
+@(resolve! [(->Increment 1) (->Increment 1)])
+;; => IllegalStateException: only one mutation can be resolved per engine run.
+----
+
+`Mutation` resolution can also return a resolvable value itself which will then
+be processed as usual.
+
+To reiterate: Nothing prevents you from performing side-effects within
+resolvables - just be aware of the risks.
+
 [[composition]]
 === Composition
 

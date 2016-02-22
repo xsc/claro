@@ -26,7 +26,7 @@
    `inspect-fn` (value -> seq of resolvables) to collect batches of
    resolvables. Returns a seq of such batches."
   [{:keys [selector] :or {selector identity}} resolvables]
-  (let [by-class (group-by class resolvables)]
+  (let [by-class (group-by class (distinct resolvables))]
     (some->> (seq (keys by-class))
              (selector)
              (assert-class-selected!)

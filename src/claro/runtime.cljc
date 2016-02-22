@@ -4,8 +4,9 @@
              [caching :as caching]
              [impl :as impl]
              [inspection :refer [inspect-resolvables]]
-             [selection :refer [select-resolvable-batches]]
-             [resolution :refer [resolve-batches!]]])
+             [mutation :refer [maybe-resolve-mutations!]]
+             [resolution :refer [resolve-batches!]]
+             [selection :refer [select-resolvable-batches]]])
   (:refer-clojure :exclude [run!]))
 
 ;; ## Depth Protection
@@ -35,20 +36,30 @@
               :cache       cache
               :batch-count new-batch-count))))
 
+(defn- resolve-and-recur!
+  [{:keys [impl] :as opts}
+   state
+   new-batch-count
+   resolvable-deferred]
+  (impl/chain1
+    impl
+    resolvable-deferred
+    #(apply-and-recur! opts state new-batch-count %)))
+
 (defn- run-step!
   [{:keys [impl] :as opts} {:keys [value cache batch-count] :as state}]
   (let [resolvables (inspect-resolvables opts value)]
     (if (empty? resolvables)
       value
-      (let [batches (select-resolvable-batches opts resolvables)
-            new-batch-count (+ batch-count (count batches))]
-        (assert-batch-count! opts new-batch-count)
-        (if (seq batches)
-          (impl/chain1
-            impl
-            (resolve-batches! opts cache batches)
-            #(apply-and-recur! opts state new-batch-count %))
-          value)))))
+      (or (some->> (maybe-resolve-mutations! opts state resolvables)
+                   (resolve-and-recur! opts state (inc batch-count)))
+          (let [batches (select-resolvable-batches opts resolvables)
+                new-batch-count (+ batch-count (count batches))]
+            (assert-batch-count! opts new-batch-count)
+            (if (seq batches)
+              (->> (resolve-batches! opts cache batches)
+                   (resolve-and-recur! opts state new-batch-count))
+              value))))))
 
 (defn run!
   "Run the resolution engine on the given value. `opts` is a map of:

@@ -68,16 +68,15 @@
       (let [resolvable->resolved (->partial-resolution resolvables 0.5)
             resolved (set (keys resolvable->resolved))
             tree' (p/apply-resolved-values tree resolvable->resolved)
-            rs (p/resolvables tree')]
+            rs (into #{} (p/resolvables tree'))]
         (and (is (not-any? resolved rs))
-             (is (= rs (set/difference resolvables resolved)))))))
+             (is (= rs (set/difference (set resolvables) resolved)))))))
 
 (defspec t-tree 200
   (prop/for-all
     [[available-resolvables tree] gen-tree]
     (let [rs (p/resolvables tree)]
-      (and (is (or (set? rs) (nil? rs)))
-           (is (every? p/resolvable? rs))
+      (and (is (every? p/resolvable? rs))
            (is (every? #(contains? available-resolvables %) rs))
            (attempt-resolution tree rs)))))
 

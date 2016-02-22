@@ -64,6 +64,12 @@
   (fn [tree resolvable->value]
     (data/apply-resolved-values tree resolvable->value)))
 
+;; ### Mutation
+
+(defn- build-mutation-predicate
+  [_]
+  #(data/mutation? %))
+
 ;; ## Options
 
 (defn- engine-opts
@@ -71,7 +77,8 @@
   (let [opts' (assoc opts :impl (impl/->deferred-impl impl))]
     (merge
       opts'
-      {:resolve-fn (build-resolve-fn opts')
+      {:mutation?  (build-mutation-predicate opts')
+       :resolve-fn (build-resolve-fn opts')
        :inspect-fn (build-inspect-fn opts')
        :apply-fn   (build-apply-fn opts')})))
 

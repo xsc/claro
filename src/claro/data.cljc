@@ -44,6 +44,7 @@
 
   [claro.data.protocols
    BatchedResolvable
+   Mutation
    project
    Resolvable
    resolvable?
