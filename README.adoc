@@ -16,8 +16,6 @@ will be for others.
 [[usage]]
 == Usage
 
-Don't.
-
 *Leiningen* (https://clojars.org/claro[via Clojars])
 
 https://clojars.org/claro[image:https://img.shields.io/clojars/v/claro.svg[Clojars Project]]
