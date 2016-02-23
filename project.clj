@@ -6,9 +6,9 @@
             :year 2015
             :key "mit"}
   :dependencies [[org.clojure/clojure "1.8.0"]
-                 [potemkin "0.4.2"]
-                 [manifold "0.1.1"]
-                 [prismatic/schema "1.0.4"]]
+                 [potemkin "0.4.3"]
+                 [manifold "0.1.2"]
+                 [prismatic/schema "1.0.5"]]
   :profiles {:dev {:dependencies [[org.clojure/test.check "0.9.0"]
                                   [org.clojure/core.async "0.2.374"]]
                    :plugins [[perforate "0.3.4"]]
