@@ -120,3 +120,16 @@
               IllegalStateException
               #"can only be used for non-collection values"
               @(run! projected-value))))))))
+
+(defspec t-map-projection-type-mismatch 200
+  (let [run! (make-engine)]
+    (prop/for-all
+      [template (gen-valid-template)
+       values   (gen/vector (gen-infinite-seq))]
+      (let [projected-value (data/project values template)]
+        (boolean
+          (is
+            (thrown-with-msg?
+              IllegalArgumentException
+              #"projection template is a map but value is not"
+              @(run! projected-value))))))))
