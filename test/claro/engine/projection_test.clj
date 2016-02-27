@@ -133,3 +133,16 @@
               IllegalArgumentException
               #"projection template is a map but value is not"
               @(run! projected-value))))))))
+
+(defspec t-sequential-projection-type-mismatch 200
+  (let [run! (make-engine)]
+    (prop/for-all
+      [template (gen-valid-template)
+       value    (gen-infinite-seq)]
+      (let [projected-value (data/project value [template])]
+        (boolean
+          (is
+            (thrown-with-msg?
+              IllegalArgumentException
+              #"projection template is sequential but value is not"
+              @(run! projected-value))))))))
