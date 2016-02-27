@@ -10,17 +10,30 @@
 
 ;; ## Fixtures
 
+(defrecord Identity [value]
+  data/Resolvable
+  (resolve! [_ _]
+    value))
+
 (defrecord InfiniteSeq [n]
   data/Resolvable
   (resolve! [_ _]
     {:value n
-     :next (InfiniteSeq. (inc n))}))
+     :next  (->InfiniteSeq (inc n))}))
+
+(defrecord WrappedInfiniteSeq [n]
+  data/Resolvable
+  (resolve! [_ _]
+    {:value (->Identity n)
+     :next  (->WrappedInfiniteSeq (inc n))}))
 
 ;; ## Generators
 
 (defn gen-infinite-seq
   []
-  (gen/fmap ->InfiniteSeq gen/int))
+  (gen/let [start-n     gen/int
+            constructor (gen/elements [->InfiniteSeq ->WrappedInfiniteSeq])]
+    (gen/return (constructor start-n))))
 
 (defn- gen-leaf-template
   []
