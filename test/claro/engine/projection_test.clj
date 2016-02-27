@@ -107,3 +107,16 @@
           (for [[result {:keys [n]}] (map vector results values)
                 :when (not (compare-to-template result template n))]
             result))))))
+
+(defspec t-invalid-map-projection 200
+  (let [run! (make-engine)]
+    (prop/for-all
+      [template (gen-invalid-template)
+       value    (gen-infinite-seq)]
+      (let [projected-value (data/project value template)]
+        (boolean
+          (is
+            (thrown-with-msg?
+              IllegalStateException
+              #"can only be used for non-collection values"
+              @(run! projected-value))))))))
