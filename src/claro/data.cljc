@@ -42,6 +42,9 @@
    then
    then!]
 
+  [claro.data.projection.objects
+   leaf]
+
   [claro.data.protocols
    BatchedResolvable
    Mutation
