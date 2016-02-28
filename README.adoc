@@ -448,8 +448,9 @@ This makes it possible to access different elements of above's `InfiniteSeq`:
 
 [source,clojure]
 ----
+(require '[claro.projection :as projection])
 (engine/run!!
-  (data/project
+  (projection/apply
     (InfiniteSeq. 0)
     {:tail {:tail {:tail {:tail {:head nil}}}}}))
 ;; => {:tail {:tail {:tail {:tail {:head 4}}}}}
@@ -460,7 +461,7 @@ Or:
 [source,clojure]
 ----
 (engine/run!!
-  (data/project
+  (projection/apply
     (InfiniteSeq. 0)
     {:tail {:tail {:head nil}}}))
 ;; => {:tail {:tail {:head 2}}}

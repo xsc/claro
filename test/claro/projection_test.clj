@@ -1,4 +1,4 @@
-(ns claro.engine.projection-test
+(ns claro.projection-test
   (:require [clojure.test.check :as tc]
             [clojure.test.check
              [clojure-test :refer [defspec]]
@@ -6,6 +6,7 @@
              [properties :as prop]]
             [clojure.test :refer :all]
             [claro.data :as data]
+            [claro.projection :as projection]
             [claro.engine.fixtures :refer [make-engine]]))
 
 ;; ## Fixtures
@@ -45,7 +46,7 @@
           :valid?   false
           :depth    0
           :template %)
-       (gen/elements [nil data/leaf]))]))
+       (gen/elements [nil projection/leaf]))]))
 
 (defn- valid-next-template?
   [t]
@@ -105,7 +106,7 @@
     (prop/for-all
       [template (gen-valid-template)
        value    (gen-infinite-seq)]
-      (let [projected-value (data/project value template)
+      (let [projected-value (projection/apply value template)
             result @(run! projected-value)]
         (compare-to-template result template (:n value))))))
 
@@ -114,7 +115,7 @@
     (prop/for-all
       [template (gen-valid-template)
        values   (gen/vector (gen-infinite-seq))]
-      (let [projected-values (data/project values [template])
+      (let [projected-values (projection/apply values [template])
             results @(run! projected-values)]
         (empty?
           (for [[result {:keys [n]}] (map vector results values)
@@ -126,7 +127,7 @@
     (prop/for-all
       [template (gen-invalid-template)
        value    (gen-infinite-seq)]
-      (let [projected-value (data/project value template)]
+      (let [projected-value (projection/apply value template)]
         (boolean
           (is
             (thrown-with-msg?
@@ -139,7 +140,7 @@
     (prop/for-all
       [template (gen-valid-template)
        values   (gen/vector (gen-infinite-seq))]
-      (let [projected-value (data/project values template)]
+      (let [projected-value (projection/apply values template)]
         (boolean
           (is
             (thrown-with-msg?
@@ -152,7 +153,7 @@
     (prop/for-all
       [template (gen-valid-template)
        value    (gen-infinite-seq)]
-      (let [projected-value (data/project value [template])]
+      (let [projected-value (projection/apply value [template])]
         (boolean
           (is
             (thrown-with-msg?

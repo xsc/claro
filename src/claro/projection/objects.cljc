@@ -1,5 +1,5 @@
-(ns claro.data.projection.objects
-  (:require [claro.data.protocols :refer [Projection]]
+(ns claro.projection.objects
+  (:require [claro.projection.protocols :refer [Projection]]
             [claro.data.ops.chain :refer [chain-eager]]))
 
 ;; ## Helpers

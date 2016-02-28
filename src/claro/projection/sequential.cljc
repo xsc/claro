@@ -1,5 +1,5 @@
-(ns claro.data.projection.sequential
-  (:require [claro.data.protocols :refer [Projection project-template]]
+(ns claro.projection.sequential
+  (:require [claro.projection.protocols :refer [Projection project-template]]
             [claro.data.ops
              [collections :as c]
              [then :refer [then]]

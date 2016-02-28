@@ -1,5 +1,5 @@
-(ns claro.data.projection.maps
-  (:require [claro.data.protocols :refer [Projection project-template]]
+(ns claro.projection.maps
+  (:require [claro.projection.protocols :refer [Projection project-template]]
             [claro.data.ops
              [then :refer [then]]
              [maps :as m]]))

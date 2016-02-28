@@ -9,10 +9,6 @@
              fmap
              maps
              then]
-            [claro.data.projection
-             maps
-             objects
-             sequential]
             [potemkin :refer [import-vars]]))
 
 (import-vars
@@ -42,13 +38,9 @@
    then
    then!]
 
-  [claro.data.projection.objects
-   leaf]
-
   [claro.data.protocols
    BatchedResolvable
    Mutation
-   project
    Resolvable
    resolvable?
    resolve!
