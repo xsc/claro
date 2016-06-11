@@ -2,9 +2,11 @@
   (:refer-clojure :exclude [apply])
   (:require [claro.projection
              [protocols :refer [project-template]]
-              maps
-              objects
-              sequential]
+             conditional
+             maps
+             objects
+             sequential
+             union]
             [potemkin :refer [import-vars]]))
 
 ;; ## Projection
@@ -17,4 +19,10 @@
 ;; ## API
 
 (import-vars
-  [claro.projection.objects leaf])
+  [claro.projection.objects
+   leaf]
+  [claro.projection.conditional
+   conditional]
+  [claro.projection.union
+   conditional-union
+   union])
