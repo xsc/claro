@@ -3,6 +3,7 @@
   (:require [claro.projection
              [protocols :refer [project-template]]
              conditional
+             level
              maps
              objects
              sequential
@@ -24,6 +25,8 @@
    leaf]
   [claro.projection.conditional
    conditional]
+  [claro.projection.level
+   levels]
   [claro.projection.union
    conditional-union
    union])
