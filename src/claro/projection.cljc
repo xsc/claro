@@ -6,6 +6,7 @@
              maps
              objects
              sequential
+             sets
              union]
             [potemkin :refer [import-vars]]))
 

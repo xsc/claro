@@ -23,17 +23,36 @@
 
 ;; ## Map
 
+(defn map-single
+  "Iterate the given function over every element of the given, potentially
+   partially resolved value. The collection type will be maintained."
+  [f sq]
+  (let [rechain #(fmap* f %&)
+        prototype (empty sq)]
+    (-> (vec sq)
+        (chain/chain-when
+          (wrap-assert-coll
+            chain/every-processable?
+            "can only apply 'map' to collections, given:")
+          #(core/map rechain %))
+        (chain/chain-eager
+          (if (or (list? sq) (seq? sq))
+            list*
+            #(into prototype %))))))
+
 (defn map
   "Iterate the given function over every element of the given, potentially
-   partially resolved value."
+   partially resolved values. The collection type may not be maintained."
   [f & sq]
-  (let [rechain #(fmap* f %&)]
-    (chain/chain-when
-      (vec sq)
-      (wrap-assert-coll
-        chain/every-processable?
-        "can only apply 'map' to collections, given:")
-      #(core/apply core/map rechain %))))
+  (if (next sq)
+    (let [rechain #(fmap* f %&)]
+      (chain/chain-when
+        (vec sq)
+        (wrap-assert-coll
+          chain/every-processable?
+          "can only apply 'map' to collections, given:")
+        #(core/apply core/map rechain %)))
+    (map-single f (core/first sq))))
 
 ;; ## Element Access
 

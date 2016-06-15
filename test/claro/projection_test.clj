@@ -117,10 +117,21 @@
        values   (gen/vector (gen-infinite-seq))]
       (let [projected-values (projection/apply values [template])
             results @(run! projected-values)]
-        (empty?
-          (for [[result {:keys [n]}] (map vector results values)
-                :when (not (compare-to-template result template n))]
-            result))))))
+        (and (vector? results)
+             (empty?
+               (for [[result {:keys [n]}] (map vector results values)
+                     :when (not (compare-to-template result template n))]
+                 result)))))))
+
+(defspec t-set-projection 200
+  (let [run! (make-engine)]
+    (prop/for-all
+      [template (gen-valid-template)
+       values   (gen/set (gen-infinite-seq))]
+      (let [projected-values (projection/apply values #{template})
+            results @(run! projected-values)]
+        (and (<= (count results) (count values))
+             (set? results))))))
 
 (defspec t-invalid-map-projection 200
   (let [run! (make-engine)]
@@ -159,4 +170,17 @@
             (thrown-with-msg?
               IllegalArgumentException
               #"projection template is sequential but value is not"
+              @(run! projected-value))))))))
+
+(defspec t-set-projection-type-mismatch 200
+  (let [run! (make-engine)]
+    (prop/for-all
+      [template (gen-valid-template)
+       value    (gen-infinite-seq)]
+      (let [projected-value (projection/apply value #{template})]
+        (boolean
+          (is
+            (thrown-with-msg?
+              IllegalArgumentException
+              #"projection template is set but value is not"
               @(run! projected-value))))))))
