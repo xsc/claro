@@ -7,20 +7,19 @@
 
 (defn- project-match
   [condition->template else-template value]
-  (or (some
-        (fn [[condition template]]
-          (if (condition value)
-            (pr/project-template template value)))
-        condition->template)
-      (if else-template
-        (then value #(pr/project-template else-template %)))
-      (if (p/resolvable? value)
-        (then value #(project-match condition->template else-template %)))))
+  (second
+    (or (some
+          (fn [[condition template]]
+            (if (condition value)
+              [:done (pr/project-template template value)]))
+          condition->template)
+        (if else-template
+          [:done (pr/project-template else-template value)]))))
 
 (defrecord ConditionalProjection [condition->template else-template]
   pr/Projection
   (project-template [_ value]
-    (project-match condition->template else-template value)))
+    (then value #(project-match condition->template else-template %))))
 
 ;; ## Constructors
 
