@@ -83,3 +83,12 @@
 (defn invalid-template
   []
   (template false))
+
+(defn compare-to-template
+  [value template expected-value]
+  (and (= (set (keys value))
+          (set (keys template)))
+       (or (not (contains? template :value))
+           (= (:value value) expected-value))
+       (or (not (contains? template :next))
+           (recur (:next value) (:next template) (inc expected-value)))))
