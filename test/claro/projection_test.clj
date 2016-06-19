@@ -5,90 +5,10 @@
              [generators :as gen]
              [properties :as prop]]
             [clojure.test :refer :all]
+            [claro.projection.generators :as g]
             [claro.data :as data]
             [claro.projection :as projection]
             [claro.engine.fixtures :refer [make-engine]]))
-
-;; ## Fixtures
-
-(defrecord Identity [value]
-  data/Resolvable
-  (resolve! [_ _]
-    value))
-
-(defrecord InfiniteSeq [n]
-  data/Resolvable
-  (resolve! [_ _]
-    {:value n
-     :next  (->InfiniteSeq (inc n))}))
-
-(defrecord WrappedInfiniteSeq [n]
-  data/Resolvable
-  (resolve! [_ _]
-    {:value (->Identity n)
-     :next  (->WrappedInfiniteSeq (inc n))}))
-
-;; ## Generators
-
-(defn gen-infinite-seq
-  []
-  (gen/let [start-n     gen/int
-            constructor (gen/elements [->InfiniteSeq ->WrappedInfiniteSeq])]
-    (gen/return (constructor start-n))))
-
-(defn- gen-leaf-template
-  []
-  (gen/one-of
-    [(gen/return nil)
-     (gen/fmap
-       #(hash-map
-          :leaf?    true
-          :valid?   false
-          :depth    0
-          :template %)
-       (gen/elements [nil projection/leaf]))]))
-
-(defn- valid-next-template?
-  [t]
-  (or (nil? t)
-      (and (:valid? t) (not (:leaf? t)))))
-
-(defn- assoc-template
-  [t k v]
-  (if v
-    (assoc t k (:template v))
-    t))
-
-(defn gen-template
-  [valid?]
-  (->> (gen/recursive-gen
-         (fn [template-gen]
-           (gen/let [value-template (gen-leaf-template)
-                     next-template  template-gen]
-             (let [new-depth ((fnil inc 0) (:depth next-template))]
-               (gen/return
-                 {:leaf?    false
-                  :valid?   (and (< new-depth 256)
-                                 (valid-next-template? next-template))
-                  :depth    new-depth
-                  :template (-> {}
-                                (assoc-template :value value-template)
-                                (assoc-template :next next-template))}))))
-         (gen-leaf-template))
-       (gen/fmap #(dissoc % :leaf?))
-       (#(gen/such-that
-           (if valid? :valid? (complement :valid?))
-           %
-           50))
-       (gen/fmap :template)))
-
-(defn- gen-valid-template
-  []
-  (gen-template true))
-
-(defn- gen-invalid-template
-  []
-  (gen-template false))
 
 ;; ## Tests
 
@@ -104,8 +24,8 @@
 (defspec t-map-projection 200
   (let [run! (make-engine)]
     (prop/for-all
-      [template (gen-valid-template)
-       value    (gen-infinite-seq)]
+      [template (g/valid-template)
+       value    (g/infinite-seq)]
       (let [projected-value (projection/apply value template)
             result @(run! projected-value)]
         (compare-to-template result template (:n value))))))
@@ -113,8 +33,8 @@
 (defspec t-sequential-projection 200
   (let [run! (make-engine)]
     (prop/for-all
-      [template (gen-valid-template)
-       values   (gen/vector (gen-infinite-seq))]
+      [template (g/valid-template)
+       values   (gen/vector (g/infinite-seq))]
       (let [projected-values (projection/apply values [template])
             results @(run! projected-values)]
         (and (vector? results)
@@ -126,8 +46,8 @@
 (defspec t-set-projection 200
   (let [run! (make-engine)]
     (prop/for-all
-      [template (gen-valid-template)
-       values   (gen/set (gen-infinite-seq))]
+      [template (g/valid-template)
+       values   (gen/set (g/infinite-seq))]
       (let [projected-values (projection/apply values #{template})
             results @(run! projected-values)]
         (and (<= (count results) (count values))
@@ -136,8 +56,8 @@
 (defspec t-invalid-map-projection 200
   (let [run! (make-engine)]
     (prop/for-all
-      [template (gen-invalid-template)
-       value    (gen-infinite-seq)]
+      [template (g/invalid-template)
+       value    (g/infinite-seq)]
       (let [projected-value (projection/apply value template)]
         (boolean
           (is
@@ -149,8 +69,8 @@
 (defspec t-map-projection-type-mismatch 200
   (let [run! (make-engine)]
     (prop/for-all
-      [template (gen-valid-template)
-       values   (gen/vector (gen-infinite-seq))]
+      [template (g/valid-template)
+       values   (gen/vector (g/infinite-seq))]
       (let [projected-value (projection/apply values template)]
         (boolean
           (is
@@ -162,8 +82,8 @@
 (defspec t-sequential-projection-type-mismatch 200
   (let [run! (make-engine)]
     (prop/for-all
-      [template (gen-valid-template)
-       value    (gen-infinite-seq)]
+      [template (g/valid-template)
+       value    (g/infinite-seq)]
       (let [projected-value (projection/apply value [template])]
         (boolean
           (is
@@ -175,8 +95,8 @@
 (defspec t-set-projection-type-mismatch 200
   (let [run! (make-engine)]
     (prop/for-all
-      [template (gen-valid-template)
-       value    (gen-infinite-seq)]
+      [template (g/valid-template)
+       value    (g/infinite-seq)]
       (let [projected-value (projection/apply value #{template})]
         (boolean
           (is
