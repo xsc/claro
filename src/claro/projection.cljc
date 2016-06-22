@@ -24,7 +24,8 @@
   [claro.projection.objects
    leaf]
   [claro.projection.conditional
-   conditional]
+   conditional
+   conditional-when]
   [claro.projection.level
    levels]
   [claro.projection.union

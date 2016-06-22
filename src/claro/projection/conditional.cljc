@@ -1,7 +1,7 @@
 (ns claro.projection.conditional
   (:require [claro.projection.protocols :as pr]
             [claro.data.protocols :as p]
-            [claro.data.ops.then :refer [then]]))
+            [claro.data.ops.chain :refer [chain-eager chain-when]]))
 
 ;; ## Record
 
@@ -16,12 +16,25 @@
         (if else-template
           [:done (pr/project-template else-template value)]))))
 
-(defrecord ConditionalProjection [condition->template else-template]
+(defrecord ConditionalProjection [predicate condition->template else-template]
   pr/Projection
   (project-template [_ value]
-    (then value #(project-match condition->template else-template %))))
+    (let [f #(project-match condition->template else-template %)]
+      (if predicate
+        (chain-when value predicate f)
+        (chain-eager value f)))))
 
 ;; ## Constructors
+
+(defn- make-conditional
+  [predicate condition template more]
+  (let [pairs (cons [condition template] (partition 2 more))
+        [c maybe-else-template] (last pairs)
+        [condition->template else-template]
+        (if (= c :else)
+          [(butlast pairs) maybe-else-template]
+          [pairs nil]) ]
+    (->ConditionalProjection predicate condition->template else-template)))
 
 (defn conditional
   "Apply the first projection template whose predicate matches the value.
@@ -35,10 +48,11 @@
    "
   [condition template & more]
   {:pre [(even? (count more))]}
-  (let [pairs (cons [condition template] (partition 2 more))
-        [c maybe-else-template] (last pairs)
-        [condition->template else-template]
-        (if (= c :else)
-          [(butlast pairs) maybe-else-template]
-          [pairs nil]) ]
-    (->ConditionalProjection condition->template else-template)))
+  (make-conditional nil condition template more))
+
+(defn conditional-when
+  "Like `conditional` but the template will only be applied once the given
+   `predicate` holds."
+  [predicate condition template & more]
+  {:pre [(even? (count more))]}
+  (make-conditional predicate condition template more))
