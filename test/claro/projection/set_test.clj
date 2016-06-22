@@ -12,11 +12,19 @@
   (let [run! (make-engine)]
     (prop/for-all
       [template (g/valid-template)
-       values   (gen/set (g/infinite-seq))]
-      (let [projected-values (projection/apply values #{template})
-            results @(run! projected-values)]
-        (and (<= (count results) (count values))
-             (set? results))))))
+       values   (let [g (g/infinite-seq)]
+                  (gen/one-of
+                    [(gen/vector g)
+                     (gen/list g)
+                     (gen/set g)]))]
+      (= (->> values
+              (map #(projection/apply % template))
+              (map (comp deref run!))
+              (into #{}))
+         (-> values
+             (projection/apply #{template})
+             (run!)
+             (deref))))))
 
 (defspec t-set-projection-type-mismatch 200
   (let [run! (make-engine)]
