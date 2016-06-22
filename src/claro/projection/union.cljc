@@ -2,7 +2,7 @@
   (:require [claro.projection.protocols :as pr]
             [claro.projection.conditional :refer [conditional]]
             [claro.data.ops
-             [then :refer [then!]]]))
+             [then :refer [then then!]]]))
 
 ;; ## Record
 
@@ -30,7 +30,7 @@
   pr/Projection
   (project-template [_ value]
     (-> (mapv #(pr/project-template % value) templates)
-        (then! #(union-of-maps %)))))
+        (then! union-of-maps))))
 
 ;; ## Constructor
 

@@ -30,6 +30,10 @@
             constructor (gen/elements [->InfiniteSeq ->WrappedInfiniteSeq])]
     (gen/return (constructor start-n))))
 
+(defn non-wrapped-infinite-seq
+  []
+  (gen/fmap ->InfiniteSeq gen/int))
+
 (defn- leaf-template
   []
   (gen/one-of
