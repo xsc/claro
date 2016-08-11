@@ -61,6 +61,14 @@
        (repeatedly (Math/floor (* (count resolvables) ratio)))
        (->resolution)))
 
+;; ## No Resolvable Tre
+
+(defspec t-tree-without-resolvables (test/times 100)
+  (prop/for-all
+    [value gen/any]
+    (let [tree (tree/wrap-tree value)]
+      (= tree value))))
+
 ;; ## Resolution
 
 (defn- attempt-resolution
