@@ -63,9 +63,16 @@
 
 ;; ## No Resolvable Tre
 
+(let [NaN? #(and (number? %) (Double/isNaN %))]
+  (def gen-any-non-NaN
+    "Generator for any value, excluding generation of NaN, b/c NaN breaks equality."
+    (gen/recursive-gen
+      gen/container-type
+      (gen/such-that (complement NaN?) gen/simple-type))))
+
 (defspec t-tree-without-resolvables (test/times 100)
   (prop/for-all
-    [value gen/any]
+    [value gen-any-non-NaN]
     (let [tree (tree/wrap-tree value)]
       (= tree value))))
 
