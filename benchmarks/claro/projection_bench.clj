@@ -2,6 +2,7 @@
   (:require [perforate.core :refer [defgoal defcase]]
             [manifold.deferred :as d]
             [claro.data :as data]
+            [claro.projection :as projection]
             [claro.engine :as engine]))
 
 (def run!! engine/run!!)
@@ -17,7 +18,7 @@
 
 (defn infinite-seq
   [max-n]
-  (data/project
+  (projection/apply
     (InfiniteSeq. 0)
     (assoc-in {} (repeat max-n :tail) {:head nil})))
 
