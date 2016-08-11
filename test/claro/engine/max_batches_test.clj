@@ -5,6 +5,7 @@
              [generators :as gen]
              [properties :as prop]]
             [clojure.test :refer :all]
+            [claro.test :as test]
             [claro.data :as data]
             [claro.engine.fixtures :refer [make-engine]]))
 
@@ -14,7 +15,7 @@
     (when (< n max-n)
       {:nested (Nested. (inc n) max-n)})))
 
-(defspec t-max-batches 100
+(defspec t-max-batches (test/times 100)
   (prop/for-all
     [max-n       gen/pos-int
      max-batches gen/s-pos-int]

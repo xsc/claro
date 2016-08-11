@@ -2,8 +2,7 @@
   (:require [claro.projection.protocols :refer [Projection project-template]]
             [claro.data.ops
              [collections :as c]
-             [then :refer [then]]
-             [maps :as m]]))
+             [then :refer [then]]]))
 
 ;; ## Helpers
 
@@ -17,8 +16,9 @@
   value)
 
 (defn- project-elements
-  [template sq]
-  (c/map #(project-template template %) sq))
+  [template value]
+  (assert-sequential! value)
+  (c/map-single #(project-template template %) value))
 
 ;; ## Implementation
 
@@ -26,7 +26,4 @@
   clojure.lang.Sequential
   (project-template [[template :as sq] value]
     {:pre [(= (count sq) 1)]}
-    (then
-      value
-      (comp #(project-elements template %)
-            assert-sequential!))))
+    (then value #(project-elements template %))))

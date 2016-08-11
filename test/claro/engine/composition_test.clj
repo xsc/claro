@@ -5,6 +5,7 @@
              [generators :as gen]
              [properties :as prop]]
             [clojure.test :refer :all]
+            [claro.test :as test]
             [claro.data :as data]
             [claro.engine.fixtures :refer [make-engine]]))
 
@@ -30,7 +31,7 @@
 
 ;; ## Tests
 
-(defspec t-blocking-composition 50
+(defspec t-blocking-composition (test/times 50)
   (prop/for-all
     [resolvable gen-nested-resolvable]
     (let [run! (make-engine)
@@ -38,7 +39,7 @@
           [result printed] @(run! value)]
       (= (pr-str result) printed))))
 
-(defspec t-eager-composition 50
+(defspec t-eager-composition (test/times 50)
   (prop/for-all
     [resolvable gen-nested-resolvable]
     (let [run! (make-engine)
@@ -46,7 +47,7 @@
           [result printed] @(run! value)]
       (= (pr-str resolvable) printed))))
 
-(defspec t-conditional-composition 50
+(defspec t-conditional-composition (test/times 50)
   (prop/for-all
     [resolvable0 gen-resolvable
      resolvable1 gen-resolvable]
