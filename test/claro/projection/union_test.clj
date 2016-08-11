@@ -4,12 +4,13 @@
              [generators :as gen]
              [properties :as prop]]
             [clojure.test :refer :all]
+            [claro.test :as test]
             [claro.projection.generators :as g]
             [claro.engine.fixtures :refer [make-engine]]
             [claro.data.ops.then :refer [then]]
             [claro.projection :as projection]))
 
-(defspec t-union-projection 100
+(defspec t-union-projection (test/times 100)
   (let [run! (make-engine)]
     (prop/for-all
       [template (g/valid-template)
@@ -24,7 +25,7 @@
                        (select-keys template [:value])]))
                   (run!)))))))
 
-(defspec t-union-projection-key-overlap 100
+(defspec t-union-projection-key-overlap (test/times 100)
   (let [run! (make-engine)]
     (prop/for-all
       [template (g/valid-template)
@@ -39,7 +40,7 @@
                      (projection/apply (projection/union [template template]))
                      (run!)))))))))
 
-(defspec t-conditional-union-projection 100
+(defspec t-conditional-union-projection (test/times 100)
   (let [run! (make-engine)]
     (prop/for-all
       [template (g/valid-template)

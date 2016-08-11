@@ -5,6 +5,7 @@
              [generators :as gen]
              [properties :as prop]]
             [clojure.test :refer :all]
+            [claro.test :as test]
             [claro.data :as data]
             [claro.engine.fixtures :refer [make-engine]]))
 
@@ -54,7 +55,7 @@
   (resolve! [_ _]
     v))
 
-(defspec t-map-ops 100
+(defspec t-map-ops (test/times 100)
   (prop/for-all
     [actions gen-actions
      unresolved-value (gen-nested-map (gen/elements [{} (->Identity {})]))]

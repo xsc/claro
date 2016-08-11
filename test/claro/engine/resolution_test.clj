@@ -5,6 +5,7 @@
              [generators :as gen]
              [properties :as prop]]
             [clojure.test :refer :all]
+            [claro.test :as test]
             [claro.data :as data]
             [claro.engine.fixtures :refer [make-engine]]))
 
@@ -21,7 +22,7 @@
   (resolve! [_ {:keys [colours]}]
     (vec (take size (repeatedly #(Apple. (rand-nth colours)))))))
 
-(defspec t-simple-resolution 100
+(defspec t-simple-resolution (test/times 100)
   (prop/for-all
     [basket-size gen/pos-int]
     (let [resolutions (atom [])
@@ -38,7 +39,7 @@
 
 ;; ## Collections
 
-(defspec t-collection-type-maintained 100
+(defspec t-collection-type-maintained (test/times 100)
   (let [apple-gen (->> [(Apple. :red) (Apple. :green)]
                        (gen/elements)
                        (gen/vector)
@@ -58,7 +59,7 @@
              (or (not (sequential? apples))
                  (is (= colours (map :colour result)))))))))
 
-(defspec t-seq-order-maintained 100
+(defspec t-seq-order-maintained (test/times 100)
   (let [->resolvable #(reify data/Resolvable (resolve! [_ _] %))]
     (prop/for-all
       [values (gen/vector gen/int)
@@ -83,7 +84,7 @@
                     (gen/vector)
                     (gen/not-empty))]
 
-  (defspec t-map-value-resolution 100
+  (defspec t-map-value-resolution (test/times 100)
     (prop/for-all
       [apple-path path-gen]
       (let [run! (make-engine (atom []))
@@ -92,7 +93,7 @@
              (is (= {:type :apple, :colour :red}
                     (get-in result apple-path)))))))
 
-  (defspec t-map-key-resolution 100
+  (defspec t-map-key-resolution (test/times 100)
     (prop/for-all
       [apple-path path-gen]
       (let [run! (make-engine (atom []))
@@ -115,7 +116,7 @@
   (resolve! [_ _]
     value))
 
-(defspec t-nested-resolution 100
+(defspec t-nested-resolution (test/times 100)
   (prop/for-all
     [nesting-level gen/nat
      nested-value  gen/simple-type]

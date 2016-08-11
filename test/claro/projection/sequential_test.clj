@@ -4,11 +4,12 @@
              [generators :as gen]
              [properties :as prop]]
             [clojure.test :refer :all]
+            [claro.test :as test]
             [claro.projection.generators :as g]
             [claro.engine.fixtures :refer [make-engine]]
             [claro.projection :as projection]))
 
-(defspec t-sequential-projection 200
+(defspec t-sequential-projection (test/times 200)
   (let [run! (make-engine)]
     (prop/for-all
       [template (g/valid-template)
@@ -21,7 +22,7 @@
                      :when (not (g/compare-to-template result template n))]
                  result)))))))
 
-(defspec t-sequential-projection-type-mismatch 200
+(defspec t-sequential-projection-type-mismatch (test/times 200)
   (let [run! (make-engine)]
     (prop/for-all
       [template (g/valid-template)

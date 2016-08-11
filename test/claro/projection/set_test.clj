@@ -4,11 +4,12 @@
              [generators :as gen]
              [properties :as prop]]
             [clojure.test :refer :all]
+            [claro.test :as test]
             [claro.projection.generators :as g]
             [claro.engine.fixtures :refer [make-engine]]
             [claro.projection :as projection]))
 
-(defspec t-set-projection 200
+(defspec t-set-projection (test/times 200)
   (let [run! (make-engine)]
     (prop/for-all
       [template (g/valid-template)
@@ -26,7 +27,7 @@
              (run!)
              (deref))))))
 
-(defspec t-set-projection-type-mismatch 200
+(defspec t-set-projection-type-mismatch (test/times 200)
   (let [run! (make-engine)]
     (prop/for-all
       [template (g/valid-template)

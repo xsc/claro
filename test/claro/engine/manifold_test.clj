@@ -5,6 +5,7 @@
              [generators :as gen]
              [properties :as prop]]
             [clojure.test :refer :all]
+            [claro.test :as test]
             [claro.data :as data]
             [claro.engine.fixtures :refer [make-engine]]
             [manifold.deferred :as d])
@@ -85,11 +86,11 @@
            ~'result @(run!# ~'resolvable)]
        (= ~'expected ~'result))))
 
-(defspec t-manifold 100
+(defspec t-manifold (test/times 100)
   (resolution-prop gen-resolvable))
 
-(defspec t-mixed-manifold 100
+(defspec t-mixed-manifold (test/times 100)
   (resolution-prop gen-resolvables))
 
-(defspec t-batched-manifold 100
+(defspec t-batched-manifold (test/times 100)
   (resolution-prop gen-batched-resolvables))

@@ -4,12 +4,13 @@
              [generators :as gen]
              [properties :as prop]]
             [clojure.test :refer :all]
+            [claro.test :as test]
             [claro.projection.generators :as g]
             [claro.engine.fixtures :refer [make-engine]]
             [claro.data.ops.then :refer [then]]
             [claro.projection :as projection]))
 
-(defspec t-conditional-projection 100
+(defspec t-conditional-projection (test/times 100)
   (let [run! (make-engine)]
     (prop/for-all
       [template (g/valid-template)
@@ -43,7 +44,7 @@
                       :else {:extra? projection/leaf, :value projection/leaf}))
                   (run!))))))))
 
-(defspec t-conditional-when-projection 100
+(defspec t-conditional-when-projection (test/times 100)
   (let [run! (make-engine)]
     (prop/for-all
       [template (g/valid-template)

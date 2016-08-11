@@ -5,6 +5,7 @@
              [generators :as gen]
              [properties :as prop]]
             [clojure.test :refer :all]
+            [claro.test :as test]
             [clojure.set :as set]
             [claro.data.protocols :as p]
             [claro.data.tree :as tree]))
@@ -72,7 +73,7 @@
         (and (is (not-any? resolved rs))
              (is (= rs (set/difference (set resolvables) resolved)))))))
 
-(defspec t-tree 200
+(defspec t-tree (test/times 200)
   (prop/for-all
     [[available-resolvables tree] gen-tree]
     (let [rs (p/resolvables tree)]
@@ -82,7 +83,7 @@
 
 ;; ## Collections
 
-(defspec t-collections 100
+(defspec t-collections (test/times 100)
   (prop/for-all
     [[available-resolvables coll] gen-collection]
     (let [resolvable->value (->resolution available-resolvables)

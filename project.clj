@@ -10,7 +10,8 @@
                  [manifold "0.1.2"]
                  [prismatic/schema "1.0.5"]]
   :profiles {:dev {:dependencies [[org.clojure/test.check "0.9.0"]
-                                  [org.clojure/core.async "0.2.374"]]
+                                  [org.clojure/core.async "0.2.374"]
+                                  [com.gfredericks/test.chuck "0.2.7"]]
                    :plugins [[perforate "0.3.4"]]
                    :source-paths ["benchmarks"]
                    :perforate

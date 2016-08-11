@@ -4,11 +4,12 @@
              [generators :as gen]
              [properties :as prop]]
             [clojure.test :refer :all]
+            [claro.test :as test]
             [claro.projection.generators :as g]
             [claro.engine.fixtures :refer [make-engine]]
             [claro.projection :as projection]))
 
-(defspec t-map-projection 200
+(defspec t-map-projection (test/times 200)
   (let [run! (make-engine)]
     (prop/for-all
       [template (g/valid-template)
@@ -17,7 +18,7 @@
             result @(run! projected-value)]
         (g/compare-to-template result template (:n value))))))
 
-(defspec t-invalid-map-projection 200
+(defspec t-invalid-map-projection (test/times 200)
   (let [run! (make-engine)]
     (prop/for-all
       [template (g/invalid-template)
@@ -30,7 +31,7 @@
               #"can only be used for non-collection values"
               @(run! projected-value))))))))
 
-(defspec t-map-projection-type-mismatch 200
+(defspec t-map-projection-type-mismatch (test/times 200)
   (let [run! (make-engine)]
     (prop/for-all
       [template (g/valid-template)
