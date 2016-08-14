@@ -57,7 +57,7 @@
     (assoc t k (:template v))
     t))
 
-(defn template
+(defn raw-template
   [valid?]
   (->> (gen/recursive-gen
          (fn [template-gen]
@@ -77,8 +77,11 @@
        (#(gen/such-that
            (if valid? :valid? (complement :valid?))
            %
-           50))
-       (gen/fmap :template)))
+           50))))
+
+(defn template
+  [valid?]
+  (gen/fmap :template (raw-template valid?)))
 
 (defn valid-template
   []
