@@ -30,7 +30,7 @@
     (fn [value [k template]]
       (-> value
           (assert-contains! k)
-          (update k then #(project-template template %))))
+          (update k #(project-template template %))))
     value templates))
 
 ;; ## Implementation

@@ -8,6 +8,7 @@
              objects
              sequential
              sets
+             transform
              union]
             [potemkin :refer [import-vars]]))
 
@@ -28,6 +29,9 @@
    conditional-when]
   [claro.projection.level
    levels]
+  [claro.projection.transform
+   transform
+   transform-at]
   [claro.projection.union
    conditional-union
    union])

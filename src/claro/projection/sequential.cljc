@@ -18,7 +18,10 @@
 (defn- project-elements
   [template value]
   (assert-sequential! value)
-  (c/map-single #(project-template template %) value))
+  (let [vs (map #(project-template template %) value)]
+    (if (or (list? value) (seq? value))
+      (list* vs)
+      (into (empty value) vs))))
 
 ;; ## Implementation
 
