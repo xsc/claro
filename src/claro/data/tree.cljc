@@ -98,3 +98,10 @@
           (seq? value) (list->tree value)
           (coll? value) (collection->tree value)
           :else value)))
+
+(defn transform-partial
+  [value f]
+  (-> value
+      (p/partial-value nil)
+      (f)
+      (wrap-tree)))
