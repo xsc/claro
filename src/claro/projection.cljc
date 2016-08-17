@@ -1,11 +1,13 @@
 (ns claro.projection
-  (:refer-clojure :exclude [apply])
+  (:refer-clojure :exclude [apply alias])
   (:require [claro.projection
              [protocols :refer [project-template]]
+             alias
              conditional
              level
              maps
              objects
+             parameters
              sequential
              sets
              transform
@@ -24,6 +26,8 @@
 (import-vars
   [claro.projection.objects
    leaf]
+  [claro.projection.alias
+   alias]
   [claro.projection.conditional
    conditional
    conditional-when]
@@ -32,6 +36,8 @@
   [claro.projection.transform
    transform
    transform-at]
+  [claro.projection.parameters
+   parameters]
   [claro.projection.union
    conditional-union
    union])
