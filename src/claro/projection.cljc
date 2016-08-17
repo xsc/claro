@@ -7,6 +7,7 @@
              level
              maps
              objects
+             parameters
              sequential
              sets
              transform
@@ -35,6 +36,8 @@
   [claro.projection.transform
    transform
    transform-at]
+  [claro.projection.parameters
+   parameters]
   [claro.projection.union
    conditional-union
    union])
