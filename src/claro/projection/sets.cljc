@@ -18,8 +18,7 @@
 (defn- project-set
   [template value]
   (assert-set! value)
-  (-> (c/map-single #(project-template template %) value)
-      (then set)))
+  (set (map #(project-template template %) value)))
 
 ;; ## Implementation
 

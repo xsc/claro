@@ -81,6 +81,19 @@
               (projection/apply [(projection/transform transform-fn template)])
               (run!))))))
 
+(defspec t-transform-set (test/times 100)
+  (let [run! (make-engine)]
+    (prop/for-all
+      [values       (gen/vector (g/infinite-seq))
+       transform-fn gen-infinite-seq-transform
+       template     (g/valid-template)]
+      (= @(-> (mapv transform-fn values)
+              (projection/apply #{template})
+              (run!))
+         @(-> values
+              (projection/apply #{(projection/transform transform-fn template)})
+              (run!))))))
+
 (defspec t-transform-at (test/times 100)
   (let [run! (make-engine)]
     (prop/for-all
