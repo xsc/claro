@@ -108,6 +108,22 @@
                 (projection/transform-at :nested transform-fn template))
               (run!))))))
 
+(defspec t-transform-at-with-missing-key (test/times 10)
+  (let [run! (make-engine)]
+    (prop/for-all
+      [value        (g/infinite-seq)
+       template     (g/valid-template)
+       transform-fn gen-infinite-seq-transform]
+      (boolean
+        (is
+          (thrown-with-msg?
+            IllegalArgumentException
+            #"value does not contain it"
+            @(-> {:nested value}
+                 (projection/apply
+                   (projection/transform-at :missing transform-fn template))
+                 (run!))))))))
+
 (defspec t-transform-at-with-alias (test/times 100)
   (let [run! (make-engine)]
     (prop/for-all
@@ -121,6 +137,24 @@
               (projection/apply
                 (projection/transform-at :nested transform-fn template :alias))
               (run!))))))
+
+(defspec t-transform-at-with-overriding-alias (test/times 10)
+  (let [run! (make-engine)]
+    (prop/for-all
+      [value        (g/infinite-seq)
+       template     (g/valid-template)
+       transform-fn gen-infinite-seq-transform]
+      (boolean
+        (is
+          (thrown-with-msg?
+            IllegalArgumentException
+            #"would override key"
+            @(-> {:nested value
+                  :alias  1}
+                 (projection/apply
+                   (projection/transform-at
+                     :nested transform-fn template :alias))
+                 (run!))))))))
 
 (defspec t-transform-at-with-alias-and-union (test/times 100)
   (let [run! (make-engine)]

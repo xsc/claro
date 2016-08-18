@@ -39,7 +39,7 @@
   (when-not (map? value)
     (throw
       (IllegalArgumentException.
-        (str "projection template is a map but value is not: "
+        (str "'transform-at' template is a map but value is not: "
              (pr-str value)))))
   value)
 
@@ -48,8 +48,17 @@
   (when-not (contains? value k)
     (throw
       (IllegalArgumentException.
-        (str "projection template expects key '" k "' but value "
+        (str "projection 'transform-at' expects key '" k "' but value "
              "does not contain it: " (pr-str value)))))
+  value)
+
+(defn- assert-no-override!
+  [value k]
+  (when (contains? value k)
+    (throw
+      (IllegalArgumentException.
+        (str "projection 'transform-at' would override key '" k "' in: "
+             (pr-str value)))))
   value)
 
 (defrecord MapTransformation [f rest-template key alias-key]
@@ -59,6 +68,7 @@
            (-> value
                (assert-map!)
                (assert-contains! key)
+               (assert-no-override! alias-key)
                (apply-map-transformation f rest-template key alias-key)))
          (then value))))
 
