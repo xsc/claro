@@ -1,5 +1,6 @@
 (ns claro.runtime.resolution
-  (:require [claro.runtime.impl :as impl]))
+  (:require [claro.runtime.impl :as impl]
+            [claro.runtime.caching :as caching]))
 
 (defn- assert-deferrable
   "Make sure the given value is a deferrable, throw `IllegalStateException`
@@ -52,8 +53,9 @@
          result result
          uncached (transient [])]
     (if (seq batch)
-      (let [[h & rst] batch]
-        (if-let [v (get cache h)]
+      (let [[h & rst] batch
+            v (caching/read-cache opts cache h ::miss)]
+        (if (not= v ::miss)
           (recur rst (assoc-in result [:cached h] v) uncached)
           (recur rst result (conj! uncached h))))
       (if-let [rs (seq (persistent! uncached))]

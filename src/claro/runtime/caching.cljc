@@ -13,3 +13,7 @@
     #(assoc! % (key %2) (val %2))
     cache
     resolvable->value))
+
+(defn read-cache
+  [_ cache resolvable not-found]
+  (get cache resolvable not-found))
