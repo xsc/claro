@@ -22,8 +22,8 @@
                (pr-str candidate)))))))
 
 (defn maybe-resolve-mutations!
-  [{:keys [mutation? cache] :as opts}
-   {:keys [batch-count] :as state}
+  [{:keys [mutation?] :as opts}
+   {:keys [batch-count cache] :as state}
    resolvables]
   (when mutation?
     (if (zero? batch-count)
