@@ -46,22 +46,24 @@
     (generate-deferred opts batch)
     #(merge-resolvables batch %)))
 
+(defn- resolve-batches-with-cache-step!
+  [opts cache result batch]
+  (loop [batch  batch
+         result result
+         uncached (transient [])]
+    (if (seq batch)
+      (let [[h & rst] batch]
+        (if-let [v (get cache h)]
+          (recur rst (assoc-in result [:cached h] v) uncached)
+          (recur rst result (conj! uncached h))))
+      (if-let [rs (seq (persistent! uncached))]
+        (update result :ds conj (resolve-batch! opts rs))
+        result))))
+
 (defn- resolve-batches-with-cache!
   [opts cache batches]
   (reduce
-    (fn [result batch]
-      (loop [batch  batch
-             result result
-             uncached []]
-        (cond (seq batch)
-              (let [[h & rst] batch]
-                (if-let [v (get cache h)]
-                  (recur rst (assoc-in result [:cached h] v) uncached)
-                  (recur rst result (conj uncached h))))
-              (seq uncached)
-              (update result :ds conj (resolve-batch! opts uncached))
-              :else
-              result)))
+    #(resolve-batches-with-cache-step! opts cache %1 %2)
     {:cached {}, :ds []}
     batches))
 
