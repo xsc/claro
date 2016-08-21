@@ -34,8 +34,7 @@
   [claro.projection.level
    levels]
   [claro.projection.transform
-   transform
-   transform-at]
+   prepare]
   [claro.projection.parameters
    parameters]
   [claro.projection.union

@@ -49,7 +49,7 @@
           (is
             (thrown-with-msg?
               IllegalArgumentException
-              #"is a map but value is not"
+              #"expects a map but value is not"
               @(-> [value]
                    (projection/apply template)
                    (run!)))))))))
@@ -65,6 +65,20 @@
             (thrown-with-msg?
               IllegalArgumentException
               #"expects key"
+              @(-> value
+                   (projection/apply template)
+                   (run!)))))))))
+
+(defspec t-alias-overriding-key (test/times 25)
+  (let [run! (make-engine)]
+    (prop/for-all
+      [value        (g/infinite-seq)]
+      (let [template (projection/alias :next :value projection/leaf)]
+        (boolean
+          (is
+            (thrown-with-msg?
+              IllegalArgumentException
+              #"would override key"
               @(-> value
                    (projection/apply template)
                    (run!)))))))))

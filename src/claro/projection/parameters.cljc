@@ -1,6 +1,6 @@
 (ns claro.projection.parameters
   (:require [claro.data.protocols :as p]
-            [claro.projection.transform :refer [transform]]))
+            [claro.projection.transform :refer [prepare]]))
 
 (defn- assert-resolvable!
   [value]
@@ -54,4 +54,4 @@
    injections."
   [params rest-template]
   {:pre [(map? params)]}
-  (transform #(inject-params % params) rest-template))
+  (prepare #(inject-params % params) rest-template))
