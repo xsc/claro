@@ -2,7 +2,7 @@
   (:require [claro.projection.protocols :as pr]
             [claro.data.tree :as tree]
             [claro.data.ops
-             [then :refer [then]]]))
+             [then :refer [then then!]]]))
 
 ;; ## Preparation (before Resolution)
 
@@ -23,4 +23,16 @@
   [f rest-template]
   (->Preparation f rest-template))
 
+;; ## Transformation (after Resolution)
 
+(defrecord Transformation [f template]
+  pr/Projection
+  (project-template [_ value]
+    (-> (pr/project-template template value)
+        (then! f))))
+
+(defn transform
+  "A projection applying a transformation function to a fully resolved value.
+   `template` is used to project the initial value."
+  [f template]
+  (->Transformation f template))
