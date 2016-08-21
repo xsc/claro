@@ -1,4 +1,4 @@
-(ns claro.engine.composition-test
+(ns claro.data.ops.then-test
   (:require [clojure.test.check :as tc]
             [clojure.test.check
              [clojure-test :refer [defspec]]
@@ -7,6 +7,7 @@
             [clojure.test :refer :all]
             [claro.test :as test]
             [claro.data :as data]
+            [claro.data.ops :as ops]
             [claro.engine.fixtures :refer [make-engine]]))
 
 ;; ## Generator
@@ -35,7 +36,7 @@
   (prop/for-all
     [resolvable gen-nested-resolvable]
     (let [run! (make-engine)
-          value (data/then! resolvable (juxt identity pr-str))
+          value (ops/then! resolvable (juxt identity pr-str))
           [result printed] @(run! value)]
       (= (pr-str result) printed))))
 
@@ -43,7 +44,7 @@
   (prop/for-all
     [resolvable gen-nested-resolvable]
     (let [run! (make-engine)
-          value (data/then resolvable (juxt identity pr-str))
+          value (ops/then resolvable (juxt identity pr-str))
           [result printed] @(run! value)]
       (= (pr-str resolvable) printed))))
 
@@ -57,7 +58,7 @@
                            (not (instance? Identity y))
                            (not= (class x) (class y))))
           action (juxt :x :y)
-          value (data/on {:x resolvable0, :y resolvable1} predicate action)]
+          value (ops/on {:x resolvable0, :y resolvable1} predicate action)]
       (if (= (-> resolvable0 :v class)  (-> resolvable1 :v class))
         (boolean
           (is (thrown-with-msg?
@@ -72,19 +73,19 @@
         c (count (:v resolvable))
         run! (make-engine)]
     (testing "blocking composition."
-      (is (= {:x c} @(run! (data/then! {:x resolvable} update :x count)))))
+      (is (= {:x c} @(run! (ops/then! {:x resolvable} update :x count)))))
     (testing "eager composition."
-      (is (= {:x 1} @(run! (data/then {:x resolvable} update :x count)))))
+      (is (= {:x 1} @(run! (ops/then {:x resolvable} update :x count)))))
     (testing "conditional composition."
-      (is (= {:x c} @(run! (data/on {:x resolvable} #(-> % :x string?) update :x count)))))
+      (is (= {:x c} @(run! (ops/on {:x resolvable} #(-> % :x string?) update :x count)))))
     (testing "built-in update."
-      (is (= {:x c} @(run! (data/update {:x resolvable} :x count)))))))
+      (is (= {:x c} @(run! (ops/update {:x resolvable} :x count)))))))
 
 (defspec t-nested-composition 100
   (prop/for-all
     [resolvable gen-resolvable
      nesting-level gen/nat
-     chain-fn (gen/elements [data/then data/then!])]
+     chain-fn (gen/elements [ops/then ops/then!])]
     (let [run! (make-engine)
           value (chain-fn
                   (nth (iterate ->Identity resolvable) nesting-level)

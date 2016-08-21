@@ -28,6 +28,7 @@
                       :source-paths ["src"]
                       :source-uri "https://github.com/xsc/claro/blob/master/{filepath}#L{line}"
                       :namespaces [claro.data
+                                   claro.data.ops
                                    claro.engine
                                    claro.projection]}}}
   :aliases {"codox" ["with-profile" "+codox" "codox"]}

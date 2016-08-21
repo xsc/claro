@@ -1,4 +1,4 @@
-(ns claro.engine.map-ops-test
+(ns claro.data.ops.maps-test
   (:require [clojure.test.check :as tc]
             [clojure.test.check
              [clojure-test :refer [defspec]]
@@ -7,6 +7,7 @@
             [clojure.test :refer :all]
             [claro.test :as test]
             [claro.data :as data]
+            [claro.data.ops.maps :as ops]
             [claro.engine.fixtures :refer [make-engine]]))
 
 ;; ## Generator
@@ -33,13 +34,13 @@
   (def ^:private gen-actions
     (gen/vector
       (gen/one-of
-        [(action-gen 'assoc assoc data/assoc k v)
-         (action-gen 'assoc-in assoc-in data/assoc-in ks v)
-         (action-gen 'update update data/update k (gen/fmap constantly v))
-         (action-gen 'update-in update-in data/update-in ks (gen/fmap constantly v))
-         (action-gen 'select-keys select-keys data/select-keys ks)
-         (action-gen 'get get data/get k)
-         (action-gen 'get-in get-in data/get-in ks)])
+        [(action-gen 'assoc assoc ops/assoc k v)
+         (action-gen 'assoc-in assoc-in ops/assoc-in ks v)
+         (action-gen 'update update ops/update k (gen/fmap constantly v))
+         (action-gen 'update-in update-in ops/update-in ks (gen/fmap constantly v))
+         (action-gen 'select-keys select-keys ops/select-keys ks)
+         (action-gen 'get get ops/get k)
+         (action-gen 'get-in get-in ops/get-in ks)])
       1 20)))
 
 ;; ## Application

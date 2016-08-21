@@ -7,6 +7,7 @@
             [clojure.test :refer :all]
             [claro.test :as test]
             [claro.data :as data]
+            [claro.data.ops :as ops]
             [claro.engine.fixtures :refer [make-engine]]))
 
 ;; ## Simple Resolution
@@ -68,7 +69,7 @@
             #(map inc %)
             identity])]
       (let [run! (make-engine)
-            value (data/then! (map ->resolvable values) f)
+            value (ops/then! (map ->resolvable values) f)
             result @(run! value)]
         (and (is (= (count values) (count result)))
              (is (= (f values) result)))))))
