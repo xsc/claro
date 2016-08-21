@@ -7,8 +7,7 @@
             :key "mit"}
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [potemkin "0.4.3"]
-                 [manifold "0.1.5"]
-                 [prismatic/schema "1.0.5"]]
+                 [manifold "0.1.5"]]
   :profiles {:dev {:dependencies [[org.clojure/test.check "0.9.0"]
                                   [org.clojure/core.async "0.2.385"]
                                   [com.gfredericks/test.chuck "0.2.7"]]
