@@ -4,7 +4,6 @@
   (:require [claro.data.protocols :as p]
             [claro.data.tree :refer [wrap-tree]]
             [claro.data.ops.chain :as chain]
-            [claro.data.ops.fmap :refer [fmap]]
             [clojure.core :as core]))
 
 ;; ## Helpers
@@ -42,7 +41,7 @@
       value
       (wrap-assert-map
         (fn [value]
-          (core/update value k #(fmap f %)))
+          (core/update value k chain/chain-eager f))
         "can only apply 'update' to resolvables producing maps, given:"))))
 
 (defn update-in
