@@ -1,5 +1,5 @@
 (ns claro.projection.sets
-  (:require [claro.projection.protocols :refer [Projection project-template]]
+  (:require [claro.projection.protocols :refer [Projection project]]
             [claro.data.ops
              [collections :as c]
              [then :refer [then]]]))
@@ -18,13 +18,13 @@
 (defn- project-set
   [template value]
   (assert-set! value)
-  (set (map #(project-template template %) value)))
+  (set (map #(project template %) value)))
 
 ;; ## Implementation
 
 (extend-protocol Projection
   clojure.lang.IPersistentSet
-  (project-template [sq value]
+  (project [sq value]
     {:pre [(= (count sq) 1)]}
     (let [template (first sq)]
       (then value #(project-set template %)))))

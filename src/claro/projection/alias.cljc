@@ -37,11 +37,11 @@
 
 (defn- alias-value
   [value alias-key key template]
-  {alias-key (pr/project-template template (get value key))})
+  {alias-key (pr/project template (get value key))})
 
 (defrecord Alias [alias-key key template]
   pr/Projection
-  (project-template [this value]
+  (project [this value]
     (->> (fn [value]
            (-> value
                (assert-map! this)

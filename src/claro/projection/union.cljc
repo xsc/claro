@@ -28,8 +28,8 @@
 
 (defrecord UnionProjection [templates]
   pr/Projection
-  (project-template [_ value]
-    (-> (mapv #(pr/project-template % value) templates)
+  (project [_ value]
+    (-> (mapv #(pr/project % value) templates)
         (then! union-of-maps))))
 
 ;; ## Constructor

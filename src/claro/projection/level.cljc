@@ -12,7 +12,7 @@
   [m current-level]
   (if (pos? current-level)
     (let [template (->LevelProjection (dec current-level))
-          project  #(pr/then-project-template template %)]
+          project  #(pr/then-project template %)]
       (->> (for [[k v] m]
              [(project k) (project v)])
            (into {})))
@@ -22,7 +22,7 @@
   [c current-level]
   (if (pos? current-level)
     (let [template (->LevelProjection current-level)]
-      (c/map-single #(pr/project-template template %) c))
+      (c/map-single #(pr/project template %) c))
     (empty c)))
 
 (defn- project-level
@@ -33,7 +33,7 @@
 
 (defrecord LevelProjection [n]
   pr/Projection
-  (project-template [_ value]
+  (project [_ value]
     (then value #(project-level % n))))
 
 ;; ## Constructor

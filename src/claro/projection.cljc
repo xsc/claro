@@ -1,7 +1,7 @@
 (ns claro.projection
   (:refer-clojure :exclude [apply alias])
   (:require [claro.projection
-             [protocols :refer [project-template]]
+             [protocols :refer [project]]
              alias
              conditional
              level
@@ -19,7 +19,7 @@
 (defn apply
   "Project the given value using the given template."
   [value template]
-  (project-template template value))
+  (project template value))
 
 ;; ## API
 

@@ -1,5 +1,5 @@
 (ns claro.projection.maps
-  (:require [claro.projection.protocols :refer [Projection project-template]]
+  (:require [claro.projection.protocols :as pr]
             [claro.data.ops
              [then :refer [then]]
              [maps :as m]]))
@@ -30,14 +30,14 @@
     (fn [value [k template]]
       (-> value
           (assert-contains! k)
-          (update k #(project-template template %))))
+          (update k #(pr/project template %))))
     value templates))
 
 ;; ## Implementation
 
-(extend-protocol Projection
+(extend-protocol pr/Projection
   clojure.lang.IPersistentMap
-  (project-template [templates value]
+  (pr/project [templates value]
     (let [ks (keys templates)]
       (then
         value

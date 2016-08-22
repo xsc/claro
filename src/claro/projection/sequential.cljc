@@ -1,5 +1,5 @@
 (ns claro.projection.sequential
-  (:require [claro.projection.protocols :refer [Projection project-template]]
+  (:require [claro.projection.protocols :refer [Projection project]]
             [claro.data.ops
              [collections :as c]
              [then :refer [then]]]))
@@ -18,7 +18,7 @@
 (defn- project-elements
   [template value]
   (assert-sequential! value)
-  (let [vs (map #(project-template template %) value)]
+  (let [vs (map #(project template %) value)]
     (if (or (list? value) (seq? value))
       (list* vs)
       (into (empty value) vs))))
@@ -27,6 +27,6 @@
 
 (extend-protocol Projection
   clojure.lang.Sequential
-  (project-template [[template :as sq] value]
+  (project [[template :as sq] value]
     {:pre [(= (count sq) 1)]}
     (then value #(project-elements template %))))

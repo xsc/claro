@@ -9,11 +9,11 @@
 (defn- apply-preparation
   [value f rest-template]
   (->> (tree/transform-partial value f)
-       (pr/project-template rest-template)))
+       (pr/project rest-template)))
 
 (defrecord Preparation [f rest-template]
   pr/Projection
-  (project-template [_ value]
+  (project [_ value]
     (apply-preparation value f rest-template)))
 
 (defn prepare
@@ -27,8 +27,8 @@
 
 (defrecord Transformation [f template]
   pr/Projection
-  (project-template [_ value]
-    (-> (pr/project-template template value)
+  (project [_ value]
+    (-> (pr/project template value)
         (then! f))))
 
 (defn transform

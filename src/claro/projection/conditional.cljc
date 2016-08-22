@@ -11,14 +11,14 @@
     (or (some
           (fn [[condition template]]
             (if (condition value)
-              [:done (pr/project-template template value)]))
+              [:done (pr/project template value)]))
           condition->template)
         (if else-template
-          [:done (pr/project-template else-template value)]))))
+          [:done (pr/project else-template value)]))))
 
 (defrecord ConditionalProjection [predicate condition->template else-template]
   pr/Projection
-  (project-template [_ value]
+  (project [_ value]
     (let [f #(project-match condition->template else-template %)]
       (if predicate
         (chain-when value predicate f)

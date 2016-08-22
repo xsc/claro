@@ -26,10 +26,10 @@
   "Projection template for leaf values (equivalent to `nil` but preferable
    since more explicit)."
   (reify Projection
-    (project-template [_ value]
+    (project [_ value]
       (chain-eager value assert-leaf))))
 
 (extend-protocol Projection
   nil
-  (project-template [_ value]
+  (project [_ value]
     (chain-eager value assert-leaf)))
