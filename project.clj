@@ -15,13 +15,18 @@
              :benchmarks
              {:plugins [[perforate "0.3.4"]]
               :source-paths ["benchmarks"]
+              :dependencies [[perforate "0.3.4"]
+                             [funcool/urania "0.1.0"]
+                             [funcool/promesa "1.5.0"]]
               :jvm-opts ^:replace ["-server" "-XX:+TieredCompilation"]
               :perforate
               {:environments
                [{:name :resolution-benchmarks
                  :namespaces [claro.expansion-bench
                               claro.projection-bench
-                              claro.simple-resolution-bench]}]}}
+                              claro.simple-resolution-bench]}
+                {:name :comparison-benchmarks
+                 :namespaces [claro.comparison]}]}}
              :codox
              {:dependencies [[org.clojure/tools.reader "1.0.0-beta2"]]
               :plugins [[lein-codox "0.9.6"]]
