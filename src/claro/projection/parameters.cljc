@@ -50,7 +50,7 @@
      explicitly contain even optional parameter fields).
 
    These restrictions are intended to make resolution more predictable. Note
-   that you can always use `transform` directly to perform arbitrary
+   that you can always use `prepare` directly to perform arbitrary
    injections."
   [params rest-template]
   {:pre [(map? params)]}
