@@ -25,14 +25,20 @@
 
 ;; ## Transformation (after Resolution)
 
-(defrecord Transformation [f template]
+(defrecord Transformation [f input-template output-template]
   pr/Projection
   (project [_ value]
-    (-> (pr/project template value)
-        (then! f))))
+    (-> (pr/project input-template value)
+        (then! (comp #(pr/project output-template %) f)))))
 
 (defn transform
   "A projection applying a transformation function to a fully resolved value.
-   `template` is used to project the initial value."
-  [f template]
-  (->Transformation f template))
+   `input-template` is used to project the initial value, `output-template` will
+   be used to further project the resulting value.
+
+   If no structural changes will be made to the value, you can use the
+   two-parameter version, using the same template for input and output."
+  ([f template]
+   (transform f template template))
+  ([f input-template output-template]
+   (->Transformation f input-template output-template)))
