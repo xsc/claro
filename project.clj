@@ -11,9 +11,11 @@
   :profiles {:dev
              {:dependencies [[org.clojure/test.check "0.9.0"]
                              [org.clojure/core.async "0.2.385"]
-                             [com.gfredericks/test.chuck "0.2.7"]]
-              :plugins [[perforate "0.3.4"]]
+                             [com.gfredericks/test.chuck "0.2.7"]]}
+             :benchmarks
+             {:plugins [[perforate "0.3.4"]]
               :source-paths ["benchmarks"]
+              :jvm-opts ^:replace ["-server" "-XX:+TieredCompilation"]
               :perforate
               {:environments
                [{:name :resolution-benchmarks
@@ -31,5 +33,6 @@
                                    claro.data.ops
                                    claro.engine
                                    claro.projection]}}}
-  :aliases {"codox" ["with-profile" "+codox" "codox"]}
+  :aliases {"codox" ["with-profile" "+codox" "codox"]
+            "perforate" ["with-profile" "+benchmarks" "perforate"] }
   :pedantic? :abort)
