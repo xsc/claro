@@ -19,7 +19,7 @@
   {:env         {}
    :selector    identity
    :adapter     adapter/default-adapter
-   :max-batches 256})
+   :max-batches 32})
 
 (def ^:private default-engine
   "The pre-prepared default engine."
@@ -36,7 +36,7 @@
    all currently resolvable classes and returns those that should be resolved
    in parallel (default: `identity`),
    - `:max-batches`: a value describing how many iterations are allowed before
-   the engine will throw an `IllegalStateException` (default: `256`).
+   the engine will throw an `IllegalStateException` (default: `32`).
 
    The resulting value's resolution behaviour can be wrapped using
    `claro.engine/wrap-resolver` & co."
