@@ -4,9 +4,6 @@
              [core :as core]
              [adapter :as adapter]
              [protocols :as p]]
-            [claro.engine.middlewares
-             [override :as override]
-             [trace :as trace]]
             #?(:clj [claro.runtime.impl.manifold :as default])
             #?(:cljs [claro.runtime.impl.core-async :as default])
             [potemkin :refer [import-vars]]))
@@ -69,10 +66,4 @@
 
 (import-vars
   [claro.engine.core
-   wrap-resolver]
-  [claro.engine.middlewares.override
-   override
-   overrides]
-  [claro.engine.middlewares.trace
-   trace
-   trace-stats])
+   wrap-resolver])
