@@ -1,5 +1,5 @@
 (ns claro.engine.middlewares.override
-  (:require [claro.engine.protocols :as engine]
+  (:require [claro.engine.core :as engine]
             [claro.runtime.impl :as impl]))
 
 (defn override

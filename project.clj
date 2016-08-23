@@ -37,6 +37,8 @@
                       :namespaces [claro.data
                                    claro.data.ops
                                    claro.engine
+                                   claro.engine.adapter
+                                   #"^claro\.engine\.middlewares\..*"
                                    claro.projection]}}}
   :aliases {"codox" ["with-profile" "+codox" "codox"]
             "perforate" ["with-profile" "+benchmarks" "perforate"] }

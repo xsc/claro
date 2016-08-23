@@ -1,7 +1,8 @@
 (ns claro.engine
   (:refer-clojure :exclude [run!])
   (:require [claro.engine
-             [builder :as builder]
+             [core :as core]
+             [adapter :as adapter]
              [protocols :as p]]
             [claro.engine.middlewares
              [override :as override]
@@ -12,15 +13,28 @@
 
 ;; ## Engine Constructors/Runners
 
+(def default-impl
+  "The default deferred implementation used for resolution."
+  default/impl)
+
+(def default-opts
+  "The default engine options."
+  {:env         {}
+   :selector    identity
+   :adapter     adapter/default-adapter
+   :max-batches 256})
+
 (def ^:private default-engine
   "The pre-prepared default engine."
-  (builder/build default/impl {}))
+  (core/build default-impl default-opts))
 
 (defn engine
   "Create a new resolution engine, based on the following options:
 
    - `:env`: a value that is passed as the `env` parameter to `Resolvable`s'
    `resolve!` and `resolve-batch!` functions (default: `{}`),
+   - `:adapter`: a function that will be called to run calls to `resolve!` and
+   `resolve-batch!`,
    - `:selector`: a function that, during each iteration, is given a seq of
    all currently resolvable classes and returns those that should be resolved
    in parallel (default: `identity`),
@@ -33,9 +47,9 @@
   ([opts]
    (if (empty? opts)
      default-engine
-     (builder/build default/impl opts)))
+     (engine default-impl opts)))
   ([impl opts]
-   (builder/build impl opts)))
+   (core/build impl (merge default-opts opts))))
 
 (defn run!
   "Resolve the given value using an engine created on-the-fly. See
@@ -54,9 +68,8 @@
 ;; ## Middlewares
 
 (import-vars
-  [claro.engine.protocols
-   wrap-resolver
-   wrap-selector]
+  [claro.engine.core
+   wrap-resolver]
   [claro.engine.middlewares.override
    override
    overrides]

@@ -1,5 +1,5 @@
 (ns claro.engine.middlewares.trace
-  (:require [claro.engine.protocols :as engine]
+  (:require [claro.engine.core :as engine]
             [claro.runtime.impl :as impl]))
 
 ;; ## General Stats
