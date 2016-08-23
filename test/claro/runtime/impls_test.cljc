@@ -13,6 +13,7 @@
         chain #(apply impl/chain impl %&)
         zip #(impl/zip impl %)
         value #(impl/value impl %)
+        run #(impl/run impl %)
         loop #(impl/loop impl %1 %2)
         recur #(impl/recur impl %)
         deferred? #(impl/deferred? impl %)]
@@ -21,6 +22,12 @@
         (is (deferred? d))
         (is (impl/deferrable? impl d))
         (is (= d (impl/->deferred impl d)))))
+    (testing "run."
+      (let [d (run (constantly :value))]
+        (is (deferred? d))
+        (is (impl/deferrable? impl d))
+        (is (= d (impl/->deferred impl d)))
+        (chain d (fn [value] (is (= :value value))))))
     (testing "chain."
       (is (deferred?
             (chain

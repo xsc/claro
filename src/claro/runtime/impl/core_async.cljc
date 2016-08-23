@@ -67,5 +67,6 @@
    :value       #(async/go %)
    :chain       chain
    :zip         zip
+   :run         #(async/thread (%))
    :loop-fn     async-loop
    :recur-fn    async-recur})
