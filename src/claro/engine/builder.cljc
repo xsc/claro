@@ -1,5 +1,6 @@
 (ns claro.engine.builder
   (:require [claro.engine.protocols :as p]
+            [claro.engine.adapter :as adapter]
             [claro.runtime :as runtime]
             [claro.runtime.impl :as impl]
             [claro.data
@@ -32,16 +33,23 @@
 ;; ### Resolution
 
 (defn- resolve-them-all!
-  [{:keys [impl]} env [head :as batch]]
+  [{:keys [impl adapter]
+    :or {adapter adapter/default-adapter}}
+   env
+   [head :as batch]]
   (cond (data/batched-resolvable? head)
-        (data/resolve-batch! head env batch)
+        (adapter impl #(data/resolve-batch! head env batch))
 
         (next batch)
-        (let [deferreds (mapv #(data/resolve! % env) batch)]
+        (let [deferreds (mapv
+                          (fn [item]
+                            (adapter impl #(data/resolve! item env)))
+                          batch)]
           (impl/zip impl deferreds))
 
         :else
-        (impl/chain1 impl (data/resolve! head env) vector)))
+        (let [deferred (adapter impl #(data/resolve! head env))]
+          (impl/chain1 impl deferred vector))))
 
 (defn- build-resolve-fn
   [{:keys [impl] :as opts}]
