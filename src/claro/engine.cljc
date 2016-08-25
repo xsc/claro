@@ -1,41 +1,52 @@
 (ns claro.engine
   (:refer-clojure :exclude [run!])
   (:require [claro.engine
-             [builder :as builder]
+             [core :as core]
+             [adapter :as adapter]
              [protocols :as p]]
-            [claro.engine.middlewares
-             [override :as override]
-             [trace :as trace]]
             #?(:clj [claro.runtime.impl.manifold :as default])
             #?(:cljs [claro.runtime.impl.core-async :as default])
             [potemkin :refer [import-vars]]))
 
 ;; ## Engine Constructors/Runners
 
+(def default-impl
+  "The default deferred implementation used for resolution."
+  default/impl)
+
+(def default-opts
+  "The default engine options."
+  {:env         {}
+   :selector    identity
+   :adapter     adapter/default-adapter
+   :max-batches 32})
+
 (def ^:private default-engine
   "The pre-prepared default engine."
-  (builder/build default/impl {}))
+  (core/build default-impl default-opts))
 
 (defn engine
   "Create a new resolution engine, based on the following options:
 
    - `:env`: a value that is passed as the `env` parameter to `Resolvable`s'
    `resolve!` and `resolve-batch!` functions (default: `{}`),
+   - `:adapter`: a function that will be called to run calls to `resolve!` and
+   `resolve-batch!`,
    - `:selector`: a function that, during each iteration, is given a seq of
    all currently resolvable classes and returns those that should be resolved
    in parallel (default: `identity`),
    - `:max-batches`: a value describing how many iterations are allowed before
-   the engine will throw an `IllegalStateException` (default: `256`).
+   the engine will throw an `IllegalStateException` (default: `32`).
 
    The resulting value's resolution behaviour can be wrapped using
-   `claro.engine/wrap-resolver` & co."
+   `claro.engine/wrap`."
   ([] default-engine)
   ([opts]
    (if (empty? opts)
      default-engine
-     (builder/build default/impl opts)))
+     (engine default-impl opts)))
   ([impl opts]
-   (builder/build impl opts)))
+   (core/build impl (merge default-opts opts))))
 
 (defn run!
   "Resolve the given value using an engine created on-the-fly. See
@@ -54,12 +65,5 @@
 ;; ## Middlewares
 
 (import-vars
-  [claro.engine.protocols
-   wrap-resolver
-   wrap-selector]
-  [claro.engine.middlewares.override
-   override
-   overrides]
-  [claro.engine.middlewares.trace
-   trace
-   trace-stats])
+  [claro.engine.core
+   wrap])

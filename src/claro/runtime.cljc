@@ -66,15 +66,12 @@
 
    - `:inspect-fn`: a function that, given a value, returns a seq of all
       available resolvables within that value,
-   - `:selector`: a function that, given a seq of resolvable classes returns
+   - `:select-fn`: a function that, given a seq of resolvable classes returns
      those to resolve during the next step,
    - `:mutation?`: a function that, given a seq of resolvables, returns whether
      or not said resolvable represents a mutation,
    - `:resolve-fn`: a function that given a seq of resolvables of the same class
      returns a manifold deferred with resolved values in-order,
-   - `:deferred-fn`: a function called on each manifold deferred encapsuling a
-     single resolution step (parameters are batch-to-be-resolved, as well as
-     the deferred value),
    - `:apply-fn`: a function that takes the original value, as well as a map
      of resolvable -> resolved value pairs, and returns a map of `:value` and
      `:resolvables`, where `:value` is the now-more-resolved value for the next

@@ -24,6 +24,7 @@
            value
            chain
            zip
+           run
            loop-fn
            recur-fn] :as impl}]
   {:pre [(fn? deferrable?)
@@ -32,6 +33,7 @@
          (fn? value)
          (fn? chain)
          (fn? zip)
+         (fn? run)
          (fn? loop-fn)
          (fn? recur-fn)]}
   impl)
@@ -63,6 +65,10 @@
 (defn zip
   [{:keys [zip]} deferreds]
   (zip deferreds))
+
+(defn run
+  [{:keys [run]} f]
+  (run f))
 
 (defn loop
   [{:keys [loop-fn]} f initial-state]

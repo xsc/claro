@@ -1,5 +1,5 @@
 (ns claro.engine.middlewares.trace
-  (:require [claro.engine.protocols :as engine]
+  (:require [claro.engine.core :as engine]
             [claro.runtime.impl :as impl]))
 
 ;; ## General Stats
@@ -31,7 +31,7 @@
                  #(trace-stats! batch start %))
                (catch Throwable t
                  (trace-stats! batch start t))))))
-       (engine/wrap-resolver engine)))
+       (engine/wrap engine)))
 
 ;; ## Trace Results
 
@@ -58,4 +58,4 @@
                    (flush)
                    result))
                (resolver env batch))))
-         (engine/wrap-resolver engine))))
+         (engine/wrap engine))))

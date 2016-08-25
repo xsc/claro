@@ -1,5 +1,5 @@
 (ns claro.engine.middlewares.override
-  (:require [claro.engine.protocols :as engine]
+  (:require [claro.engine.core :as engine]
             [claro.runtime.impl :as impl]))
 
 (defn override
@@ -15,7 +15,7 @@
                  (impl/->deferred impl result)
                  (impl/chain1 impl result identity)))
              (resolver env batch))))
-       (engine/wrap-resolver engine)))
+       (engine/wrap engine)))
 
 (defn overrides
   "See `override`; intercepts resolution of all classes used as keys in the
