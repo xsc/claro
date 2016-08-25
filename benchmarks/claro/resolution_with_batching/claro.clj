@@ -27,7 +27,7 @@
       (->> (map :id people)
            (fetch-people!)
            (map
-             (fn [{:keys [image-id friend-ids] :as person} ]
+             (fn [{:keys [image-id friend-ids] :as person}]
                (-> person
                    (assoc :friends (map ->ClaroPerson friend-ids))
                    (assoc :image (->ClaroImage image-id)))))))))
