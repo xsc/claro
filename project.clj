@@ -14,19 +14,22 @@
                              [com.gfredericks/test.chuck "0.2.7"]]}
              :benchmarks
              {:plugins [[perforate "0.3.4"]]
-              :source-paths ["benchmarks"]
               :dependencies [[perforate "0.3.4"]
+                             [muse "0.4.0"]
+                             [cats "0.4.0"]
+                             [org.clojure/core.async "0.2.385"]
                              [funcool/urania "0.1.0"]
                              [funcool/promesa "1.5.0"]]
-              :jvm-opts ^:replace ["-server" "-XX:+TieredCompilation"]
+              :source-paths ["benchmarks"]
               :perforate
               {:environments
-               [{:name :resolution-benchmarks
-                 :namespaces [claro.expansion-bench
-                              claro.projection-bench
-                              claro.simple-resolution-bench]}
-                {:name :comparison-benchmarks
-                 :namespaces [claro.comparison]}]}}
+               [{:name :comparison
+                 :namespaces [claro.resolution-without-batching.claro
+                              claro.resolution-without-batching.urania
+                              claro.resolution-without-batching.muse
+                              claro.resolution-without-batching.assertion
+                              claro.resolution-without-batching]}]}
+              :jvm-opts ^:replace ["-server" "-XX:+TieredCompilation"]}
              :codox
              {:dependencies [[org.clojure/tools.reader "1.0.0-beta2"]]
               :plugins [[lein-codox "0.9.6"]]
@@ -40,6 +43,5 @@
                                    claro.engine.adapter
                                    #"^claro\.engine\.middlewares\..*"
                                    claro.projection]}}}
-  :aliases {"codox" ["with-profile" "+codox" "codox"]
-            "perforate" ["with-profile" "+benchmarks" "perforate"] }
+  :aliases {"codox" ["with-profile" "+codox" "codox"]}
   :pedantic? :abort)
