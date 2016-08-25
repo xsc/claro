@@ -18,14 +18,14 @@
   (sleep)
   (str "http://images.claro.de/" image-id ".png"))
 
-(defn fetch-images-batched!
+(defn fetch-images!
   [image-ids]
   (sleep)
   (map
     #(str "http://images.claro.de/" % ".png")
     image-ids))
 
-(defn fetch-people-batched!
+(defn fetch-people!
   [person-ids]
   (sleep)
   (map

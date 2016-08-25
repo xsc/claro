@@ -28,7 +28,15 @@
                               claro.resolution-without-batching.urania
                               claro.resolution-without-batching.muse
                               claro.resolution-without-batching.assertion
-                              claro.resolution-without-batching]}]}
+                              claro.resolution-without-batching
+                              claro.resolution-with-batching.claro
+                              claro.resolution-with-batching.urania
+                              claro.resolution-with-batching.muse
+                              claro.resolution-with-batching.assertion
+                              claro.resolution-with-batching]}
+                {:name :performance
+                 :namespaces [claro.resolution-without-batching.claro
+                              claro.resolution-with-batching.claro]}]}
               :jvm-opts ^:replace ["-server" "-XX:+TieredCompilation"]}
              :codox
              {:dependencies [[org.clojure/tools.reader "1.0.0-beta2"]]
