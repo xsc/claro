@@ -39,7 +39,7 @@
    the engine will throw an `IllegalStateException` (default: `32`).
 
    The resulting value's resolution behaviour can be wrapped using
-   `claro.engine/wrap-resolver` & co."
+   `claro.engine/wrap`."
   ([] default-engine)
   ([opts]
    (if (empty? opts)
@@ -66,4 +66,4 @@
 
 (import-vars
   [claro.engine.core
-   wrap-resolver])
+   wrap])

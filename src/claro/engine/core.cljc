@@ -12,9 +12,8 @@
 (defprotocol+ IEngine
   "Protocol for a Resolution engine that supports wrapping of the
    resolver fn."
-  (wrap-resolver [engine wrap-fn]
-    "Wrap the given engine's batchwise resolution fn using the given
-     `wrap-fn`.")
+  (wrap [engine wrap-fn]
+    "Wrap the given engine's resolver using the given `wrap-fn`.")
   (impl [engine]
     "Return the given engines deferred implementation."))
 
@@ -22,7 +21,7 @@
 
 (deftype Engine [opts]
   IEngine
-  (wrap-resolver [engine wrap-fn]
+  (wrap [engine wrap-fn]
     (Engine. (update opts :resolve-fn wrap-fn)))
   (impl [_]
     (:impl opts))
