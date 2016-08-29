@@ -49,14 +49,17 @@
 
 ;; ## Cases
 
-(defcase deep-projection :projection-depth-256
-  []
-  (run!! (make-value 1 255)))
+(let [value (make-value 1 255)]
+  (defcase deep-projection :projection-depth-256
+    []
+    (run!! value)))
 
-(defcase deep-projection :projection-depth-512
-  []
-  (run!! (make-value 1 511)))
+(let [value (make-value 1 511)]
+  (defcase deep-projection :projection-depth-512
+    []
+    (run!! value)))
 
-(defcase deep-projection :projection-depth-1024
-  []
-  (run!! (make-value 1 1023)))
+(let [value (make-value 1 1023)]
+  (defcase deep-projection :projection-depth-1024
+    []
+    (run!! value)))
