@@ -13,8 +13,16 @@
 ;; ## Generators
 
 (let [not-nan? #(not (and (number? %) (Double/isNaN %)))
+      gen-simple  (gen/one-of
+                    [gen/int
+                     gen/large-integer
+                     (gen/such-that not-nan? gen/double)
+                     gen/char
+                     gen/string-ascii
+                     gen/ratio
+                     gen/boolean])
       gen-any (gen/frequency
-                [[10 (gen/such-that not-nan? gen/simple-type)]
+                [[10 gen-simple]
                  [1 (gen/return nil)]])]
   (def gen-ephemeral-resolvable
     (gen/let [values (gen/not-empty (gen/vector gen-any))]
@@ -24,9 +32,12 @@
             (resolve! [this _]
               (first (swap! data next)))))))))
 
+(def gen-nesting-depths
+  (gen/not-empty (gen/vector (gen/fmap #(min 256 %) gen/nat))))
+
 (def gen-identical-resolvables
   (gen/let [resolvable     gen-ephemeral-resolvable
-            nesting-depths (gen/not-empty (gen/vector gen/nat))]
+            nesting-depths gen-nesting-depths]
     (gen/return
       (mapv
         (fn [nesting-depth]
@@ -52,7 +63,7 @@
     (every? #(identical? v %) sq)))
 
 (defspec t-caching (test/times 100)
-  (let [run! (make-engine)]
+  (let [run! (make-engine {:max-batches Long/MAX_VALUE})]
     (prop/for-all
       [resolvables gen-identical-resolvables]
       (let [result (is @(run! resolvables))]
