@@ -46,9 +46,9 @@
     (let [run! (make-engine)
           value (ops/then resolvable (juxt identity pr-str))
           [result printed] @(run! value)]
-      (= (pr-str resolvable) printed))))
+      (is (= (pr-str resolvable) printed)))))
 
-(defspec t-conditional-composition (test/times 50)
+(defspec t-conditional-composition (test/times 100)
   (prop/for-all
     [resolvable0 gen-resolvable
      resolvable1 gen-resolvable]
@@ -68,7 +68,7 @@
         (is (= [(:v resolvable0) (:v resolvable1)]
                @(run! value)))))))
 
-(deftest t-composition
+(deftest t-composition (test/times 100)
   (let [resolvable (->Identity "string")
         c (count (:v resolvable))
         run! (make-engine)]
@@ -81,7 +81,7 @@
     (testing "built-in update."
       (is (= {:x c} @(run! (ops/update {:x resolvable} :x count)))))))
 
-(defspec t-nested-composition 100
+(defspec t-nested-composition (test/times 100)
   (prop/for-all
     [resolvable gen-resolvable
      nesting-level gen/nat

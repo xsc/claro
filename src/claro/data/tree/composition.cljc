@@ -4,23 +4,50 @@
 
 ;; ## Helper
 
-(defn matches?
+(defn- throw-resolved-without-predicate!
   [value predicate]
-  (and (not (p/wrapped? value))
-       (p/resolved? value)
-       (or (not predicate)
-           (predicate value))))
+  (throw
+    (IllegalStateException.
+      (format "predicate %s does not hold for fully resolved: %s"
+              (pr-str predicate)
+              (pr-str value)))))
 
-(defn tree-matches?
-  [value predicate]
-  (and (p/resolved? value)
-       (or (not predicate)
-           (predicate value)
-           (throw
-             (IllegalStateException.
-               (format "predicate %s does not hold for fully resolved: %s"
-                       (pr-str predicate)
-                       (pr-str value)))))))
+(defn- match-simple-value
+  [value predicate no-match]
+  (if (or (not predicate)
+          (predicate value))
+    value
+    no-match))
+
+(defn match-resolved-value
+  [value predicate no-match]
+  (let [result (match-simple-value value predicate no-match)]
+    (if (not= result no-match)
+      result
+      (throw-resolved-without-predicate! value predicate))))
+
+(defn match-partial-value
+  [value predicate no-match]
+  (let [value' (p/partial-value value ::none)]
+    (if (and (not= value' ::none)
+             (not (p/resolvable? value')))
+      (match-simple-value value' predicate no-match)
+      no-match)))
+
+(defn match-value
+  [value predicate no-match]
+  (cond (or (p/resolvable? value)
+            (p/wrapped? value))
+        no-match
+
+        (p/resolved? value)
+        (match-resolved-value value predicate no-match)
+
+        :else
+        (let [value (match-partial-value value predicate ::none)]
+          (if (not= value ::none)
+            value
+            no-match))))
 
 ;; ## Resolvable Node
 
@@ -38,12 +65,9 @@
     (p/resolvables* tree))
   (apply-resolved-values [this resolvable->value]
     (let [tree' (p/apply-resolved-values tree resolvable->value)]
-      (cond (identical? tree tree') this
-            (p/wrapped? tree') (ResolvableComposition. tree' predicate f)
-            (tree-matches? tree' predicate) (f tree')
-            :else (let [value (p/partial-value tree' ::none)]
-                    (if (and (not= value ::none)
-                             (p/processable? value)
-                             (or (not predicate) (predicate value)))
-                      (f value)
-                      (ResolvableComposition. tree' predicate f)))))))
+      (if-not (identical? tree tree')
+        (let [value (match-value tree' predicate ::none)]
+          (if (not= value ::none)
+            (f value)
+            (ResolvableComposition. tree' predicate f)))
+        this))))

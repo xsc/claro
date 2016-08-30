@@ -2,8 +2,7 @@
   (:require [claro.data.protocols :as p]
             [claro.data.tree
              [blocking-composition :refer [->BlockingComposition]]
-             [composition
-              :refer [->ResolvableComposition matches? tree-matches?]]
+             [composition :as composition :refer [->ResolvableComposition]]
              [leaf :refer [->ResolvableLeaf]]]
             [claro.data.tree :refer [wrap-tree]]))
 
@@ -25,22 +24,35 @@
 
 ;; ## Chains
 
+(defn- chain-resolvable-when
+  [value predicate f]
+  (when (p/resolvable? value)
+    (->ResolvableComposition (->ResolvableLeaf value) predicate f)))
+
+(defn- chain-directly-when
+  [value predicate f]
+  (when (and (p/resolved? value)
+             (or (not predicate)
+                 (predicate value)))
+    (->ResolvedComposition value f)))
+
+(defn- chain-tree-when
+  [value predicate f]
+  (let [tree (wrap-tree value)
+        value' (composition/match-partial-value tree predicate ::none)]
+    (if (= value' ::none)
+      (->ResolvableComposition tree predicate f)
+      (->ResolvedComposition value' f))))
+
 (defn chain-when
   "Apply the given function to the (potentially not fully-resolved) value
    once `predicate` is fulfilled."
   [value predicate f]
   (let [f' (comp wrap-tree f)]
-    (cond (p/resolvable? value)
-          (->ResolvableComposition (->ResolvableLeaf value) predicate f')
-
-          (matches? value predicate)
-          (->ResolvedComposition value f')
-
-          :else
-          (let [tree (wrap-tree value)]
-            (if (tree-matches? tree predicate)
-              (->ResolvedComposition value f')
-              (->ResolvableComposition tree predicate f'))))))
+    (or (when-not (p/wrapped? value)
+          (or (chain-resolvable-when value predicate f')
+              (chain-directly-when value predicate f')))
+        (chain-tree-when value predicate f'))))
 
 (defn chain-blocking
   "Apply the given function once `value` is fully resolved."

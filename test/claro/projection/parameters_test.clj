@@ -17,6 +17,12 @@
   (resolve! [_ _]
     {:infinite-seq (g/->InfiniteSeq nil)}))
 
+(defrecord ParameterizableSeqs []
+  data/Resolvable
+  (resolve! [_ _]
+    {:infinite-seqs
+     [(g/->InfiniteSeq nil) (g/->InfiniteSeq nil)]}))
+
 ;; ## Tests
 
 (defspec t-parameterizable-seq-needs-value (test/times 5)
@@ -92,3 +98,19 @@
                  (projection/apply
                    (projection/parameters {:n n} template))
                  (run!))))))))
+
+(defspec t-parameters-within-seq (test/times 100)
+  (let [run! (make-engine)]
+    (prop/for-all
+      [template (g/valid-template)
+       n        gen/int]
+      (let [{:keys [infinite-seqs]}
+            @(-> (->ParameterizableSeqs)
+                 (projection/apply
+                   {:infinite-seqs
+                    [(projection/parameters {:n n} template)]})
+                 (run!))]
+        (is
+          (every?
+            #(g/compare-to-template % template n)
+            infinite-seqs))))))
