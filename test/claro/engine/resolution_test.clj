@@ -18,25 +18,64 @@
     {:type :apple
      :colour colour}))
 
+(defn- make-apples
+  [size {:keys [colours]}]
+  (vec (take size (repeatedly #(Apple. (rand-nth colours))))))
+
 (defrecord AppleBasket [size]
   data/Resolvable
-  (resolve! [_ {:keys [colours]}]
-    (vec (take size (repeatedly #(Apple. (rand-nth colours)))))))
+  (resolve! [_ env]
+    (make-apples size env)))
+
+(defrecord AppleBasketBatched [size]
+  data/Resolvable
+  data/BatchedResolvable
+  (resolve-batch! [_ env baskets]
+    (map #(make-apples (:size %) env) baskets)))
+
+(def gen-apple-basket
+  (->> (gen/tuple
+         (gen/elements [->AppleBasket ->AppleBasketBatched])
+         gen/s-pos-int)
+       (gen/fmap
+         (fn [[f size]]
+           (f size)))))
 
 (defspec t-simple-resolution (test/times 100)
   (prop/for-all
-    [basket-size gen/pos-int]
+    [value gen-apple-basket]
     (let [resolutions (atom [])
           run! (make-engine resolutions {:env {:colours [:red :green]}})
-          basket (run! (AppleBasket. basket-size))]
+          basket-size (:size value)
+          basket (run! value)]
       (and (is (instance? clojure.lang.IDeref basket))
            (is (= basket-size (count @basket)))
            (is (every? #{:apple} (map :type @basket)))
            (is (every? #{:red :green} (map :colour @basket)))
-           (is (= [AppleBasket 1] (first @resolutions)))
+           (is (= [(class value) 1] (first @resolutions)))
            (is (= (when (pos? basket-size)
                     [Apple (count (set (map :colour @basket)))])
                   (second @resolutions)))))))
+
+;; ## Resolution Count Mismatch
+
+(defrecord AppleBasketMismatch [size]
+  data/Resolvable
+  data/BatchedResolvable
+  (resolve-batch! [_ env baskets]
+    (map #(make-apples (:size %) env) (rest baskets))))
+
+(defspec t-resolution-count-mismatch (test/times 100)
+  (let [run! (make-engine (atom []) {:env {:colours [:red :green]}})]
+    (prop/for-all
+      [basket-sizes (gen/not-empty (gen/vector gen/s-pos-int))]
+      (let [value (map ->AppleBasketMismatch basket-sizes)]
+        (boolean
+          (is
+            (thrown-with-msg?
+              IllegalStateException
+              #"some of the values in the current batch were not resolved"
+              @(run! value))))))))
 
 ;; ## Collections
 
