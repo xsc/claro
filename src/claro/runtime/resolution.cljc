@@ -24,18 +24,30 @@
            (assert-deferrable opts batch)
            (impl/->deferred impl)))
 
+(defn- assert-resolution-count!
+  [batch resolved-values]
+  (let [batch-count (count batch)
+        resolved-count (count resolved-values)]
+    (when (< resolved-count batch-count)
+      (throw
+        (IllegalStateException.
+          (str "some of the values in the current batch were not resolved – "
+               (if (= batch-count 1)
+                 "1 value was"
+                 (str batch-count " values were"))
+               " given, only "
+               (if (= resolved-count 1)
+                 "1 was"
+                 (str resolved-count " were"))
+               " produced.\nin:  "
+               (pr-str (vec batch)) "\nout: "
+               (pr-str (vec resolved-values))))))))
+
 (defn- merge-resolvables
   "Merge all resolved values with the original batch."
   [batch resolved-values]
-  (let [batch-count (count batch)
-        resolved-values (take batch-count resolved-values)]
-    (when (< batch-count (count resolved-values))
-      (throw
-        (IllegalStateException.
-          (str "'resolve-fn' did not resolve all values - "
-               (count batch) " values were given, only "
-               (count resolved-values) " were produced."))))
-    (zipmap batch resolved-values)))
+  (assert-resolution-count! batch resolved-values)
+  (zipmap batch resolved-values))
 
 (defn- resolve-batch!
   "Returns a deferred representing the resolution of the given batch.
