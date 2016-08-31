@@ -1,5 +1,5 @@
 (ns claro.projection
-  (:refer-clojure :exclude [apply alias])
+  (:refer-clojure :exclude [apply alias case])
   (:require [claro.projection
              [protocols :refer [project]]
              alias
