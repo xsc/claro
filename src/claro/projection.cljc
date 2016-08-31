@@ -6,6 +6,7 @@
              conditional
              level
              maps
+             maybe
              objects
              parameters
              sequential
@@ -33,6 +34,9 @@
    conditional-when]
   [claro.projection.level
    levels]
+  [claro.projection.maybe
+   maybe
+   default]
   [claro.projection.transform
    prepare
    transform]
