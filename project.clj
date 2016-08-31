@@ -2,7 +2,7 @@
   :description "claro que sí"
   :url "https://github.com/xsc/claro"
   :license {:name "MIT License"
-            :url "http://opensource.org/licenses/MIT"
+            :url "https://opensource.org/licenses/MIT"
             :year 2015
             :key "mit"}
   :dependencies [[org.clojure/clojure "1.8.0"]
