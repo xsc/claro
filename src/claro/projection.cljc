@@ -4,6 +4,7 @@
              [protocols :refer [project]]
              alias
              conditional
+             case
              level
              maps
              maybe
@@ -32,6 +33,8 @@
   [claro.projection.conditional
    conditional
    conditional-when]
+  [claro.projection.case
+   case]
   [claro.projection.level
    levels]
   [claro.projection.maybe
