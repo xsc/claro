@@ -7,17 +7,18 @@
 ;; ## Helpers
 
 (defn- assert-sequential!
-  [value]
+  [value template]
   (when-not (sequential? value)
     (throw
       (IllegalArgumentException.
-        (str "projection template is sequential but value is not: "
-             (pr-str value)))))
+        (str "projection template is sequential but value is not.\n"
+             "template: [" (pr-str template) "]\n"
+             "value:    " (pr-str value)))))
   value)
 
 (defn- project-elements
   [template value]
-  (assert-sequential! value)
+  (assert-sequential! value template)
   (let [vs (map #(project template %) value)]
     (if (or (list? value) (seq? value))
       (list* vs)

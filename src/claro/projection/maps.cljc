@@ -7,21 +7,31 @@
 ;; ## Helpers
 
 (defn- assert-map!
-  [value]
+  [value template]
   (when-not (map? value)
     (throw
       (IllegalArgumentException.
-        (str "projection template is a map but value is not: "
-             (pr-str value)))))
+        (format
+          (str "projection template is a map but value is not.%n"
+               "template: %s%n"
+               "value:    %s")
+                (pr-str template)
+                (pr-str value)))))
   value)
 
 (defn- assert-contains!
-  [value k]
+  [value template k]
   (when-not (contains? value k)
     (throw
       (IllegalArgumentException.
-        (str "projection template expects key '" k "' but value "
-             "does not contain it: " (pr-str value)))))
+        (format
+          (str "projection template expects key '%s' but value does not "
+               "contain it.%n"
+               "template:       %s%n"
+               "available keys: %s")
+          k
+          (pr-str template)
+          (pr-str (vec (keys value)))))))
   value)
 
 (defn- project-keys
@@ -29,7 +39,7 @@
   (reduce
     (fn [value [k template]]
       (-> value
-          (assert-contains! k)
+          (assert-contains! templates k)
           (update k #(pr/project template %))))
     value templates))
 
@@ -43,4 +53,4 @@
         value
         (comp #(select-keys % ks)
               #(project-keys % templates)
-              assert-map!)))))
+              #(assert-map! % templates))))))

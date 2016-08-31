@@ -7,17 +7,18 @@
 ;; ## Helpers
 
 (defn- assert-set!
-  [value]
+  [value template]
   (when-not (and (coll? value) (not (map? value)))
     (throw
       (IllegalArgumentException.
-        (str "projection template is set but value is not a collection: "
-             (pr-str value)))))
+        (str "projection template is set but value is not.\n"
+             "template: #{" (pr-str template) "}\n"
+             "value:    " (pr-str value)))))
   value)
 
 (defn- project-set
   [template value]
-  (assert-set! value)
+  (assert-set! value template)
   (set (map #(project template %) value)))
 
 ;; ## Implementation
