@@ -50,7 +50,7 @@
                                    claro.data.ops
                                    claro.engine
                                    claro.engine.adapter
-                                   #"^claro\.engine\.middlewares\..*"
+                                   #"^claro\.middlewares\..*"
                                    claro.projection]}}}
-  :aliases {"codox" ["with-profile" "+codox" "codox"]}
+  :aliases {"codox" ["with-profile" "codox,dev" "codox"]}
   :pedantic? :abort)
