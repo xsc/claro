@@ -1,4 +1,4 @@
-(ns claro.engine.middlewares.override
+(ns claro.middleware.override
   (:require [claro.engine.core :as engine]
             [claro.runtime.impl :as impl]))
 

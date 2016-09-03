@@ -1,4 +1,4 @@
-(ns claro.engine.middlewares.trace
+(ns claro.middleware.trace
   (:require [claro.engine.core :as engine]
             [claro.runtime.impl :as impl]))
 
