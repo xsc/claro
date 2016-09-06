@@ -5,12 +5,12 @@
             :url "https://opensource.org/licenses/MIT"
             :year 2015
             :key "mit"}
-  :dependencies [[org.clojure/clojure "1.8.0"]
+  :dependencies [[org.clojure/clojure "1.8.0" :scope "provided"]
+                 [org.clojure/core.async "0.2.385" :scope "provided"]
                  [potemkin "0.4.3"]
                  [manifold "0.1.5"]]
   :profiles {:dev
              {:dependencies [[org.clojure/test.check "0.9.0"]
-                             [org.clojure/core.async "0.2.385"]
                              [com.gfredericks/test.chuck "0.2.7"]]}
              :benchmarks
              {:plugins [[perforate "0.3.4"]]
