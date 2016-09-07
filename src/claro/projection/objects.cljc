@@ -34,3 +34,9 @@
   nil
   (project [_ value]
     (chain-eager value assert-leaf)))
+
+;; ## Printing
+
+(defmethod print-method LeafProjection
+  [value ^java.io.Writer writer]
+  (.write writer "<leaf>"))
