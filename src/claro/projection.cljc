@@ -1,10 +1,11 @@
 (ns claro.projection
-  (:refer-clojure :exclude [apply alias case])
+  (:refer-clojure :exclude [apply alias case let])
   (:require [claro.projection
              [protocols :refer [project]]
              alias
              conditional
              case
+             bind
              level
              maps
              maybe
@@ -36,6 +37,9 @@
    conditional-when]
   [claro.projection.case
    case]
+  [claro.projection.bind
+   bind
+   let]
   [claro.projection.level
    levels]
   [claro.projection.maybe
