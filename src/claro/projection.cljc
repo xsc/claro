@@ -13,7 +13,8 @@
              sequential
              sets
              transform
-             union]
+             union
+             value]
             [potemkin :refer [import-vars]]))
 
 ;; ## Projection
@@ -47,4 +48,6 @@
    parameters]
   [claro.projection.union
    conditional-union
-   union])
+   union]
+  [claro.projection.value
+   value])

@@ -1,5 +1,6 @@
 (ns claro.projection.maps
   (:require [claro.projection.protocols :as pr]
+            [claro.projection.value :refer [value?]]
             [claro.data.ops
              [then :refer [then]]
              [maps :as m]]))
@@ -21,7 +22,8 @@
 
 (defn- assert-contains!
   [value template k]
-  (when-not (contains? value k)
+  (when-not (or (contains? value k)
+                (value? (get template k)))
     (throw
       (IllegalArgumentException.
         (format
