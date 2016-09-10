@@ -67,9 +67,10 @@ mentioned it. Let's see who's in there by extending our base projection:
 
 ```clojure
 (def person-with-friends
-  (projection/union
-    [base-person
-     {:friends [base-person]}]))
+  {:id      projection/leaf
+   :name    projection/leaf
+   :friends [{:id   projection/leaf
+              :name projection/leaf}]})
 
 (engine/run!!
   (projection/apply (->Person 1) person-with-friends))
@@ -80,7 +81,7 @@ mentioned it. Let's see who's in there by extending our base projection:
 ```
 
 As you can see, projections can be nested. And by putting them inside a
-vector (like `[base-person]` above), we apply them to every element of a seq.
+vector we apply them to every element of a seq.
 
 ### Interlude
 
@@ -100,6 +101,29 @@ This doesn't mean you can just be careless, of course. Writing flexibly reusable
 projections is just as much of a challenge as writing reusable code in general.
 
 ### More Projections
+
+#### Union
+
+Speaking of reusability, it can be useful to merge the results of multiple
+projections:
+
+```clojure
+(def base-person
+  {:id   projection/leaf
+   :name projection/leaf})
+
+(def friend-list
+  {:friends [base-person]})
+
+(def person-with-friends
+  (projection/union
+    [base-person
+     friend-list]))
+```
+
+> __Note:__ You might be tempted to use `merge` in these cases. Don't, since it
+> only works with plain-map projections and you might want to use others
+> sometime in the future.
 
 #### Parameterisation
 
