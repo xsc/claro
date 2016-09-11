@@ -33,9 +33,20 @@
   (resolve-batch! [_ env baskets]
     (map #(make-apples (:size %) env) baskets)))
 
+(defrecord AppleBasketBatchedMap [size]
+  data/Resolvable
+  data/BatchedResolvable
+  (resolve-batch! [_ env baskets]
+    (zipmap
+      baskets
+      (map #(make-apples (:size %) env) baskets))))
+
 (def gen-apple-basket
   (->> (gen/tuple
-         (gen/elements [->AppleBasket ->AppleBasketBatched])
+         (gen/elements
+           [->AppleBasket
+            ->AppleBasketBatched
+            ->AppleBasketBatchedMap])
          gen/s-pos-int)
        (gen/fmap
          (fn [[f size]]

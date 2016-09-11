@@ -41,13 +41,31 @@
                  (str resolved-count " were"))
                " produced.\nin:  "
                (pr-str (vec batch)) "\nout: "
-               (pr-str (vec resolved-values))))))))
+               (pr-str (vec resolved-values)))))))
+  resolved-values)
+
+(defn- assert-every-resolution!
+  [batch resolved-values]
+  (let [missing (keep
+                  #(when (not (contains? resolved-values %))
+                     %)
+                  batch)]
+    (when (seq missing)
+      (throw
+        (IllegalStateException.
+          (str "some of the values in the current batch were not resolved.\n"
+               "missing: " (pr-str (vec missing)) \n
+               "in:      " (pr-str (vec batch)) "\n"
+               "out:     " (pr-str resolved-values))))))
+  resolved-values)
 
 (defn- merge-resolvables
   "Merge all resolved values with the original batch."
   [batch resolved-values]
-  (assert-resolution-count! batch resolved-values)
-  (zipmap batch resolved-values))
+  (if (map? resolved-values)
+    (assert-every-resolution! batch resolved-values)
+    (->> (assert-resolution-count! batch resolved-values)
+         (zipmap batch))))
 
 (defn- resolve-batch!
   "Returns a deferred representing the resolution of the given batch.
