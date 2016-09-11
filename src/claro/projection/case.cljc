@@ -51,7 +51,7 @@
                      [classes])]
          [class template])
        (reduce
-         (fn [result [class template]]
+         (fn [result [^Class class template]]
            (when (contains? result class)
              (throw
                (IllegalArgumentException.
