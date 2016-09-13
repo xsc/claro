@@ -5,6 +5,7 @@
              [protocols :as p]
              [tree :refer [wrap-tree]]]
             [claro.engine.resolver :as resolver]
+            [claro.engine.selector :as selector]
             [potemkin :refer [defprotocol+]]))
 
 ;; ## Protocol
@@ -19,20 +20,28 @@
 
 ;; ## Type
 
-(deftype Engine [opts]
+(defn- run-via-runtime!
+  [opts selector resolvable]
+  (runtime/run!
+    (assoc opts :select-fn (selector/instantiate selector))
+    (wrap-tree resolvable)))
+
+(deftype Engine [selector opts]
   IEngine
   (wrap [engine wrap-fn]
-    (Engine. (update opts :resolve-fn wrap-fn)))
+    (Engine. selector (update opts :resolve-fn wrap-fn)))
   (impl [_]
     (:impl opts))
 
   clojure.lang.IFn
-  (invoke [_ resolvable]
-    (runtime/run! opts (wrap-tree resolvable)))
-  (invoke [_ resolvable {:keys [env]}]
-    (runtime/run!
-      (update opts :env merge env)
-      (wrap-tree resolvable))))
+  (invoke [this resolvable]
+    (run-via-runtime! opts selector resolvable))
+  (invoke [_ resolvable {env' :env, selector' :selector}]
+    (run-via-runtime!
+      (-> opts
+          (update :env merge env'))
+      (or selector' selector)
+      resolvable)))
 
 (alter-meta! #'->Engine assoc :private true)
 
@@ -48,6 +57,7 @@
   (let [impl (impl/->deferred-impl impl)]
     (-> opts
         (merge fixed-runtime-opts)
+        (dissoc :selector)
         (assoc :impl       impl
                :resolve-fn (resolver/build impl adapter)))))
 
@@ -56,5 +66,6 @@
 (defn build
   "Create a new Engine relying on the given deferred implementation and
    options."
-  [impl opts]
-  (->Engine (->runtime-opts impl opts)))
+  [impl {:keys [selector] :as opts}]
+  {:pre [selector]}
+  (->Engine selector (->runtime-opts impl opts)))
