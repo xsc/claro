@@ -84,7 +84,8 @@
           (fn [class->resolvables]
             (let [next-batch (some-> (first @remaining)
                                      (filter (keys class->resolvables)))]
-              (vswap! remaining next)
               (if (seq next-batch)
-                next-batch
+                (do
+                  (vswap! remaining next)
+                  next-batch)
                 (fallback class->resolvables)))))))))
