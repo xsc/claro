@@ -75,9 +75,6 @@
    ```
    "
   [class-batches & [fallback-selector]]
-  {:pre [(sequential? class-batches)
-         (every? sequential? class-batches)
-         (every? class? (apply concat class-batches))]}
   (let [fallback-selector (or fallback-selector default-selector)
         class-batches (map set class-batches)]
     (reify Selector
