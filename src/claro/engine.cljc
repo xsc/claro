@@ -3,6 +3,7 @@
   (:require [claro.engine
              [core :as core]
              [adapter :as adapter]
+             [selector :as selector]
              [protocols :as p]]
             #?(:clj [claro.runtime.impl.manifold :as default])
             #?(:cljs [claro.runtime.impl.core-async :as default])
@@ -17,7 +18,7 @@
 (def default-opts
   "The default engine options."
   {:env         {}
-   :selector    identity
+   :selector    selector/default-selector
    :adapter     adapter/default-adapter
    :max-batches 32})
 
@@ -32,9 +33,8 @@
    `resolve!` and `resolve-batch!` functions (default: `{}`),
    - `:adapter`: a function that will be called to run calls to `resolve!` and
    `resolve-batch!`,
-   - `:selector`: a function that, during each iteration, is given a seq of
-   all currently resolvable classes and returns those that should be resolved
-   in parallel (default: `identity`),
+   - `:selector`: a `claro.engine.selector/Selector` implementation used during
+   each iteration to decide what to resolve next,
    - `:max-batches`: a value describing how many iterations are allowed before
    the engine will throw an `IllegalStateException` (default: `32`).
 

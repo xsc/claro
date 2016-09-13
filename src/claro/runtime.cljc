@@ -81,7 +81,9 @@
 
    Returns a manifold deferred with the resolved result."
   [{:keys [impl] :as opts} value]
-  {:pre [(every? fn? (map opts [:inspect-fn :resolve-fn :apply-fn]))]}
+  {:pre [(every?
+           (comp fn? opts)
+           [:select-fn :inspect-fn :resolve-fn :apply-fn])]}
   (impl/loop
     impl
     #(run-step! opts %)
