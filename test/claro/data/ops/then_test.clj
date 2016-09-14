@@ -23,12 +23,15 @@
 (def gen-nested-resolvable
   (gen/recursive-gen
     (fn [g]
-      (gen/one-of
-        [(gen/vector g)
-         (gen/set g)
-         (gen/list g)
-         (gen/map g g)]))
+      (gen/not-empty
+        (gen/one-of
+          [(gen/vector g)
+           (gen/set g)
+           (gen/list g)
+           (gen/map g g)])))
     gen-resolvable))
+
+(deftype Preserve [v])
 
 ;; ## Tests
 
@@ -36,17 +39,19 @@
   (prop/for-all
     [resolvable gen-nested-resolvable]
     (let [run! (make-engine)
-          value (ops/then! resolvable (juxt identity pr-str))
-          [result printed] @(run! value)]
-      (= (pr-str result) printed))))
+          value (ops/then! resolvable (juxt identity ->Preserve))
+          [result preserved] @(run! value)]
+      (= result (.-v preserved)))))
 
 (defspec t-eager-composition (test/times 50)
   (prop/for-all
     [resolvable gen-nested-resolvable]
     (let [run! (make-engine)
-          value (ops/then resolvable (juxt identity pr-str))
-          [result printed] @(run! value)]
-      (is (= (pr-str resolvable) printed)))))
+          value (ops/then resolvable (juxt identity ->Preserve))
+          [result preserved] @(run! value)
+          observed (.-v preserved)]
+      (and (is (not= result observed))
+           (is (= result @(run! observed)))))))
 
 (defspec t-conditional-composition (test/times 100)
   (prop/for-all
@@ -68,14 +73,18 @@
         (is (= [(:v resolvable0) (:v resolvable1)]
                @(run! value)))))))
 
-(deftest t-composition (test/times 100)
+(deftest t-composition
   (let [resolvable (->Identity "string")
         c (count (:v resolvable))
         run! (make-engine)]
     (testing "blocking composition."
       (is (= {:x c} @(run! (ops/then! {:x resolvable} update :x count)))))
     (testing "eager composition."
-      (is (= {:x 1} @(run! (ops/then {:x resolvable} update :x count)))))
+      (is
+        (thrown-with-msg?
+          Exception
+          #"count not supported"
+          @(run! (ops/then {:x resolvable} update :x count)))))
     (testing "conditional composition."
       (is (= {:x c} @(run! (ops/on {:x resolvable} #(-> % :x string?) update :x count)))))
     (testing "built-in update."
@@ -89,6 +98,6 @@
     (let [run! (make-engine)
           value (chain-fn
                   (nth (iterate ->Identity resolvable) nesting-level)
-                  pr-str)
+                  ->Preserve)
           result @(run! value)]
-      (is (= (pr-str (:v resolvable)) result)))))
+      (is (= (:v resolvable) (.-v result))))))
