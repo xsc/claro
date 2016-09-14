@@ -33,3 +33,7 @@
           (if (empty? resolvables')
             (into prototype elements)
             (ResolvableCollection. resolvables' prototype elements)))))))
+
+(defmethod print-method ResolvableCollection
+  [value ^java.io.Writer writer]
+  (print-method (p/partial-value value nil) writer))

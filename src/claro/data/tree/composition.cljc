@@ -71,3 +71,10 @@
             (f value)
             (ResolvableComposition. tree' predicate f)))
         this))))
+
+(defmethod print-method ResolvableComposition
+  [^ResolvableComposition value ^java.io.Writer writer]
+  (.write writer "<< ")
+  (print-method (.-tree value) writer)
+  (.write writer (str " -> " (.-f value)))
+  (.write writer " >>"))

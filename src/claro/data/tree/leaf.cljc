@@ -16,3 +16,7 @@
     [(.-resolvable this)])
   (apply-resolved-values [tree resolvable->resolved]
     (get resolvable->resolved (.-resolvable tree) tree)))
+
+(defmethod print-method ResolvableLeaf
+  [^ResolvableLeaf value ^java.io.Writer writer]
+  (print-method (.-resolvable value) writer))
