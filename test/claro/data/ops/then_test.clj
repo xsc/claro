@@ -18,7 +18,10 @@
     v))
 
 (def gen-resolvable
-  (gen/fmap ->Identity gen/simple-type))
+  (let [not-nan? #(not (and (number? %) (Double/isNaN %)))]
+    (->> gen/simple-type
+        (gen/such-that not-nan?)
+        (gen/fmap ->Identity))))
 
 (def gen-nested-resolvable
   (gen/recursive-gen
