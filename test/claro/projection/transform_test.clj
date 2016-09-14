@@ -102,8 +102,8 @@
       (let [base-template
             {:next {:value projection/leaf}}
             transform-template
-            (->> (projection/prepare op template)
-                 (projection/alias :alias :nested))
+            {(projection/alias :alias :nested)
+             (projection/prepare op template)}
             union-template
             (projection/union
               [{:nested base-template}

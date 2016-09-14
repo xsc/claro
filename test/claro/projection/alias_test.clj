@@ -23,10 +23,8 @@
                            end-template
                            projection/leaf)
             raw-template (assoc-in {} (conj path key-to-alias) end-template)
-            alias-template (->> (projection/alias
-                                  alias-key
-                                  key-to-alias
-                                  end-template)
+            alias-template (->> {(projection/alias alias-key key-to-alias)
+                                 end-template}
                                 (assoc-in {} path))]
         (= (-> value
                (projection/apply alias-template)
@@ -44,12 +42,12 @@
     (prop/for-all
       [value        (g/infinite-seq)
        alias-key    gen/string-ascii]
-      (let [template (projection/alias alias-key :value projection/leaf)]
+      (let [template {(projection/alias alias-key :value) projection/leaf}]
         (boolean
           (is
             (thrown-with-msg?
               IllegalArgumentException
-              #"expects a map but value is not"
+              #"is a map but value is not"
               @(-> [value]
                    (projection/apply template)
                    (run!)))))))))
@@ -59,7 +57,7 @@
     (prop/for-all
       [value        (g/infinite-seq)
        alias-key    gen/string-ascii]
-      (let [template (projection/alias alias-key :unknown projection/leaf)]
+      (let [template {(projection/alias alias-key :unknown) projection/leaf}]
         (boolean
           (is
             (thrown-with-msg?
@@ -73,7 +71,7 @@
   (let [run! (make-engine)]
     (prop/for-all
       [value        (g/infinite-seq)]
-      (let [template (projection/alias :next :value projection/leaf)]
+      (let [template {(projection/alias :next :value) projection/leaf}]
         (boolean
           (is
             (thrown-with-msg?

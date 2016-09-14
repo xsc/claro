@@ -2,7 +2,6 @@
   (:refer-clojure :exclude [apply alias case let])
   (:require [claro.projection
              [protocols :refer [project]]
-             alias
              conditional
              case
              bind
@@ -30,8 +29,6 @@
 (import-vars
   [claro.projection.objects
    leaf]
-  [claro.projection.alias
-   alias]
   [claro.projection.conditional
    conditional
    conditional-when]
@@ -42,6 +39,8 @@
    let]
   [claro.projection.level
    levels]
+  [claro.projection.maps
+   alias]
   [claro.projection.maybe
    maybe
    default]

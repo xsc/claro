@@ -162,7 +162,13 @@ of [[parameters]] for further details.
 
 If you want to apply multiple projections to the same subtree, you need to
 uniquely name them (since otherwise, they'll just overwrite each other). This is
-especially useful when injecting different parameters into the same field.
+especially useful when injecting different parameters into the same field. Or
+for simple renaming, e.g. from `:name` to `:person-name`:
+
+```clojure
+{:id                                   projection/leaf
+ (projection/alias :person-name :name) projection/leaf}
+```
 
 For example, we could introduce a flag checking friend status to our `Person`
 records:
@@ -189,9 +195,10 @@ we can use [[alias]] and [[parameters]] to generate a result:
 ```clojure
 (defn- friend-of?
   [alias-key person-id]
-  (->> {:name projection/leaf}
-       (projection/parameters {:person-id person-id})
-       (projection/alias alias-key :friend-of?)))
+  {(projection/alias alias-key :friend-of?)
+   (projection/parameters
+     {:person-id person-id}
+     {:name projection/leaf})))
 
 (def person-with-certain-friends
   (projection/union
@@ -201,7 +208,7 @@ we can use [[alias]] and [[parameters]] to generate a result:
      (friend-of? :friend-of-watson? 2)))
 ```
 
-Applying this projection to a `Person` will produce a result akin to:
+Applying this projection to a `Person` will produce a map akin to:
 
 ```clojure
 {:id 3
