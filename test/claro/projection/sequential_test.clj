@@ -9,7 +9,7 @@
             [claro.engine.fixtures :refer [make-engine]]
             [claro.projection :as projection]))
 
-(defspec t-sequential-projection (test/times 200)
+(defspec t-sequential-projection (test/times 100)
   (let [run! (make-engine)]
     (prop/for-all
       [template (g/valid-template)
@@ -22,7 +22,7 @@
                      :when (not (g/compare-to-template result template n))]
                  result)))))))
 
-(defspec t-sequential-projection-type-mismatch (test/times 200)
+(defspec t-sequential-projection-type-mismatch (test/times 100)
   (let [run! (make-engine)]
     (prop/for-all
       [template (g/valid-template)

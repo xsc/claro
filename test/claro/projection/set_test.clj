@@ -9,7 +9,7 @@
             [claro.engine.fixtures :refer [make-engine]]
             [claro.projection :as projection]))
 
-(defspec t-set-projection (test/times 200)
+(defspec t-set-projection (test/times 100)
   (let [run! (make-engine)]
     (prop/for-all
       [template (g/valid-template)
@@ -27,7 +27,7 @@
              (run!)
              (deref))))))
 
-(defspec t-set-projection-type-mismatch (test/times 200)
+(defspec t-set-projection-type-mismatch (test/times 100)
   (let [run! (make-engine)]
     (prop/for-all
       [template (g/valid-template)

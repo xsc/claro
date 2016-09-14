@@ -2,7 +2,7 @@
   (:require [claro.projection.protocols :refer [Projection project]]
             [claro.data.ops
              [collections :as c]
-             [then :refer [then]]]))
+             [then :refer [then then!]]]))
 
 ;; ## Helpers
 
@@ -11,7 +11,7 @@
   (when-not (and (coll? value) (not (map? value)))
     (throw
       (IllegalArgumentException.
-        (str "projection template is set but value is not.\n"
+        (str "projection template is set but value is not a collection.\n"
              "template: #{" (pr-str template) "}\n"
              "value:    " (pr-str value)))))
   value)
@@ -19,7 +19,8 @@
 (defn- project-set
   [template value]
   (assert-set! value template)
-  (set (map #(project template %) value)))
+  (then! (mapv #(project template %) value)
+         set))
 
 ;; ## Implementation
 
