@@ -19,14 +19,14 @@
     value
     no-match))
 
-(defn match-resolved-value
+(defn- match-resolved-value
   [value predicate no-match]
   (let [result (match-simple-value value predicate no-match)]
     (if (not= result no-match)
       result
       (throw-resolved-without-predicate! value predicate))))
 
-(defn match-partial-value
+(defn- match-partial-value
   [value predicate no-match]
   (let [value' (p/partial-value value ::none)]
     (if (and (not= value' ::none)

@@ -29,17 +29,10 @@
   (when (p/resolvable? value)
     (->ResolvableComposition (->ResolvableLeaf value) predicate f)))
 
-(defn- chain-directly-when
-  [value predicate f]
-  (when (and (p/resolved? value)
-             (or (not predicate)
-                 (predicate value)))
-    (->ResolvedComposition value f)))
-
 (defn- chain-tree-when
   [value predicate f]
   (let [tree (wrap-tree value)
-        value' (composition/match-partial-value tree predicate ::none)]
+        value' (composition/match-value tree predicate ::none)]
     (if (= value' ::none)
       (->ResolvableComposition tree predicate f)
       (->ResolvedComposition value' f))))
@@ -49,9 +42,7 @@
    once `predicate` is fulfilled."
   [value predicate f]
   (let [f' (comp wrap-tree f)]
-    (or (when-not (p/wrapped? value)
-          (or (chain-resolvable-when value predicate f')
-              (chain-directly-when value predicate f')))
+    (or (chain-resolvable-when value predicate f')
         (chain-tree-when value predicate f'))))
 
 (defn chain-blocking
