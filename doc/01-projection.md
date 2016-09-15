@@ -160,17 +160,16 @@ of [[parameters]] for further details.
 
 #### Aliases
 
-If you want to apply multiple projections to the same subtree, you need to
-uniquely name them (since otherwise, they'll just overwrite each other). This is
-especially useful when injecting different parameters into the same field. Or
-for simple renaming, e.g. from `:name` to `:person-name`:
+To rename a field you can use the [[alias]] projection:
 
 ```clojure
 {:id                                   projection/leaf
  (projection/alias :person-name :name) projection/leaf}
 ```
 
-For example, we could introduce a flag checking friend status to our `Person`
+This is especially useful if you want to apply multiple different projections to
+the same subtree, e.g. to inject a series of parameters into a field.  For
+example, we could introduce a flag checking friend status to our `Person`
 records:
 
 ```clojure
