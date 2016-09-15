@@ -28,15 +28,12 @@
   [depth]
   (if (zero? depth)
     {}
-    (projection/union
-      [{:id projection/leaf
-        :name projection/leaf}
-       (projection/alias
-         :first-friend
-         :friends
-         (projection/prepare
-           ops/first
-           (make-template (dec depth))))])))
+    {:id projection/leaf
+     :name projection/leaf
+     (projection/alias :first-friend :friends)
+     (projection/prepare
+       ops/first
+       (make-template (dec depth)))}))
 
 (defn- make-value
   [id depth]
