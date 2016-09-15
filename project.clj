@@ -40,16 +40,19 @@
                               claro.deep-projection]}]}
               :jvm-opts ^:replace ["-server" "-XX:+TieredCompilation"]}
              :codox
-             {:dependencies [[org.clojure/tools.reader "1.0.0-beta2"]]
-              :plugins [[lein-codox "0.9.6"]]
+             {:dependencies [[org.clojure/tools.reader "1.0.0-beta2"]
+                             [codox-theme-rdash "0.1.0"]]
+              :plugins [[lein-codox "0.10.0"]]
               :codox {:project {:name "claro"}
                       :metadata {:doc/format :markdown}
+                      :themes [:rdash]
                       :source-paths ["src"]
                       :source-uri "https://github.com/xsc/claro/blob/master/{filepath}#L{line}"
                       :namespaces [claro.data
                                    claro.data.ops
                                    claro.engine
                                    claro.engine.adapter
+                                   claro.engine.selector
                                    #"^claro\.middlewares\..*"
                                    claro.projection]}}}
   :aliases {"codox" ["with-profile" "codox,dev" "codox"]}
