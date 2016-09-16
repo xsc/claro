@@ -235,3 +235,21 @@ retrieve a real one:
 
 This will apply the given projection either to any non-`nil` value or to
 `unknown-person`.
+
+#### Constant Values
+
+It might happen that you want to inject a value into the tree. For this, you can
+use the [[value]] projection:
+
+```clojure
+{:id   projection/leaf
+ :role (projection/value :admin)}
+```
+
+If you want to inject non-leaf values – like another resolvable – you'll need to
+supply a projection to apply on it, e.g.:
+
+```clojure
+{:id    projection/leaf
+ :roles (projection/value (->Roles) [projection/leaf])}
+```
