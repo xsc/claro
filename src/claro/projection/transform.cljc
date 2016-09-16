@@ -34,6 +34,17 @@
 (defn transform
   "A projection applying a transformation function to a fully resolved value.
    `input-template` is used to project the initial value, `output-template` will
-   be used to further project the resulting value."
+   be used to further project the resulting value.
+
+   For example, to extract the `:name` key from a seq of maps:
+
+   ```clojure
+   (-> [{:name \"Zebra\"}, {:name \"Tiger\"}]
+       (projection/apply
+         [(projection/transform :name {:name projection/leaf} projection/leaf)])
+       (engine/run!!))
+   ;; => [\"Zebra\" \"Tiger\"]
+   ```
+   "
   [f input-template output-template]
   (->Transformation f input-template output-template))

@@ -31,7 +31,7 @@
    leaf]
   [claro.projection.conditional
    conditional
-   conditional-when]
+   conditional-union]
   [claro.projection.case
    case]
   [claro.projection.bind
@@ -50,7 +50,7 @@
   [claro.projection.parameters
    parameters]
   [claro.projection.union
-   conditional-union
+   union*
    union]
   [claro.projection.value
    value])

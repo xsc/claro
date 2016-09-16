@@ -59,7 +59,21 @@
            (assoc result class template)) {})))
 
 (defn case
-  "Dispatch on the class of a `Resolvable`, applying the respective template."
+  "Dispatch on the class of a `Resolvable`, applying the correspnding template.
+
+   ```clojure
+   (-> (->Animals)
+       (projection/apply
+         [(projection/case
+            Dolphin {:name projection/leaf, :intelligence projection/leaf}
+            Zebra   {:name projection/leaf, :number-of-stripes projection/leaf}
+            :else   {:name projection/leaf})])
+        (engine/run!!))
+   ;; => [{:name \"Tiger\"}
+   ;;     {:name \"Dolphin\", :intelligence 80}
+   ;;     {:name \"Zebra\", :number-of-stripes 20}]
+   ```
+   "
   [class template & more]
   {:pre [(even? (count more))]}
   (->> (partition 2 more)

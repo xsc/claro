@@ -105,7 +105,7 @@
             {(projection/alias :alias :nested)
              (projection/prepare op template)}
             union-template
-            (projection/union
+            (projection/union*
               [{:nested base-template}
                transform-template])]
         (= {:nested @(-> value

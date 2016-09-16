@@ -11,8 +11,13 @@
           #(some->> % (pr/project template)))))
 
 (defn maybe
-  "Apply projection template if the value is not `nil`. Otherwise, just let the
-   `nil` stay as it is."
+  "Apply projection template if the value is not `nil`, otherwise just keep the
+   `nil`.
+
+   ```clojure
+   (projection/maybe {:name projection/leaf})
+   ```
+   "
   [template]
   (->MaybeProjection template))
 
@@ -28,6 +33,11 @@
                 (pr/project template)))))
 
 (defn default
-  "Apply the given template to the non-nil value or the given default."
+  "Apply the given projection to any non-nil value or the given default.
+
+   ```clojure
+   (projection/default {:name projection/leaf} unknown-person)
+   ```
+   "
   [template default-value]
   (->DefaultProjection template default-value))

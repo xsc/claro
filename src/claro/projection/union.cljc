@@ -1,6 +1,5 @@
 (ns claro.projection.union
   (:require [claro.projection.protocols :as pr]
-            [claro.projection.conditional :refer [conditional]]
             [claro.data.ops
              [then :refer [then then!]]]))
 
@@ -34,20 +33,36 @@
 
 ;; ## Constructor
 
-(defn union
+(defn union*
   "Apply all projection templates to the value, merging them together into
-   a final value. The templates have to produce maps with disjunct
-   sets of keys."
+   a final value.
+
+   ```clojure
+   (projection/union
+     [{:id projection/leaf}
+      (projection/case
+        Zebra   {:number-of-stripes projection/leaf}
+        Dolphin {:intelligence projection/leaf}
+        :else   {})])
+   ```
+
+   Note that the the templates have to produce maps with disjunct sets of keys."
   [templates]
   (->UnionProjection templates))
 
-(defn conditional-union
-  "Apply projection templates whose predicate matches the value. The matching
-   templates have to produce maps with disjunct sets of keys."
-  [condition template & more]
-  (->> (partition 2 more)
-       (map
-         (fn [[condition template]]
-           (conditional condition template)))
-       (cons (conditional condition template))
-       (union)))
+(defn union
+  "Syntactic sugar for [[union*]] allowing for projections-to-merge to be given
+   as single parameters:
+
+   ```clojure
+   (projection/union
+     {:id projection/leaf}
+     (projection/case
+       Zebra   {:number-of-stripes projection/leaf}
+       Dolphin {:intelligence projection/leaf}
+       :else   {}))
+   ```
+
+   Note that the the templates have to produce maps with disjunct sets of keys."
+  [& templates]
+  (union* templates))
