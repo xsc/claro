@@ -73,7 +73,9 @@
    ;;     {:name \"Dolphin\", :intelligence 80}
    ;;     {:name \"Zebra\", :number-of-stripes 20}]
    ```
-   "
+
+   By specifiying a vector of classes, e.g. `[Tiger Zebra]` you can apply the
+   same projection to multiple kinds of resolvables."
   [class template & more]
   {:pre [(even? (count more))]}
   (->> (partition 2 more)

@@ -6,7 +6,7 @@ transformations of your data.
 
 [1]: 01-projection.md
 
-### Dispatch on Class (`case`)
+### Dispatch on Resolvable Class
 
 There might be cases where you expect different kinds of `Resolvable` values to
 appear at a certain position. For example, we might want to model a series of
@@ -66,7 +66,7 @@ the lines of:
 > __Note:__ Multiple options to dispatch on can be given by supplying a vector
 > (e.g. `[Tiger Zebra]`) instead of just a single class.
 
-### Dispatch on Partial Result (`conditional`)
+### Dispatch on Partial Result
 
 Let's keep our animals, but now let's assume that they are not represented by
 different resolvables classes but can be identified using a `:type` key within
@@ -107,3 +107,81 @@ projection:
 What happens here is that first we project any given element using `{:type
 projection/leaf}` whose result will then be used to find a matching predicate.
 The corresponding projection is then re-applied to the initial element.
+
+### Arbitrary Transformation
+
+If you need to change the structure of your data (e.g. extracting keys, merging
+subtrees, ...) you can use [[transform]]. It takes a transformation function, a
+projection that generates the value-to-transform, as well as another projection
+to be used on the transformed result – or, long story short, a description of
+the input, the transformation and the output:
+
+```clojure
+(-> [{:type :zebra, :count 10}, {:type :dolphin, :count 5}]
+    (projection/apply
+      (projection/transform
+        #(apply + (map :count %))
+        [{:count projection/leaf}]
+        projection/leaf))
+    (engine/run!!))
+;; =>  15
+```
+
+### Dependent Projections
+
+The above transformation and dispatch mechanisms could be seen – in one way or
+another – as special cases of a more generic approach:
+
+1. Use an initial projection to generate a partial result.
+2. Use the partial result to generate a new projection.
+3. Apply the new projection to the initial value.
+
+Consider the following example where each `Person` has a list of followers,
+again `Person` values.
+
+```clojure
+(declare ->Person)
+
+(defrecord Person [id]
+  data/Resolvable
+  (resolve! [_ _]
+    (d/future
+      {:id id, :followers (map ->Person (range (inc id) (+ id 15) 3))})))
+```
+
+A valid question here could be: "Does the person in question follow their
+followers back?" Let's answer it by firstly specifying what "X follows Y" means
+– which is clearly that their IDs have the same last digit:
+
+```clojure
+(defrecord IsFollowing [person-id follower-id]
+  data/Resolvable
+  (resolve! [_ _]
+    (= (mod person-id 10) (mod follower-id 10))))
+```
+
+Now, we have to remember the ID of the top-level `Person` and use it to inject
+an `IsFollowing` record into each follower, based on said follower's own ID:
+
+```clojure
+(-> (->Person 1)
+    (projection/apply
+      (projection/let [{person-id :id} {:id projection/leaf}]
+        {:id projection/leaf
+         :followers
+         [(projection/let [{follower-id :id} {:id projection/leaf}]
+            {:id projection/leaf
+             :follows-back? (projection/value
+                              (->IsFollowing follower-id person-id))})]}))
+    (engine/run!!))
+;; => {:id 1
+;;     :followers ({:id 2,  :follows-back? false}
+;;                 {:id 5,  :follows-back? false}
+;;                 {:id 8,  :follows-back? false}
+;;                 {:id 11, :follows-back? true}
+;;                 {:id 14, :follows-back? false})}
+```
+
+> __Note:__ [[value]] can be used for injection of subtrees. In this case one
+> might also think about offering `:followed-by?` as a `Person` property and
+> using [[parameters]] to inject the top-level `person-id` into each follower.
