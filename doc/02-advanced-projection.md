@@ -46,25 +46,31 @@ handle the animal specific fields like `:number-of-stripes` and `:intelligence`?
 the lines of:
 
 ```clojure
+(def animal
+  (projection/case
+    Zebra
+    {:name              projection/leaf
+     :number-of-stripes projection/leaf}
+    Dolphin
+    {:name         projection/leaf
+     :intelligence projection/leaf}
+    :else
+    {:name projection/leaf}))
+```
+
+> __Note:__ Multiple options to dispatch on can be given by supplying a vector
+> (e.g. `[Tiger Zebra]`) instead of just a single class.
+
+Application is done as usual, retrieving different fields for different animals:
+
+```clojure
 (-> [(->Tiger 1) (->Dolphin 2) (->Zebra 5)]
-    (projection/apply
-      [(projection/case
-         Zebra
-         {:name              projection/leaf
-          :number-of-stripes projection/leaf}
-         Dolphin
-         {:name         projection/leaf
-          :intelligence projection/leaf}
-         :else
-         {:name projection/leaf})])
+    (projection/apply [animal])
     (engine/run!!))
 ;; => [{:name "Tiger"}
 ;;     {:name "Dolphin", :intelligence 80}
 ;;     {:name "Zebra", :number-of-stripes 20}]
 ```
-
-> __Note:__ Multiple options to dispatch on can be given by supplying a vector
-> (e.g. `[Tiger Zebra]`) instead of just a single class.
 
 ### Dispatch on Partial Result
 
@@ -88,13 +94,21 @@ projection to _actually_ use based on its value. Enter the [[conditional]]
 projection:
 
 ```clojure
+(def animal
+  (projection/conditional
+    {:type projection/leaf}
+    (comp #{:zebra} :type) {:name projection/leaf, :number-of-stripes projection/leaf}
+    (comp #{:dolphin} :type) {:name projection/leaf, :intelligence projection/leaf}
+    :else {:name projection/leaf}))
+```
+
+What happens here is that first we project any given element using `{:type
+projection/leaf}` whose result will then be used to find a matching predicate.
+The corresponding projection is then re-applied to the initial element.
+
+```clojure
 (-> [(->Animal 1) (->Animal 2) (->Animal 3)]
-    (projection/apply
-      [(projection/conditional
-         {:type projection/leaf}
-         (comp #{:zebra} :type) {:name projection/leaf, :number-of-stripes projection/leaf}
-         (comp #{:dolphin} :type) {:name projection/leaf, :intelligence projection/leaf}
-         :else {:name projection/leaf})])
+    (projection/apply [animal])
     (engine/run!!))
 ;; => [{:name "Zebra", :number-of-stripes 4}
 ;;     {:name "Dolphin", :intelligence 80}
@@ -104,27 +118,30 @@ projection:
 > __Note:__ Don't forget the vector around the `(projection/conditional ...)`
 > form – after all we want to apply it to each element.
 
-What happens here is that first we project any given element using `{:type
-projection/leaf}` whose result will then be used to find a matching predicate.
-The corresponding projection is then re-applied to the initial element.
-
 ### Arbitrary Transformation
 
 If you need to change the structure of your data (e.g. extracting keys, merging
 subtrees, ...) you can use [[transform]]. It takes a transformation function, a
 projection that generates the value-to-transform, as well as another projection
 to be used on the transformed result – or, long story short, a description of
-the input, the transformation and the output:
+the input, the transformation and the output.
+
+```clojure
+(def sum-counts
+  (projection/transform
+    #(apply + (map :count %))
+    [{:count projection/leaf}]
+    projection/leaf))
+```
+
+This expects a seq of maps with at least the `:count` key and will produce a
+single leaf value:
 
 ```clojure
 (-> [{:type :zebra, :count 10}, {:type :dolphin, :count 5}]
-    (projection/apply
-      (projection/transform
-        #(apply + (map :count %))
-        [{:count projection/leaf}]
-        projection/leaf))
+    (projection/apply sum-counts)
     (engine/run!!))
-;; =>  15
+;; => 15
 ```
 
 ### Dependent Projections
@@ -160,28 +177,45 @@ followers back?" Let's answer it by firstly specifying what "X follows Y" means
     (= (mod person-id 10) (mod follower-id 10))))
 ```
 
-Now, we have to remember the ID of the top-level `Person` and use it to inject
-an `IsFollowing` record into each follower, based on said follower's own ID:
+Now, we can adjust any `Person` projection to inject an `IsFollowing` record
+into the person map, describing if a given `person-id` is following them.
+
+```clojure
+(defn add-followed-by
+  [template k person-id]
+  (projection/let [{:keys [id]} {:id projection/leaf}]
+    (projection/union
+      {k (projection/value (->IsFollowing id person-id))}
+      template)))
+```
+
+> __Remember:__ [[value]] can be used to inject/override subtrees.
+
+All that remains is to remember the ID of the top-level `Person` and use it to
+generate our concrete `IsFollowing` injection:
+
+```clojure
+(def person-with-followers
+  (projection/let [{:keys [id]} {:id projection/leaf}]
+    {:id projection/leaf
+     :followers [(-> {:id projection/leaf}
+                     (add-followed-by :followed-by-parent? id))]}))
+```
+
+And the projected result will finally answer our question:
 
 ```clojure
 (-> (->Person 1)
-    (projection/apply
-      (projection/let [{person-id :id} {:id projection/leaf}]
-        {:id projection/leaf
-         :followers
-         [(projection/let [{follower-id :id} {:id projection/leaf}]
-            {:id projection/leaf
-             :follows-back? (projection/value
-                              (->IsFollowing follower-id person-id))})]}))
+    (projection/apply person-with-followers)
     (engine/run!!))
 ;; => {:id 1
-;;     :followers ({:id 2,  :follows-back? false}
-;;                 {:id 5,  :follows-back? false}
-;;                 {:id 8,  :follows-back? false}
-;;                 {:id 11, :follows-back? true}
-;;                 {:id 14, :follows-back? false})}
+;;     :followers ({:id 2,  :followed-by-parent? false}
+;;                 {:id 5,  :followed-by-parent? false}
+;;                 {:id 8,  :followed-by-parent? false}
+;;                 {:id 11, :followed-by-parent? true}
+;;                 {:id 14, :followed-by-parent? false})}
 ```
 
-> __Note:__ [[value]] can be used for injection of subtrees. In this case one
-> might also think about offering `:followed-by?` as a `Person` property and
-> using [[parameters]] to inject the top-level `person-id` into each follower.
+> __Note:__ In this case one might also think about offering `:followed-by?` as
+> a `Person` property and using [[parameters]] to inject the top-level
+> `person-id` into each follower.
