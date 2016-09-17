@@ -66,4 +66,5 @@
 
 (import-vars
   [claro.engine.core
+   impl
    wrap])
