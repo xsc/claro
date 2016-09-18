@@ -21,7 +21,7 @@
           (impl/chain1 impl deferred vector))))
 
 (defn- rewrap-tree
-  [result]
+  [batch result]
   (if (map? result)
     (persistent!
       (reduce
@@ -29,7 +29,7 @@
           (assoc! m (key e) (wrap-tree (val e))))
         (transient {})
         result))
-    (map wrap-tree result)))
+    (zipmap batch (map wrap-tree result))))
 
 (defn build
   "Generate a resolver function for `claro.runtime/run`, suitable for
@@ -40,4 +40,4 @@
     (impl/chain
       impl
       (resolve-them-all! impl adapter env batch)
-      rewrap-tree)))
+      #(rewrap-tree batch %))))
