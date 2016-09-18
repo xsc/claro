@@ -118,7 +118,7 @@
   "Identical to [[wrap-observe-batches]], except that `observer-fn` is passed an
    additional argument representing the resolution duration in nanoseconds."
   ([engine observer-fn]
-   (wrap-observe-batches-duration engine (constantly true) observer-fn))
+   (wrap-observe-duration engine (constantly true) observer-fn))
   ([engine predicate observer-fn]
    (->> (fn [resolver]
           (fn [env batch]
