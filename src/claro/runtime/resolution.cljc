@@ -35,7 +35,7 @@
       (throw
         (IllegalStateException.
           (str "some of the values in the current batch were not resolved.\n"
-               "missing: " (pr-str (vec missing)) \n
+               "missing: " (pr-str (vec missing)) "\n"
                "in:      " (pr-str (vec batch)) "\n"
                "out:     " (pr-str resolved-values))))))
   resolved-values)
