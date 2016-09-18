@@ -60,3 +60,31 @@
                       #(instance? % resolvable)
                       classes-to-observe))]
     (wrap-observe engine predicate observer-fn)))
+
+(defn wrap-observe-batches
+  "Middleware that will pass the result of any batch matching `predicate` to
+   `observer-fn`.
+
+   For example, to increase a total resolvable counter:
+
+   ```clojure
+   (def run-engine
+     (-> (engine/engine)
+         (wrap-observe-batches
+           (fn [result]
+             (swap! counter + (count result))))))
+   ```
+
+   If no `predicate` is given, every batch will be observed."
+  ([engine observer-fn]
+   (wrap-observe-batches engine (constantly true) observer-fn))
+  ([engine predicate observer-fn]
+   (->> (fn [resolver]
+          (fn [env batch]
+            (impl/chain1
+              (engine/impl engine)
+              (resolver env batch)
+              (fn [result]
+                (observer-fn result)
+                result))))
+        (engine/wrap engine))))
