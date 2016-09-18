@@ -31,6 +31,24 @@
   [value]
   (instance? claro.data.protocols.BatchedResolvable value))
 
+;; ## Postprocessing
+;;
+;; Splitting up data retrieval and processing, allows for code reuse and
+;; increases testability, since we only have to mock a very limited part of the
+;; I/O logic.
+
+(defprotocol+ Transform
+  "Protocol for post-processing the result of [[resolve!]] and the single
+   results of [[resolve-batch!]]."
+  (transform [resolvable resolve-result]
+    "Transform the result of [[resolve!]] (or a single result of
+     [[resolve-batch!]]) for the current [[Resolvable]] class.."))
+
+(extend-protocol Transform
+  Object
+  (transform [_ resolve-result]
+    resolve-result))
+
 ;; ## Mutations
 
 (defprotocol+ Mutation

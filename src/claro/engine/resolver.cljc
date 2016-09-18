@@ -20,16 +20,17 @@
         (let [deferred (adapter impl #(p/resolve! head env))]
           (impl/chain1 impl deferred vector))))
 
-(defn- rewrap-tree
-  [batch result]
-  (if (map? result)
-    (persistent!
-      (reduce
-        (fn [m e]
-          (assoc! m (key e) (wrap-tree (val e))))
-        (transient {})
-        result))
-    (zipmap batch (map wrap-tree result))))
+(defn- finalize
+  [[resolvable :as batch] result]
+  (let [finalize-fn (comp wrap-tree #(p/transform resolvable %))]
+    (if (map? result)
+      (persistent!
+        (reduce
+          (fn [m e]
+            (assoc! m (key e) (finalize-fn (val e))))
+          (transient {})
+          result))
+      (zipmap batch (map finalize-fn result)))))
 
 (defn build
   "Generate a resolver function for `claro.runtime/run`, suitable for
@@ -40,4 +41,4 @@
     (impl/chain
       impl
       (resolve-them-all! impl adapter env batch)
-      #(rewrap-tree batch %))))
+      #(finalize batch %))))

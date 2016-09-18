@@ -7,6 +7,8 @@
    BatchedResolvable
    Mutation
    Resolvable
+   Transform
    resolvable?
    resolve!
-   resolve-batch!])
+   resolve-batch!
+   transform])
