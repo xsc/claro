@@ -56,6 +56,35 @@ And this way you can even write resolvables that produce other resolvables:
 > __Note:__ `d/future` creates a Manifold future but you can use any deferred
 > value, e.g. Clojure futures or the result of `ExecutorService.submit()`.
 
+### Pure vs. Impure Logic
+
+To increase [testability][testing] it generally makes sense to separate your
+impure logic (I/O) from your pure one (transformation of I/O results). To
+facilitate this, claro lets resolvables implement the [[Transform]] protocol
+which will be automatically be used to postprocess resolution results.
+
+The previous example can thus be rewritten as:
+
+```clojure
+(defrecord FriendsOf [id]
+  data/Resolvable
+  (resolve! [_ env]
+    (d/future
+      (fetch-friend-ids! (:db env) id)))
+
+  data/Transform
+  (transform [_ friend-ids]
+    (map ->Person friend-ids)))
+```
+
+> __Note:__ `transform` expects a single result as input, even if your
+> `Resolvable` implements the batching mechanisms outlined in the next section.
+
+While this split-up is compeletely optional, it is highly recommended. See the
+topic [Testing & Debugging][testing] on how to best leverage it.
+
+[testing]: 04-testing-and-debugging.md
+
 ### Batching
 
 With our above records, resolving a `FriendsOf` record for someone that has a
