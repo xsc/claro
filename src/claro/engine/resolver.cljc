@@ -22,15 +22,15 @@
 
 (defn- finalize
   [[resolvable :as batch] result]
-  (let [finalize-fn (comp wrap-tree #(p/transform resolvable %))]
+  (let [finalize-fn (comp wrap-tree p/transform)]
     (if (map? result)
       (persistent!
         (reduce
           (fn [m e]
-            (assoc! m (key e) (finalize-fn (val e))))
+            (assoc! m (key e) (finalize-fn (key e) (val e))))
           (transient {})
           result))
-      (zipmap batch (map finalize-fn result)))))
+      (zipmap batch (map finalize-fn batch result)))))
 
 (defn build
   "Generate a resolver function for `claro.runtime/run`, suitable for
