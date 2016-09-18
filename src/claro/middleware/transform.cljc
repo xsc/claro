@@ -43,7 +43,7 @@
               #(transform! predicate transform-fn %))))
         (engine/wrap engine))))
 
-(defn wrap-transform-classes
+(defn wrap-transform-by-class
   "Middleware that will pass any `Resolvable` of one of the given
    `classes-to-transform` – as well as the resolved result – to `transform-fn`
    and use its return value in place of the actual result.
