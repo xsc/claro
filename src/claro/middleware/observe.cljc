@@ -41,7 +41,7 @@
               #(observe! predicate observer-fn %))))
         (engine/wrap engine))))
 
-(defn wrap-observe-classes
+(defn wrap-observe-by-class
   "Middleware that will pass any `Resolvable` of one of the given
    `classes-to-observe` – as well as the resolved result – to `observer-fn`.
 
@@ -65,12 +65,13 @@
   "Middleware that will pass the result of any batch matching `predicate` to
    `observer-fn`.
 
-   For example, to increase a total resolvable counter:
+   For example, to increase a total resolvable counter for `Person` records:
 
    ```clojure
    (def run-engine
      (-> (engine/engine)
          (wrap-observe-batches
+           #(instance? Person (first %))
            (fn [result]
              (swap! counter + (count result))))))
    ```
@@ -85,6 +86,30 @@
               (engine/impl engine)
               (resolver env batch)
               (fn [result]
-                (observer-fn result)
+                (when (predicate result)
+                  (observer-fn result))
                 result))))
         (engine/wrap engine))))
+
+(defn wrap-observe-batches-by-class
+  "Middleware that will pass the result of any batch of `classes-to-observe`
+   to `observer-fn`.
+
+   For example, to increase a total resolvable counter for `Person` records:
+
+   ```clojure
+   (def run-engine
+     (-> (engine/engine)
+         (wrap-observe-batches-by-class
+           [Person]
+           (fn [result]
+             (swap! counter + (count result))))))
+   ```
+   "
+  [engine classes-to-observe observer-fn]
+  {:pre [(seq classes-to-observe)]}
+  (let [predicate (fn [[resolvable]]
+                    (some
+                      #(instance? % resolvable)
+                      classes-to-observe))]
+    (wrap-observe-batches engine predicate observer-fn)))
