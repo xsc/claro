@@ -123,4 +123,5 @@ For example, we can write a middleware that attaches a timeout to each single
 ```
 
 More possibilities include caching, tracing, monitoring, circuit-breaking,
-etc...
+etc... I recommend checking out the existing middlewares (in
+`claro.middleware.*`) for more examples.
