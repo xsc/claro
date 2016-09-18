@@ -20,6 +20,12 @@
   (project [_ value]
     (then value #(bind-template % template bind-fn))))
 
+(defmethod print-method BindProjection
+  [^BindProjection value ^java.io.Writer w]
+  (.write w "#<bind ")
+  (print-method (.-template value) w)
+  (.write w ">"))
+
 ;; ## Basic Constructor
 
 (defn bind

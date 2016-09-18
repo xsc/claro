@@ -66,6 +66,14 @@
 
 (defrecord AliasKey [alias-key key])
 
+(defmethod print-method AliasKey
+  [^AliasKey value ^java.io.Writer w]
+  (.write w "#<alias ")
+  (print-method (.-key value) w)
+  (.write w " -> ")
+  (print-method (.-alias-key value) w)
+  (.write w ">"))
+
 (defn alias
   "This function can be used within maps to rename/copy an existing key
    for further projection, e.g.:
