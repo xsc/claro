@@ -113,3 +113,22 @@
                       #(instance? % resolvable)
                       classes-to-observe))]
     (wrap-observe-batches engine predicate observer-fn)))
+
+(defn wrap-observe-duration
+  "Identical to [[wrap-observe-batches]], except that `observer-fn` is passed an
+   additional argument representing the resolution duration in nanoseconds."
+  ([engine observer-fn]
+   (wrap-observe-batches-duration engine (constantly true) observer-fn))
+  ([engine predicate observer-fn]
+   (->> (fn [resolver]
+          (fn [env batch]
+            (let [start-time (System/nanoTime)]
+              (impl/chain1
+                (engine/impl engine)
+                (resolver env batch)
+                (fn [result]
+                  (let [delta (- (System/nanoTime) start-time)]
+                    (when (predicate result)
+                      (observer-fn result delta)))
+                  result)))))
+        (engine/wrap engine))))
