@@ -2,6 +2,7 @@
   (:refer-clojure :exclude [apply alias case let])
   (:require [claro.projection
              [protocols :refer [project]]
+             aux
              conditional
              case
              bind
@@ -27,6 +28,8 @@
 ;; ## API
 
 (import-vars
+  [claro.projection.aux
+   extract]
   [claro.projection.objects
    leaf]
   [claro.projection.conditional
