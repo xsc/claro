@@ -1,4 +1,13 @@
 (ns claro.engine
+  "Main resolution and engine logic.
+
+   Claro's resolution engine is powerful and customizable, allowing for flexible
+   introspection and manipulation of every resolution run.
+
+   See the [Engine][1] documentation for details and examples.
+
+   [1]: 03-engine.md
+   "
   (:refer-clojure :exclude [run!])
   (:require [claro.engine
              [core :as core]

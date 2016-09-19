@@ -1,4 +1,6 @@
 (ns claro.engine.adapter
+  "Adapters can be used to remove asynchronous execution boilerplate or mediate
+   between differen deferred implementations."
   (:require [claro.runtime.impl :as impl]))
 
 (defn default-adapter

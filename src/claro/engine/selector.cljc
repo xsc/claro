@@ -1,4 +1,11 @@
-(ns claro.engine.selector)
+(ns claro.engine.selector
+  "Selectors let you adjust and optimize the order of resolution on an engine
+   or tree level.
+
+   See the [Engine][1] documentation.
+
+   [1]: 03-engine.md
+   ")
 
 ;; ## Protocol
 

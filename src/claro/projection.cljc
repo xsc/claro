@@ -1,4 +1,16 @@
 (ns claro.projection
+  "Powerful tree projection functions.
+
+   These will allow you to convert an infinite tree of `Resolvable` values to
+   a finite form, performing transformations, injections and selection along the
+   way.
+
+   See [Projections][1] and [Advanced Projections][2] for a detailed discussion
+   and examples.
+
+   [1]: 01-projection.md
+   [2]: 02-advanced-projection.md
+   "
   (:refer-clojure :exclude [apply alias case let])
   (:require [claro.projection
              [protocols :refer [project]]
