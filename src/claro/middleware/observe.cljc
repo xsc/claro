@@ -54,7 +54,8 @@
    ```
    "
   [engine classes-to-observe observer-fn]
-  {:pre [(seq classes-to-observe)]}
+  {:pre [(coll? classes-to-observe)
+         (seq classes-to-observe)]}
   (let [predicate (fn [resolvable]
                     (some
                       #(instance? % resolvable)
@@ -107,7 +108,8 @@
    ```
    "
   [engine classes-to-observe observer-fn]
-  {:pre [(seq classes-to-observe)]}
+  {:pre [(coll? classes-to-observe)
+         (seq classes-to-observe)]}
   (let [predicate (fn [[resolvable]]
                     (some
                       #(instance? % resolvable)
