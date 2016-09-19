@@ -82,6 +82,11 @@ And here we go:
 5. [Testing & Debugging](doc/04-testing-and-debugging.md)
 6. [Implementation Notes](doc/99-notes.md)
 
+All these topics are also available in claro's [auto-generated
+documentation][codox].
+
+[codox]: http://xsc.github.io/claro/
+
 ## Contributing
 
 Contributions are always welcome. Please take a look at the [Contribution
