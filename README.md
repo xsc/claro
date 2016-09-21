@@ -1,5 +1,7 @@
 # claro
 
+__[Documentation](http://xsc.github.io/claro/)__ | __[Guides](doc)__
+
 __claro__ is a library that allows you to streamline your data access, providing
 powerful optimisations and abstractions along the way.
 
