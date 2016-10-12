@@ -54,3 +54,11 @@
   [value]
   (->> (tree-seq coll? seq value)
        (filter error?)))
+
+(defmacro with-error?
+  "Helper macro that short-circuits if `value` is an [[error]]."
+  [value & body]
+  `(let [v# ~value]
+     (if (error? v#)
+       v#
+       (do ~@body))))

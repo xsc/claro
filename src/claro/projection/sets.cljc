@@ -1,5 +1,6 @@
 (ns claro.projection.sets
   (:require [claro.projection.protocols :refer [Projection project]]
+            [claro.data.error :refer [with-error?]]
             [claro.data.ops
              [collections :as c]
              [then :refer [then then!]]]))
@@ -18,9 +19,10 @@
 
 (defn- project-set
   [template value]
-  (assert-set! value template)
-  (then! (mapv #(project template %) value)
-         set))
+  (with-error? value
+    (assert-set! value template)
+    (then! (mapv #(project template %) value)
+           set)))
 
 ;; ## Implementation
 

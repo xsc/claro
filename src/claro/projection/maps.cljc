@@ -2,7 +2,8 @@
   (:refer-clojure :exclude [alias])
   (:require [claro.projection.protocols :as pr]
             [claro.projection.value :refer [value?]]
-            [claro.data.ops.then :refer [then]]))
+            [claro.data.ops.then :refer [then]]
+            [claro.data.error :refer [with-error?]]))
 
 ;; ## Assertions
 
@@ -100,16 +101,17 @@
 
 (defn- project-keys
   [this value]
-  (assert-map! value this)
-  (reduce
-    (fn [result [k template]]
-      (if (instance? AliasKey k)
-        (let [{:keys [key alias-key]} k]
-          (->> (project-aliased-value value alias-key key template this)
-               (assoc result alias-key)))
-        (->> (project-value value k template this)
-             (assoc result k))))
-    {} this))
+  (with-error? value
+    (assert-map! value this)
+    (reduce
+      (fn [result [k template]]
+        (if (instance? AliasKey k)
+          (let [{:keys [key alias-key]} k]
+            (->> (project-aliased-value value alias-key key template this)
+                 (assoc result alias-key)))
+          (->> (project-value value k template this)
+               (assoc result k))))
+      {} this)))
 
 (extend-protocol pr/Projection
   clojure.lang.IPersistentMap

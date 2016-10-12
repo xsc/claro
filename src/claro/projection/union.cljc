@@ -1,5 +1,6 @@
 (ns claro.projection.union
   (:require [claro.projection.protocols :as pr]
+            [claro.data.error :refer [with-error?]]
             [claro.data.ops
              [then :refer [then then!]]]))
 
@@ -28,8 +29,9 @@
 (defrecord UnionProjection [templates]
   pr/Projection
   (project [_ value]
-    (-> (mapv #(pr/project % value) templates)
-        (then! union-of-maps))))
+    (with-error? value
+      (-> (mapv #(pr/project % value) templates)
+          (then! union-of-maps)))))
 
 ;; ## Constructor
 

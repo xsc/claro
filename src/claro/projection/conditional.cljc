@@ -1,6 +1,7 @@
 (ns claro.projection.conditional
   (:require [claro.projection.protocols :as pr]
             [claro.projection.union :refer [union*]]
+            [claro.data.error :refer [with-error?]]
             [claro.data.protocols :as p]
             [claro.data.ops.then :refer [then then!]]
             [claro.data.ops.chain :refer [chain-eager chain-when]]))
@@ -23,9 +24,10 @@
                                   else-template]
   pr/Projection
   (project [_ value]
-    (-> (pr/project template value)
-        (then!
-          #(project-match condition->template else-template value %)))))
+    (with-error? value
+      (-> (pr/project template value)
+          (then!
+            #(project-match condition->template else-template value %))))))
 
 ;; ## Constructors
 

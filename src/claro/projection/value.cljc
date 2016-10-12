@@ -1,13 +1,15 @@
 (ns claro.projection.value
   (:require [claro.projection.protocols :as pr]
+            [claro.data.error :refer [with-error?]]
             [claro.projection.objects :refer [leaf]]))
 
 ;; ## Record
 
 (defrecord ValueProjection [value template]
   pr/Projection
-  (project [_ _]
-    (pr/project template value)))
+  (project [_ value']
+    (with-error? value'
+      (pr/project template value))))
 
 (defn ^:no-doc value?
   [v]

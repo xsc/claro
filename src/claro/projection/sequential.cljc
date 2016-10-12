@@ -1,5 +1,6 @@
 (ns claro.projection.sequential
   (:require [claro.projection.protocols :refer [Projection project]]
+            [claro.data.error :refer [with-error?]]
             [claro.data.ops
              [collections :as c]
              [then :refer [then]]]))
@@ -18,11 +19,12 @@
 
 (defn- project-elements
   [template value]
-  (assert-sequential! value template)
-  (let [vs (map #(project template %) value)]
-    (if (or (list? value) (seq? value))
-      (list* vs)
-      (into (empty value) vs))))
+  (with-error? value
+    (assert-sequential! value template)
+    (let [vs (map #(project template %) value)]
+      (if (or (list? value) (seq? value))
+        (list* vs)
+        (into (empty value) vs)))))
 
 ;; ## Implementation
 
