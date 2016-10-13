@@ -6,7 +6,7 @@ transformations of your data.
 
 [1]: 01-projection.md
 
-### Dispatch on Resolvable Class
+### Dispatch on Resolvable or Result Class
 
 There might be cases where you expect different kinds of `Resolvable` values to
 appear at a certain position. For example, we might want to model a series of
@@ -42,12 +42,12 @@ Assuming we have a mixed seq of these animal `Resolvable` values, we certainly
 can easily create a projection to retrieve `:id` and `:name` – but how do we
 handle the animal specific fields like `:number-of-stripes` and `:intelligence`?
 
-[[case]] dispatches on the `Resolvable` class, so we could write something along
-the lines of:
+[[case-resolvable]] dispatches on the `Resolvable` class, so we could write
+something along the lines of:
 
 ```clojure
 (def animal
-  (projection/case
+  (projection/case-resolvable
     Zebra
     {:name              projection/leaf
      :number-of-stripes projection/leaf}
@@ -71,6 +71,9 @@ Application is done as usual, retrieving different fields for different animals:
 ;;     {:name "Dolphin", :intelligence 80}
 ;;     {:name "Zebra", :number-of-stripes 20}]
 ```
+
+Similarly, you can use [[case]] to dispatch on the class of the result, i.e.
+_after resolution_.
 
 ### Dispatch on Partial Result
 

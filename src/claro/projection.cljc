@@ -48,7 +48,8 @@
    conditional
    conditional-union]
   [claro.projection.case
-   case]
+   case
+   case-resolvable]
   [claro.projection.bind
    bind
    let]
