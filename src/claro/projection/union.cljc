@@ -40,7 +40,7 @@
    ```clojure
    (projection/union
      [{:id projection/leaf}
-      (projection/case
+      (projection/case-resolvable
         Zebra   {:number-of-stripes projection/leaf}
         Dolphin {:intelligence projection/leaf}
         :else   {})])
@@ -57,7 +57,7 @@
    ```clojure
    (projection/union
      {:id projection/leaf}
-     (projection/case
+     (projection/case-resolvable
        Zebra   {:number-of-stripes projection/leaf}
        Dolphin {:intelligence projection/leaf}
        :else   {}))

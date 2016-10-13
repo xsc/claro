@@ -10,7 +10,7 @@
   (throw
     (IllegalArgumentException.
       (format
-        (str "no match in 'case' projection.%n"
+        (str "no match in 'case'/'case-resolvable' projection.%n"
              "value: %s%n"
              "cases: %s")
         (pr-str value)
@@ -22,15 +22,16 @@
     (throw
       (IllegalArgumentException.
         (format
-          (str "'case' projection can only be applied to resolvable.%n"
-               "value: %s%n"
-               "cases: %s")
+          (str
+            "'case-resolvable' projection can only be applied to resolvable.%n"
+            "value: %s%n"
+            "cases: %s")
           (pr-str value)
           (pr-str (vec (keys class->template))))))))
 
 ;; ## Record
 
-(defrecord CaseProjection [class->template]
+(defrecord CaseResolvableProjection [class->template]
   pr/Projection
   (project [_ value]
     (assert-resolvable! value class->template)
@@ -58,13 +59,13 @@
                  (str "duplicate in 'case' projection: " (.getName class)))))
            (assoc result class template)) {})))
 
-(defn case
-  "Dispatch on the class of a `Resolvable`, applying the correspnding template.
+(defn ^{:added "0.2.1"} case-resolvable
+  "Dispatch on the class of a `Resolvable`, applying the corresponding template.
 
    ```clojure
    (-> (->Animals)
        (projection/apply
-         [(projection/case
+         [(projection/case-resolvable
             Dolphin {:name projection/leaf, :intelligence projection/leaf}
             Zebra   {:name projection/leaf, :number-of-stripes projection/leaf}
             :else   {:name projection/leaf})])
@@ -81,4 +82,4 @@
   (->> (partition 2 more)
        (cons [class template])
        (collect-cases)
-       (->CaseProjection)))
+       (->CaseResolvableProjection)))

@@ -42,12 +42,12 @@ Assuming we have a mixed seq of these animal `Resolvable` values, we certainly
 can easily create a projection to retrieve `:id` and `:name` – but how do we
 handle the animal specific fields like `:number-of-stripes` and `:intelligence`?
 
-[[case]] dispatches on the `Resolvable` class, so we could write something along
-the lines of:
+[[case-resolvable]] dispatches on the `Resolvable` class, so we could write
+something along the lines of:
 
 ```clojure
 (def animal
-  (projection/case
+  (projection/case-resolvable
     Zebra
     {:name              projection/leaf
      :number-of-stripes projection/leaf}
