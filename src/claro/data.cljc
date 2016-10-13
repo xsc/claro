@@ -5,7 +5,7 @@
 
    [1]: 00-basics.md
    "
-  (:require [claro.data protocols]
+  (:require [claro.data protocols error]
             [potemkin :refer [import-vars]]))
 
 (import-vars
@@ -17,4 +17,10 @@
    resolvable?
    resolve!
    resolve-batch!
-   transform])
+   transform]
+  [claro.data.error
+   collect-errors
+   error
+   error?
+   error-message
+   error-data])

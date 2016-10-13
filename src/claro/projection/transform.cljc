@@ -1,6 +1,7 @@
 (ns claro.projection.transform
   (:require [claro.projection.protocols :as pr]
             [claro.data.tree :as tree]
+            [claro.data.error :refer [with-error?]]
             [claro.data.ops
              [then :refer [then then!]]]))
 
@@ -8,8 +9,9 @@
 
 (defn- apply-preparation
   [value f rest-template]
-  (->> (tree/transform-partial value f)
-       (pr/project rest-template)))
+  (with-error? value
+    (->> (tree/transform-partial value f)
+         (pr/project rest-template))))
 
 (defrecord Preparation [f rest-template]
   pr/Projection
@@ -34,8 +36,9 @@
 (defrecord Transformation [f input-template output-template]
   pr/Projection
   (project [_ value]
-    (-> (pr/project input-template value)
-        (then! (comp #(pr/project output-template %) f)))))
+    (with-error? value
+      (-> (pr/project input-template value)
+          (then! (comp #(pr/project output-template %) f))))))
 
 (defmethod print-method Transformation
   [^Transformation value ^java.io.Writer w]

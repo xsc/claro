@@ -2,6 +2,7 @@
   (:refer-clojure :exclude [case])
   (:require [claro.projection.protocols :as pr]
             [claro.data.ops.then :refer [then]]
+            [claro.data.error :refer [with-error?]]
             [claro.data.protocols :as p]))
 
 ;; Helpers
@@ -35,25 +36,27 @@
 (defrecord CaseResolvableProjection [class->template]
   pr/Projection
   (project [_ value]
-    (assert-resolvable! value class->template)
-    (let [template (get class->template
-                        (class value)
-                        (:else class->template ::none))]
-      (if (not= template ::none)
-        (pr/project template value)
-        (throw-case-mismatch! value class->template)))))
+    (with-error? value
+      (assert-resolvable! value class->template)
+      (let [template (get class->template
+                          (class value)
+                          (:else class->template ::none))]
+        (if (not= template ::none)
+          (pr/project template value)
+          (throw-case-mismatch! value class->template))))))
 
 (defrecord CaseProjection [class->template]
   pr/Projection
   (project [_ value]
-    (->> (fn [value]
-           (let [template (get class->template
-                               (class value)
-                               (:else class->template ::none))]
-             (if (not= template ::none)
-               (pr/project template value)
-               (throw-case-mismatch! value class->template))))
-         (then value))))
+    (with-error? value
+      (->> (fn [value]
+             (let [template (get class->template
+                                 (class value)
+                                 (:else class->template ::none))]
+               (if (not= template ::none)
+                 (pr/project template value)
+                 (throw-case-mismatch! value class->template))))
+           (then value)))))
 
 ;; ## Constructor
 
