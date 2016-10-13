@@ -1,6 +1,7 @@
 (ns claro.projection.case
   (:refer-clojure :exclude [case])
   (:require [claro.projection.protocols :as pr]
+            [claro.data.ops.then :refer [then]]
             [claro.data.protocols :as p]))
 
 ;; Helpers
@@ -29,7 +30,7 @@
           (pr-str value)
           (pr-str (vec (keys class->template))))))))
 
-;; ## Record
+;; ## Records
 
 (defrecord CaseResolvableProjection [class->template]
   pr/Projection
@@ -41,6 +42,18 @@
       (if (not= template ::none)
         (pr/project template value)
         (throw-case-mismatch! value class->template)))))
+
+(defrecord CaseProjection [class->template]
+  pr/Projection
+  (project [_ value]
+    (->> (fn [value]
+           (let [template (get class->template
+                               (class value)
+                               (:else class->template ::none))]
+             (if (not= template ::none)
+               (pr/project template value)
+               (throw-case-mismatch! value class->template))))
+         (then value))))
 
 ;; ## Constructor
 
@@ -83,3 +96,29 @@
        (cons [class template])
        (collect-cases)
        (->CaseResolvableProjection)))
+
+(defn ^{:added "0.2.1"} case
+  "Dispatch on the class of a value (after resolution), applying the
+   corresponding template.
+
+   ```clojure
+   (-> (->Animals)
+       (projection/apply
+         [(projection/case
+            Dolphin {:name projection/leaf, :intelligence projection/leaf}
+            Zebra   {:name projection/leaf, :number-of-stripes projection/leaf}
+            :else   {:name projection/leaf})])
+        (engine/run!!))
+   ;; => [{:name \"Tiger\"}
+   ;;     {:name \"Dolphin\", :intelligence 80}
+   ;;     {:name \"Zebra\", :number-of-stripes 20}]
+   ```
+
+   By specifiying a vector of classes, e.g. `[Tiger Zebra]` you can apply the
+   same projection to multiple kinds of resolvables."
+  [class template & more]
+  {:pre [(even? (count more))]}
+  (->> (partition 2 more)
+       (cons [class template])
+       (collect-cases)
+       (->CaseProjection)))

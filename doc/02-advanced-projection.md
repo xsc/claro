@@ -6,7 +6,7 @@ transformations of your data.
 
 [1]: 01-projection.md
 
-### Dispatch on Resolvable Class
+### Dispatch on Resolvable or Result Class
 
 There might be cases where you expect different kinds of `Resolvable` values to
 appear at a certain position. For example, we might want to model a series of
@@ -71,6 +71,9 @@ Application is done as usual, retrieving different fields for different animals:
 ;;     {:name "Dolphin", :intelligence 80}
 ;;     {:name "Zebra", :number-of-stripes 20}]
 ```
+
+Similarly, you can use [[case]] to dispatch on the class of the result, i.e.
+_after resolution_.
 
 ### Dispatch on Partial Result
 
