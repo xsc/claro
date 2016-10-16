@@ -1,6 +1,8 @@
 (ns claro.projection.parameters
   (:require [claro.data.protocols :as p]
-            [claro.projection.transform :refer [prepare]]))
+            [claro.data.tree :as tree]
+            [claro.data.error :refer [with-error?]]
+            [claro.projection.protocols :as pr]))
 
 (defn- assert-resolvable!
   [value]
@@ -41,6 +43,22 @@
       (assert-allowed-params! params)
       (into params)))
 
+(defrecord ParametersProjection [params rest-template]
+  pr/Projection
+  (project [_ value]
+    (with-error? value
+      (->> #(inject-params % params)
+           (tree/transform-partial value)
+           (pr/project rest-template)))))
+
+(defmethod print-method ParametersProjection
+  [^ParametersProjection value ^java.io.Writer w]
+  (.write w "#<parameters ")
+  (print-method (.-params value) w)
+  (.write w " -> ")
+  (print-method (.-rest-template value) w)
+  (.write w ">"))
+
 (defn parameters
   "Set some fields within a Resolvable record before resolution. Note that:
 
@@ -54,4 +72,4 @@
    injections."
   [params rest-template]
   {:pre [(map? params)]}
-  (prepare #(inject-params % params) rest-template))
+  (->ParametersProjection params rest-template))
