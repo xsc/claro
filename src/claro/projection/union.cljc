@@ -33,6 +33,12 @@
       (-> (mapv #(pr/project % value) templates)
           (then! union-of-maps)))))
 
+(defmethod print-method UnionProjection
+  [^UnionProjection value ^java.io.Writer w]
+  (.write w "#<union ")
+  (print-method (vec (.-templates value)) w)
+  (.write w ">"))
+
 ;; ## Constructor
 
 (defn union*
