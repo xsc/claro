@@ -45,6 +45,12 @@
           (pr/project template value)
           (throw-case-mismatch! value class->template))))))
 
+(defmethod print-method CaseResolvableProjection
+  [^CaseResolvableProjection value ^java.io.Writer w]
+  (.write w "#<case-resolvable ")
+  (print-method (.-class->template value) w)
+  (.write w ">"))
+
 (defrecord CaseProjection [class->template]
   pr/Projection
   (project [_ value]
@@ -57,6 +63,12 @@
                  (pr/project template value)
                  (throw-case-mismatch! value class->template))))
            (then value)))))
+
+(defmethod print-method CaseProjection
+  [^CaseProjection value ^java.io.Writer w]
+  (.write w "#<case ")
+  (print-method (.-class->template value) w)
+  (.write w ">"))
 
 ;; ## Constructor
 
