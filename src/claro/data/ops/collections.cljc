@@ -28,7 +28,7 @@
    partially resolved value. The collection type might not be maintained."
   [f sq]
   (->> (fn [sq]
-         (core/map #(chain/chain-eager % f) sq))
+         (core/mapv #(chain/chain-eager % f) sq))
        (chain/chain-eager sq)))
 
 (defn map
@@ -42,7 +42,7 @@
         (wrap-assert-coll
           p/every-processable?
           "can only apply 'map' to collections, given:")
-        #(core/apply core/map rechain %)))
+        #(core/apply core/mapv rechain %)))
     (map-single f (core/first sq))))
 
 ;; ## Element Access
