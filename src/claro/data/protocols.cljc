@@ -74,7 +74,7 @@
     "Unwrap the given tree as far as possible.")
   (partial-value [tree no-partial]
     "Retrieve the potentially not fully-resolved value for this tree. Returns
-     `no-partial` if this tree has not partial representation.")
+     `no-partial` if this tree has no partial representation.")
   (resolved? [tree]
     "Is the tree completely resolved?")
   (resolvables* [tree]

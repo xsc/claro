@@ -33,7 +33,7 @@
 
 (defn map
   "Iterate the given function over every element of the given, potentially
-   partially resolved values. The collection type may not be maintained."
+   partially resolved values. The collection type might not be maintained."
   [f & sq]
   (if (next sq)
     (let [rechain #(fmap* f %&)]
