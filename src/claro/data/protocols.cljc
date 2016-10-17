@@ -92,3 +92,8 @@
   "Check whether the given value is neither wrapped, nor resolvable."
   [value]
   (not (or (resolvable? value) (wrapped? value))))
+
+(defn every-processable?
+  "Check whether every value in the given collection is processable."
+  [sq]
+  (every? processable? sq))

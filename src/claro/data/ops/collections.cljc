@@ -40,7 +40,7 @@
       (chain/chain-when
         (vec sq)
         (wrap-assert-coll
-          chain/every-processable?
+          p/every-processable?
           "can only apply 'map' to collections, given:")
         #(core/apply core/map rechain %)))
     (map-single f (core/first sq))))
@@ -61,7 +61,7 @@
   [value n]
   (chain/chain-when
     [value n]
-    chain/every-processable?
+    p/every-processable?
     (wrap-assert-coll
       (fn [[v n]]
         (core/nth v n))
@@ -75,7 +75,7 @@
   [n value]
   (chain/chain-when
     [value n]
-    chain/every-processable?
+    p/every-processable?
     (wrap-assert-coll
       (fn [[v n]]
         (core/take n v))
@@ -86,7 +86,7 @@
   [n value]
   (chain/chain-when
     [value n]
-    chain/every-processable?
+    p/every-processable?
     (wrap-assert-coll
       (fn [[v n]]
         (core/drop n v))
