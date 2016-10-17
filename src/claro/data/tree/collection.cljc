@@ -7,6 +7,8 @@
   ResolvableTree
   (wrapped? [_]
     false)
+  (processable? [_]
+    false)
   (unwrap-tree [tree]
     tree)
   (partial-value [_ _]

@@ -7,6 +7,8 @@
   p/ResolvableTree
   (wrapped? [_]
     false)
+  (processable? [_]
+    true)
   (unwrap-tree [this]
     this)
   (resolved? [_]

@@ -12,6 +12,8 @@
   p/ResolvableTree
   (wrapped? [_]
     true)
+  (processable? [_]
+    false)
   (unwrap-tree [_]
     (f (p/unwrap-tree value))))
 

@@ -55,6 +55,8 @@
   ResolvableTree
   (wrapped? [this]
     true)
+  (processable? [this]
+    false)
   (unwrap-tree [this]
     this)
   (partial-value [_ no-partial]

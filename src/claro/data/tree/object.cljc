@@ -5,6 +5,8 @@
   Object
   (wrapped? [_]
     false)
+  (processable? [_]
+    true)
   (unwrap-tree [this]
     this)
   (partial-value [tree _]
@@ -19,6 +21,8 @@
   nil
   (wrapped? [_]
     false)
+  (processable? [_]
+    true)
   (unwrap-tree [_]
     nil)
   (partial-value [_ _]
