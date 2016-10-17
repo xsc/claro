@@ -1,5 +1,6 @@
 (ns claro.data.ops.fmap
-  (:require [claro.data.ops.chain :as chain]))
+  (:require [claro.data.protocols :as p]
+            [claro.data.ops.chain :as chain]))
 
 (defn fmap*
   "Apply the given function to the given, potentially partially resolved
@@ -7,7 +8,7 @@
   [f values]
   (chain/chain-when
     (vec values)
-    chain/every-processable?
+    p/every-processable?
     #(apply f %)))
 
 (defn fmap
@@ -24,7 +25,7 @@
   (chain/chain-when
     (vec values)
     (fn [values]
-      (and (chain/every-processable? values)
+      (and (p/every-processable? values)
            (apply predicate values)))
     #(apply f %)))
 

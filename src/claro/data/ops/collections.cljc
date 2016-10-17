@@ -25,33 +25,24 @@
 
 (defn map-single
   "Iterate the given function over every element of the given, potentially
-   partially resolved value. The collection type will be maintained."
+   partially resolved value. The collection type might not be maintained."
   [f sq]
-  (let [rechain #(fmap* f %&)
-        prototype (empty sq)]
-    (-> (vec sq)
-        (chain/chain-when
-          (wrap-assert-coll
-            chain/every-processable?
-            "can only apply 'map' to collections, given:")
-          #(core/map rechain %))
-        (chain/chain-eager
-          (if (or (list? sq) (seq? sq))
-            list*
-            #(into prototype %))))))
+  (->> (fn [sq]
+         (core/mapv #(chain/chain-eager % f) sq))
+       (chain/chain-eager sq)))
 
 (defn map
   "Iterate the given function over every element of the given, potentially
-   partially resolved values. The collection type may not be maintained."
+   partially resolved values. The collection type might not be maintained."
   [f & sq]
   (if (next sq)
     (let [rechain #(fmap* f %&)]
       (chain/chain-when
         (vec sq)
         (wrap-assert-coll
-          chain/every-processable?
+          p/every-processable?
           "can only apply 'map' to collections, given:")
-        #(core/apply core/map rechain %)))
+        #(core/apply core/mapv rechain %)))
     (map-single f (core/first sq))))
 
 ;; ## Element Access
@@ -70,7 +61,7 @@
   [value n]
   (chain/chain-when
     [value n]
-    chain/every-processable?
+    p/every-processable?
     (wrap-assert-coll
       (fn [[v n]]
         (core/nth v n))
@@ -84,7 +75,7 @@
   [n value]
   (chain/chain-when
     [value n]
-    chain/every-processable?
+    p/every-processable?
     (wrap-assert-coll
       (fn [[v n]]
         (core/take n v))
@@ -95,7 +86,7 @@
   [n value]
   (chain/chain-when
     [value n]
-    chain/every-processable?
+    p/every-processable?
     (wrap-assert-coll
       (fn [[v n]]
         (core/drop n v))

@@ -12,15 +12,10 @@
   p/ResolvableTree
   (wrapped? [_]
     true)
+  (processable? [_]
+    false)
   (unwrap-tree [_]
     (f (p/unwrap-tree value))))
-
-;; ## Helpers
-
-(defn every-processable?
-  "Check whether every value in the given collection is processable."
-  [sq]
-  (every? p/processable? sq))
 
 ;; ## Chains
 

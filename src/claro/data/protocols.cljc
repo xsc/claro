@@ -70,11 +70,14 @@
 (defprotocol+ ResolvableTree
   (wrapped? [tree]
     "Check whether the given tree is wrapped.")
+  (processable? [tree]
+    "Check whether the given tree already has the shape of its final value,
+     albeit with potentially partially resolved children.")
   (unwrap-tree [tree]
     "Unwrap the given tree as far as possible.")
   (partial-value [tree no-partial]
     "Retrieve the potentially not fully-resolved value for this tree. Returns
-     `no-partial` if this tree has not partial representation.")
+     `no-partial` if this tree has no partial representation.")
   (resolved? [tree]
     "Is the tree completely resolved?")
   (resolvables* [tree]
@@ -88,7 +91,7 @@
   [tree]
   (resolvables* tree))
 
-(defn processable?
-  "Check whether the given value is neither wrapped, nor resolvable."
-  [value]
-  (not (or (resolvable? value) (wrapped? value))))
+(defn every-processable?
+  "Check whether every value in the given collection is processable."
+  [sq]
+  (every? processable? sq))
