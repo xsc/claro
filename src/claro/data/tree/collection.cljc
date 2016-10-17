@@ -10,7 +10,9 @@
   (unwrap-tree [tree]
     tree)
   (partial-value [_ _]
-    (into prototype u/all-unwrap-xf elements))
+    (if (map? prototype)
+      (into prototype u/all-unwrap-xf elements)
+      (into prototype elements)))
   (resolved? [_]
     false)
   (resolvables* [tree]
