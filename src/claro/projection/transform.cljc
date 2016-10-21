@@ -38,7 +38,10 @@
   (project [_ value]
     (with-error? value
       (-> (pr/project input-template value)
-          (then! (comp #(pr/project output-template %) f))))))
+          (then!
+            (if output-template
+              (comp #(pr/project output-template %) f)
+              f))))))
 
 (defmethod print-method Transformation
   [^Transformation value ^java.io.Writer w]
@@ -60,6 +63,10 @@
        (engine/run!!))
    ;; => [\"Zebra\" \"Tiger\"]
    ```
-   "
-  [f input-template output-template]
-  (->Transformation f input-template output-template))
+
+   If no `output-template` is given, you _have_ to apply projections to
+   potentially infinite subtrees within the transformation function."
+  ([f input-template]
+   (->Transformation f input-template nil))
+  ([f input-template output-template]
+  (->Transformation f input-template output-template)))
