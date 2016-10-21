@@ -69,4 +69,5 @@
    union*
    union]
   [claro.projection.value
-   value])
+   value
+   finite-value])

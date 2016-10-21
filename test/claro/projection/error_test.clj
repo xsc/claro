@@ -30,6 +30,8 @@
            [(projection/default projection/leaf ::default)
             (projection/levels 1)
             (projection/value ::value)
+            (projection/value {:a 1} {:a projection/leaf})
+            (projection/finite-value ::value)
             projection/leaf]))))
 
 (def gen-error
