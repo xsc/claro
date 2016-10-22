@@ -41,7 +41,7 @@
               :jvm-opts ^:replace ["-server" "-XX:+TieredCompilation"]}
              :codox
              {:dependencies [[org.clojure/tools.reader "1.0.0-beta2"]
-                             [codox-theme-rdash "0.1.0"]]
+                             [codox-theme-rdash "0.1.1"]]
               :plugins [[lein-codox "0.10.0"]]
               :codox {:project {:name "claro"}
                       :metadata {:doc/format :markdown}
