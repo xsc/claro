@@ -124,10 +124,17 @@ The corresponding projection is then re-applied to the initial element.
 ### Arbitrary Transformation
 
 If you need to change the structure of your data (e.g. extracting keys, merging
-subtrees, ...) you can use [[transform]]. It takes a transformation function, a
-projection that generates the value-to-transform, as well as another projection
-to be used on the transformed result – or, long story short, a description of
-the input, the transformation and the output.
+subtrees, ...) you can use [[transform]].
+
+```clojure
+(def sum-counts
+  (projection/transform
+    #(apply + (map :count %))
+    {{:count projection/leaf}]))
+```
+
+Optionally, you can supply an output template, that will be applied to the
+transformed value:
 
 ```clojure
 (def sum-counts
@@ -137,8 +144,8 @@ the input, the transformation and the output.
     projection/leaf))
 ```
 
-This expects a seq of maps with at least the `:count` key and will produce a
-single leaf value:
+As expected, this takes a seq of maps with at least the `:count` key and
+produces a single leaf value:
 
 ```clojure
 (-> [{:type :zebra, :count 10}, {:type :dolphin, :count 5}]

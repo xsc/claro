@@ -253,3 +253,6 @@ supply a projection to apply on it, e.g.:
 {:id    projection/leaf
  :roles (projection/value (->Roles) [projection/leaf])}
 ```
+
+If you want to inject a more complex value but you're absolutely sure it does
+not resolve infinitely, you can use [[finite-value]].
