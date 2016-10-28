@@ -13,7 +13,7 @@
   (let [run! (make-engine)]
     (prop/for-all
       [template (g/valid-template)
-       values   (gen/vector (g/infinite-seq))]
+       values   (gen/vector (g/infinite-seq-no-mutation))]
       (let [projected-values (projection/apply values [template])
             results @(run! projected-values)]
         (and (vector? results)

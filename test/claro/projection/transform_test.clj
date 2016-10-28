@@ -15,7 +15,7 @@
         run!! (comp deref run! projection/apply)]
     (prop/for-all
       [initial-value (g/infinite-seq)
-       replacement-value (g/infinite-seq)
+       replacement-value (g/infinite-seq-no-mutation)
        initial-template (g/valid-template)
        replacement-template (g/valid-template)]
       (let [observed (promise)
@@ -35,7 +35,7 @@
         run!! (comp deref run! projection/apply)]
     (prop/for-all
       [initial-value (g/infinite-seq)
-       replacement-value (g/infinite-seq)
+       replacement-value (g/infinite-seq-no-mutation)
        initial-template (g/valid-template)
        replacement-template (g/valid-template)]
       (let [observed (promise)
@@ -56,7 +56,7 @@
         run!! (comp deref run! projection/apply)]
     (prop/for-all
       [initial-value (g/infinite-seq)
-       replacement-value (g/infinite-seq)
+       replacement-value (g/infinite-seq-no-mutation)
        initial-template (g/valid-template)]
       (let [observed (promise)
             transformation (projection/transform
