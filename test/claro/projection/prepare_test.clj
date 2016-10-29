@@ -1,4 +1,4 @@
-(ns claro.projection.transform-test
+(ns claro.projection.prepare-test
   (:require [clojure.test.check
              [clojure-test :refer [defspec]]
              [generators :as gen]
