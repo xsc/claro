@@ -1,8 +1,7 @@
 (ns claro.projection.union
   (:require [claro.projection.protocols :as pr]
             [claro.data.error :refer [with-error?]]
-            [claro.data.ops
-             [then :refer [then then!]]]))
+            [claro.data.ops.chain :as chain]))
 
 ;; ## Record
 
@@ -31,7 +30,7 @@
   (project [_ value]
     (with-error? value
       (-> (mapv #(pr/project % value) templates)
-          (then! union-of-maps)))))
+          (chain/chain-blocking* union-of-maps)))))
 
 (defmethod print-method UnionProjection
   [^UnionProjection value ^java.io.Writer w]

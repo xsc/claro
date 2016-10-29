@@ -2,8 +2,7 @@
   (:require [claro.projection.protocols :as pr]
             [claro.data.tree :as tree]
             [claro.data.error :refer [with-error?]]
-            [claro.data.ops
-             [then :refer [then then!]]]))
+            [claro.data.ops.chain :as chain]))
 
 ;; ## Preparation (before Resolution)
 
@@ -38,7 +37,7 @@
   (project [_ value]
     (with-error? value
       (-> (pr/project input-template value)
-          (then!
+          (chain/chain-blocking
             (if output-template
               (comp #(pr/project output-template %) f)
               f))))))

@@ -40,16 +40,22 @@
     (or (chain-resolvable-when value predicate f')
         (chain-tree-when value predicate f'))))
 
+(defn chain-blocking*
+  "Apply the given function once `value` is fully resolved. `f` is not allowed
+   to introduce any futher resolvables, or has to wrap the result using
+   `wrap-tree`."
+  [value f]
+  (if (p/resolvable? value)
+    (->BlockingComposition (->ResolvableLeaf value) f)
+    (let [tree (wrap-tree value)]
+      (if (p/resolved? tree)
+        (->ResolvedComposition tree f)
+        (->BlockingComposition tree f)))))
+
 (defn chain-blocking
   "Apply the given function once `value` is fully resolved."
   [value f]
-  (let [f' (comp wrap-tree f)]
-    (if (p/resolvable? value)
-      (->BlockingComposition (->ResolvableLeaf value) f')
-      (let [tree (wrap-tree value)]
-        (if (p/resolved? tree)
-          (->ResolvedComposition tree f')
-          (->BlockingComposition tree f'))))))
+  (chain-blocking* value (comp wrap-tree f)))
 
 (defn chain-eager
   "Apply the given function once the value is no longer a `Resolvable` or
