@@ -38,9 +38,11 @@
                 {:name :performance
                  :namespaces [claro.resolution-without-batching.claro
                               claro.resolution-with-batching.claro
-                              claro.projection-benchmarks.deep]}
+                              claro.projection-benchmarks.deep
+                              claro.projection-benchmarks.union]}
                 {:name :projections
-                 :namespaces [claro.projection-benchmarks.deep]}]}
+                 :namespaces [claro.projection-benchmarks.deep
+                              claro.projection-benchmarks.union]}]}
               :jvm-opts ^:replace ["-server" "-XX:+TieredCompilation"]}
              :codox
              {:dependencies [[org.clojure/tools.reader "1.0.0-beta2"]
