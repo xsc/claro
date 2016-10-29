@@ -1,4 +1,4 @@
-(ns claro.deep-projection
+(ns claro.projection-benchmarks.deep
   (:require [perforate.core :refer [defgoal defcase]]
             [claro.queries :refer :all]
 
