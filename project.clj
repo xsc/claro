@@ -15,6 +15,7 @@
              :benchmarks
              {:plugins [[perforate "0.3.4"]]
               :dependencies [[perforate "0.3.4"]
+                             [criterium "0.4.4"]
                              [muse "0.4.0"]
                              [cats "0.4.0"]
                              [org.clojure/core.async "0.2.385"]
