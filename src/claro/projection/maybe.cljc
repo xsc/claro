@@ -21,6 +21,12 @@
   [template]
   (->MaybeProjection template))
 
+(defmethod print-method MaybeProjection
+  [^MaybeProjection value ^java.io.Writer w]
+  (.write w "#<maybe ")
+  (print-method (.-template value) w)
+  (.write w ">"))
+
 ;; ## Default
 
 (defrecord DefaultProjection [template default-value]
@@ -41,3 +47,11 @@
    "
   [template default-value]
   (->DefaultProjection template default-value))
+
+(defmethod print-method DefaultProjection
+  [^DefaultProjection value ^java.io.Writer w]
+  (.write w "#<default ")
+  (print-method (.-template value) w)
+  (.write w " | ")
+  (print-method (.-default-value value) w)
+  (.write w ">"))
