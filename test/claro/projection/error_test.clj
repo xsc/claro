@@ -25,7 +25,7 @@
               (gen/fmap #(projection/conditional % some? %) g)
               (gen/fmap #(projection/case Object %) g)
               (gen/fmap #(projection/case-resolvable Object %) g)
-              (gen/fmap projection/union* (gen/vector g))]))
+              (gen/fmap projection/union* (gen/vector g 2))]))
          (gen/elements
            [(projection/default projection/leaf ::default)
             (projection/levels 1)

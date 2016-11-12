@@ -55,7 +55,10 @@
 
    Note that the the templates have to produce maps with disjunct sets of keys."
   [templates]
-  (->UnionProjection templates))
+  {:pre [(seq templates)]}
+  (if (next templates)
+    (->UnionProjection templates)
+    (first templates)))
 
 (defn union
   "Syntactic sugar for [[union*]] allowing for projections-to-merge to be given
