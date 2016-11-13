@@ -65,6 +65,21 @@
   [value]
   (instance? claro.data.protocols.Mutation value))
 
+;; ## Parameterization
+
+(defprotocol+ Parameters
+  "Protocol for custom parameter handling for Resolvables."
+  (set-parameters [this parameters]
+    "Set the current resolvable's parameters, returning an updated
+     resolvable.
+
+     This is used by the [[parameters]] projection for injection."))
+
+(extend-protocol Parameters
+  clojure.lang.IPersistentMap
+  (set-parameters [resolvable parameters]
+    (into resolvable parameters)))
+
 ;; ## Trees
 
 (defprotocol+ ResolvableTree

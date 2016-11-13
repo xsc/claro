@@ -23,6 +23,24 @@
     {:infinite-seqs
      [(g/->InfiniteSeq nil) (g/->InfiniteSeq nil)]}))
 
+(defrecord ParameterizableValue [value]
+  data/Resolvable
+  (resolve! [_ _]
+    value)
+
+  data/Parameters
+  (set-parameters [this {value' :value}]
+    (assoc this :value (min value' 100))))
+
+(defrecord ParameterizableValueWithError [value]
+  data/Resolvable
+  (resolve! [_ _]
+    value)
+
+  data/Parameters
+  (set-parameters [_ params]
+    (data/error "something went wrong." params)))
+
 ;; ## Tests
 
 (defspec t-parameterizable-seq-needs-value (test/times 5)
@@ -114,3 +132,23 @@
           (every?
             #(g/compare-to-template % template n)
             infinite-seqs))))))
+
+(defspec t-parameters-with-transformation (test/times 50)
+  (let [run! (make-engine)]
+    (prop/for-all
+      [value gen/int]
+      (let [result @(-> (->ParameterizableValue nil)
+                        (projection/apply
+                          (projection/parameters {:value value} projection/leaf))
+                        (run!))]
+        (= result (min value 100))))))
+
+(defspec t-parameters-with-transformation-error (test/times 50)
+  (let [run! (make-engine)]
+    (prop/for-all
+      [value gen/int]
+      (let [result @(-> (->ParameterizableValueWithError nil)
+                        (projection/apply
+                          (projection/parameters {:value value} projection/leaf))
+                        (run!))]
+        (is (data/error? result))))))

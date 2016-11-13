@@ -14,9 +14,11 @@
    Mutation
    Resolvable
    Transform
+   Parameters
    resolvable?
    resolve!
    resolve-batch!
+   set-parameters
    transform]
   [claro.data.error
    collect-errors

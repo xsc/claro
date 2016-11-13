@@ -41,7 +41,7 @@
   (-> value
       (assert-resolvable!)
       (assert-allowed-params! params)
-      (into params)))
+      (p/set-parameters params)))
 
 (defrecord ParametersProjection [params rest-template]
   pr/Projection
