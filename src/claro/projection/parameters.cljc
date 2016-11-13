@@ -5,13 +5,14 @@
             [claro.projection.protocols :as pr]))
 
 (defn- assert-resolvable!
-  [value]
+  [value params]
   (when-not (p/resolvable? value)
     (throw
       (IllegalArgumentException.
         (str
-          "'parameters' projection requires a resolvable, given: "
-          (pr-str value)))))
+          "'parameters' projection requires a resolvable.\n"
+          "parameters: " (pr-str params) "\n"
+          "value:      " (pr-str value)))))
   value)
 
 (defn- assert-allowed-params!
@@ -22,24 +23,29 @@
       (throw
         (IllegalArgumentException.
           (format
-            (str "'parameters' projection requires key '%s' to exist "
-                 "in resolvable: %s")
+            (str "'parameters' projection requires key '%s' to exist.%n"
+                 "parameters: %s%n"
+                 "value:      %s")
             k
+            (pr-str params)
             (pr-str value)))))
     (when-not (nil? current)
       (throw
         (IllegalArgumentException.
           (format
             (str "'parameters' projection cannot override non-nil value "
-                 "at '%s' in resolvable: %s")
+                 "at key '%s'%n"
+                 "parameters: %s%n"
+                 "value:      %s")
             k
+            (pr-str params)
             (pr-str value))))))
   value)
 
 (defn- inject-params
   [value params]
   (-> value
-      (assert-resolvable!)
+      (assert-resolvable! params)
       (assert-allowed-params! params)
       (p/set-parameters params)))
 
