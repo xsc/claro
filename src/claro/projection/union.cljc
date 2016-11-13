@@ -22,8 +22,11 @@
 
 (defn- union-of-maps
   [maps]
-  (assert-disjunct-keys maps)
-  (into {} maps))
+  (if (next maps)
+    (do
+      (assert-disjunct-keys maps)
+      (into {} maps))
+    (first maps)))
 
 (defrecord UnionProjection [templates]
   pr/Projection
@@ -39,6 +42,19 @@
   (.write w ">"))
 
 ;; ## Constructor
+
+(defn- with-grouped-templates
+  "Group templates by plain maps and others, then call `f`."
+  [templates f]
+  (loop [templates templates
+         maps      nil
+         non-maps  nil]
+    (if (seq templates)
+      (let [[template & rst] templates]
+        (if (and (map? template) (not (record? template)))
+          (recur rst (conj maps template) non-maps)
+          (recur rst maps (conj non-maps template))))
+      (f maps non-maps))))
 
 (defn union*
   "Apply all projection templates to the value, merging them together into
@@ -57,7 +73,17 @@
   [templates]
   {:pre [(seq templates)]}
   (if (next templates)
-    (->UnionProjection templates)
+    (with-grouped-templates templates
+      (fn [maps non-maps]
+        (cond (and maps non-maps)
+              (->UnionProjection
+                (cons (union-of-maps maps) non-maps))
+
+              maps
+              (union-of-maps maps)
+
+              :else
+              (->UnionProjection non-maps))))
     (first templates)))
 
 (defn union
