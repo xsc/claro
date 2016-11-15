@@ -13,7 +13,7 @@
   (let [run! (make-engine)]
     (prop/for-all
       [template (g/valid-template)
-       values   (let [g (g/infinite-seq)]
+       values   (let [g (g/infinite-seq-no-mutation)]
                   (gen/one-of
                     [(gen/vector g)
                      (gen/list g)

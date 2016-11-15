@@ -70,7 +70,7 @@
 (defspec t-prepare-seq (test/times 100)
   (let [run! (make-engine)]
     (prop/for-all
-      [values   (gen/vector (g/infinite-seq))
+      [values   (gen/vector (g/infinite-seq-no-mutation))
        op       gen-infinite-seq-prepare
        template (g/valid-template)]
       (= @(-> (mapv op values)
@@ -83,7 +83,7 @@
 (defspec t-prepare-set (test/times 100)
   (let [run! (make-engine)]
     (prop/for-all
-      [values   (gen/vector (g/infinite-seq))
+      [values   (gen/vector (g/infinite-seq-no-mutation))
        op       gen-infinite-seq-prepare
        template (g/valid-template)]
       (= @(-> (mapv op values)
@@ -96,7 +96,7 @@
 (defspec t-prepare-with-alias (test/times 100)
   (let [run! (make-engine)]
     (prop/for-all
-      [value    (g/infinite-seq)
+      [value    (g/infinite-seq-no-mutation)
        template (g/valid-template)
        op       gen-infinite-seq-prepare]
       (let [base-template

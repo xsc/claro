@@ -22,12 +22,29 @@
     {:value (->Identity n)
      :next  (->WrappedInfiniteSeq (inc n))}))
 
+(defrecord InfiniteSeqMutation [n]
+  data/Mutation
+  data/Resolvable
+  (resolve! [_ _]
+    (->InfiniteSeq n)))
+
 ;; ## Generators
+
+(defn infinite-seq-no-mutation
+  []
+  (gen/let [start-n     gen/int
+            constructor (gen/elements
+                          [->InfiniteSeq
+                           ->WrappedInfiniteSeq])]
+    (gen/return (constructor start-n))))
 
 (defn infinite-seq
   []
   (gen/let [start-n     gen/int
-            constructor (gen/elements [->InfiniteSeq ->WrappedInfiniteSeq])]
+            constructor (gen/elements
+                          [->InfiniteSeq
+                           ->WrappedInfiniteSeq
+                           ->InfiniteSeqMutation])]
     (gen/return (constructor start-n))))
 
 (defn non-wrapped-infinite-seq

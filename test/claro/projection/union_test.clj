@@ -39,3 +39,21 @@
                 @(-> value
                      (projection/apply (projection/union* [template template]))
                      (run!)))))))))
+
+(defspec t-union-projection-with-alias (test/times 100)
+  (let [run! (make-engine)]
+    (prop/for-all
+      [template (g/valid-template)
+       value    (g/infinite-seq)]
+      (let [raw @(-> value
+                     (projection/apply template)
+                     (run!))]
+        (is (= {:nested        (select-keys raw [:next])
+                :second-nested (select-keys raw [:value])}
+               @(-> {:nested value}
+                    (projection/apply
+                      (projection/union*
+                        [{:nested (select-keys template [:next])}
+                         {(projection/alias :second-nested :nested)
+                          (select-keys template [:value])}]))
+                    (run!))))))))
