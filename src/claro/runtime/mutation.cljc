@@ -1,6 +1,5 @@
 (ns claro.runtime.mutation
-  (:require [claro.data.protocols :as p]
-            [claro.runtime.resolution :refer [resolve-batches!]]))
+  (:require [claro.runtime.resolution :refer [resolve-batches!]]))
 
 (defn- assert-single-mutation!
   [mutations]
@@ -27,7 +26,7 @@
    resolvables]
   (when mutation?
     (if (zero? batch-count)
-      (when-let [mutations (seq (filter mutation? resolvables))]
+      (when-let [mutations (seq (distinct (filter mutation? resolvables)))]
         (assert-single-mutation! mutations)
         (resolve-batches! opts cache [mutations]))
       (assert-no-mutations! opts state resolvables))))
