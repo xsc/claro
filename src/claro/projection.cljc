@@ -11,7 +11,7 @@
    [1]: 01-projection.md
    [2]: 02-advanced-projection.md
    "
-  (:refer-clojure :exclude [apply alias case let])
+  (:refer-clojure :exclude [apply alias case let merge])
   (:require [claro.projection
              [protocols :refer [project]]
              aux
@@ -66,6 +66,8 @@
   [claro.projection.parameters
    parameters]
   [claro.projection.union
+   merge*
+   merge
    union*
    union]
   [claro.projection.value

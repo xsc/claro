@@ -1,9 +1,12 @@
 (ns claro.projection.union
+  (:refer-clojure :exclude [merge])
   (:require [claro.projection.protocols :as pr]
             [claro.data.error :refer [with-error?]]
             [claro.data.ops.chain :as chain]))
 
 ;; ## Record
+
+;; ### Union
 
 (defn- assert-disjunct-keys
   [maps]
@@ -19,6 +22,7 @@
       (IllegalStateException.
         (str "result maps for 'union' projection need to have disjunct keys "
              "but they overlap in " (pr-str (doall ks)) ": " (pr-str maps))))))
+
 
 (defn- union-of-maps
   [maps]
@@ -38,6 +42,27 @@
 (defmethod print-method UnionProjection
   [^UnionProjection value ^java.io.Writer w]
   (.write w "#<union ")
+  (print-method (vec (.-templates value)) w)
+  (.write w ">"))
+
+;; ### Merge
+
+(defn- merge-of-maps
+  [maps]
+  (if (next maps)
+    (into {} maps)
+    (first maps)))
+
+(defrecord MergeProjection [templates]
+  pr/Projection
+  (project [_ value]
+    (with-error? value
+      (-> (mapv #(pr/project % value) templates)
+          (chain/chain-blocking* merge-of-maps)))))
+
+(defmethod print-method MergeProjection
+  [^MergeProjection value ^java.io.Writer w]
+  (.write w "#<merge ")
   (print-method (vec (.-templates value)) w)
   (.write w ">"))
 
@@ -102,3 +127,16 @@
    Note that the the templates have to produce maps with disjunct sets of keys."
   [& templates]
   (union* templates))
+
+(defn ^{:added "0.2.5"} merge*
+  "Like [[union*]] but will merge overlapping keys like `clojure.core/merge`."
+  [templates]
+  {:pre [(seq templates)]}
+  (if (next templates)
+    (->MergeProjection templates)
+    (first templates)))
+
+(defn ^{:added "0.2.5"} merge
+  "Like [[union]] but will merge overlapping keys like `clojure.core/merge`."
+  [& templates]
+  (merge* templates))
