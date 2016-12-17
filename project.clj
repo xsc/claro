@@ -11,7 +11,8 @@
                  [manifold "0.1.5"]]
   :profiles {:dev
              {:dependencies [[org.clojure/test.check "0.9.0"]
-                             [com.gfredericks/test.chuck "0.2.7"]]}
+                             [com.gfredericks/test.chuck "0.2.7"]
+                             [instaparse "1.4.1"]]}
              :benchmarks
              {:plugins [[perforate "0.3.4"]]
               :dependencies [[perforate "0.3.4"]
