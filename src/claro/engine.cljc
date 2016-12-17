@@ -12,6 +12,7 @@
   (:require [claro.engine
              [core :as core]
              [adapter :as adapter]
+             [multi :as multi]
              [selector :as selector]
              [protocols :as p]]
             #?(:clj [claro.runtime.impl.manifold :as default])
@@ -56,6 +57,17 @@
      (engine default-impl opts)))
   ([impl opts]
    (core/build impl (merge default-opts opts))))
+
+(defn multi-engine
+  "Create a resolution engine that takes a seq of values and resolves them
+   in-order and independently using the optionally given base engine.
+
+   This is especially useful when resolving multiple mutations since the cache
+   will be reset between runs."
+  ([]
+   (multi-engine default-engine))
+  ([base-engine]
+   (multi/build base-engine)))
 
 (defn run!
   "Resolve the given value using an engine created on-the-fly. See

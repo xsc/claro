@@ -15,6 +15,14 @@
    resolver fn."
   (wrap [engine wrap-fn]
     "Wrap the given engine's resolver using the given `wrap-fn`.")
+  (run [engine resolvable opts]
+    "Resolve the given `resolvable` using the given engine, using `opts` to
+     override per-run options:
+
+     - `:env`
+     - `:selector`
+
+     Will return a deferred value.")
   (impl [engine]
     "Return the given engines deferred implementation."))
 
@@ -32,16 +40,18 @@
     (Engine. selector (update opts :resolve-fn wrap-fn)))
   (impl [_]
     (:impl opts))
-
-  clojure.lang.IFn
-  (invoke [this resolvable]
-    (run-via-runtime! opts selector resolvable))
-  (invoke [_ resolvable {env' :env, selector' :selector}]
+  (run [_ resolvable {env' :env, selector' :selector}]
     (run-via-runtime!
       (-> opts
           (update :env merge env'))
       (or selector' selector)
-      resolvable)))
+      resolvable))
+
+  clojure.lang.IFn
+  (invoke [this resolvable]
+    (run-via-runtime! opts selector resolvable))
+  (invoke [this resolvable opts]
+    (run this resolvable opts)))
 
 (alter-meta! #'->Engine assoc :private true)
 
