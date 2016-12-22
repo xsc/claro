@@ -11,10 +11,13 @@
 (import-vars
   [claro.data.protocols
    BatchedResolvable
+   Cost
    Mutation
+   PureResolvable
    Resolvable
    Transform
    Parameters
+   cost
    resolvable?
    resolve!
    resolve-batch!

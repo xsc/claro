@@ -21,6 +21,12 @@
     "Resolve `all-resolvables` (which is a seq including `resolvable`), returning
      a manifold deferrable containing a seq with resolved values in-order."))
 
+(defprotocol+ PureResolvable
+  "Interface for values whose resolution is done using a pure function, i.e.
+   there is no I/O or statefulness involved.
+
+   Do not use with `extend-type` or `extend-protocol`!")
+
 (defn resolvable?
   "Check whether the given value implements the `Resolvable` protocol."
   [value]
@@ -30,6 +36,33 @@
   "Check whether the given value implements the `Resolvable` protocol."
   [value]
   (instance? claro.data.protocols.BatchedResolvable value))
+
+(defn ^{:added "0.2.6"} pure-resolvable?
+  "Check whether the given value implements the `PureResolvable` protocol."
+  [value]
+  (instance? claro.data.protocols.PureResolvable value))
+
+;; ## Costs
+
+(defprotocol+ ^{:added "0.2.6"} Cost
+  "Protocol describing resolution cost for a batch of resolvables. The
+   following default values are produced:
+
+   - `0` for batches of `PureResolvable`,
+   - `1` for batches of `BatchedResolvables`
+   - `(count batch)` for other batches.
+
+   The overall cost can be used when declaring engines by supplying the
+   `:max-cost` option."
+  (^{:added "0.2.6"} cost [resolvable batch]
+    "Calculate the cost of resolution for the given batch."))
+
+(extend-protocol Cost
+  Object
+  (cost [resolvable batch]
+    (cond (pure-resolvable? resolvable)    0
+          (batched-resolvable? resolvable) 1
+          :else (count batch))))
 
 ;; ## Postprocessing
 ;;
