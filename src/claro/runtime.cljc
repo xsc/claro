@@ -4,7 +4,7 @@
              [caching :as caching]
              [impl :as impl]
              [inspection :refer [inspect-resolvables]]
-             [mutation :refer [maybe-resolve-mutations!]]
+             [mutation :refer [select-mutation-batches]]
              [resolution :refer [resolve-batches!]]
              [selection :refer [select-resolvable-batches]]])
   (:refer-clojure :exclude [run!]))
@@ -51,15 +51,14 @@
   (let [resolvables (inspect-resolvables opts value)]
     (if (empty? resolvables)
       value
-      (or (some->> (maybe-resolve-mutations! opts state resolvables)
-                   (resolve-and-recur! opts state (inc batch-count)))
-          (let [batches (select-resolvable-batches opts resolvables)
-                new-batch-count (+ batch-count (count batches))]
-            (assert-batch-count! opts new-batch-count)
-            (if (seq batches)
-              (->> (resolve-batches! opts cache batches)
-                   (resolve-and-recur! opts state new-batch-count))
-              value))))))
+      (let [batches (or (select-mutation-batches opts state resolvables)
+                        (select-resolvable-batches opts resolvables))
+            new-batch-count (+ batch-count (count batches))]
+        (assert-batch-count! opts new-batch-count)
+        (if (seq batches)
+          (->> (resolve-batches! opts cache batches)
+               (resolve-and-recur! opts state new-batch-count))
+          value)))))
 
 (defn run!
   "Run the resolution engine on the given value. `opts` is a map of:

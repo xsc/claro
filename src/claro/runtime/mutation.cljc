@@ -1,5 +1,4 @@
-(ns claro.runtime.mutation
-  (:require [claro.runtime.resolution :refer [resolve-batches!]]))
+(ns claro.runtime.mutation)
 
 (defn- assert-single-mutation!
   [mutations]
@@ -20,7 +19,7 @@
           (str "can only resolve mutations on the top-level: "
                (pr-str candidate)))))))
 
-(defn maybe-resolve-mutations!
+(defn select-mutation-batches
   [{:keys [mutation?] :as opts}
    {:keys [batch-count cache] :as state}
    resolvables]
@@ -28,5 +27,5 @@
     (if (zero? batch-count)
       (when-let [mutations (seq (distinct (filter mutation? resolvables)))]
         (assert-single-mutation! mutations)
-        (resolve-batches! opts cache [mutations]))
+        [mutations])
       (assert-no-mutations! opts state resolvables))))
