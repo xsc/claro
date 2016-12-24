@@ -1,64 +1,58 @@
 (ns claro.runtime
   (:require [claro.runtime
              [application :refer [apply-resolved-batches]]
-             [caching :as caching]
              [impl :as impl]
              [inspection :refer [inspect-resolvables]]
              [mutation :refer [select-mutation-batches]]
              [resolution :refer [resolve-batches!]]
-             [selection :refer [select-resolvable-batches]]])
+             [selection :refer [select-resolvable-batches]]
+             [state :as state]])
   (:refer-clojure :exclude [run!]))
 
-;; ## Depth Protection
+(defn- resolve-batches-in-state
+  [state]
+  (let [impl             (state/impl state)
+        resolve-deferred (resolve-batches! state)]
+    (->> (fn [resolvable->value]
+           (let [value (apply-resolved-batches state resolvable->value)]
+             (state/finalize state resolvable->value value)))
+         (impl/chain1 impl resolve-deferred))))
 
-(defn- assert-batch-count!
-  [{:keys [max-batches] :or {max-batches 256}} batch-count]
-  (when (some-> max-batches (< batch-count))
-    (throw
-      (IllegalStateException.
-        (format "resolution has exceeded maximum batch count/depth: %d/%d"
-                batch-count
-                max-batches)))))
-
-;; ## Runtime Logic
-
-(defn- apply-and-recur!
-  [{:keys [impl] :as opts}
-   {:keys [value cache] :as state}
-   new-batch-count
-   resolvable->value]
-  (let [value (apply-resolved-batches opts value resolvable->value)
-        cache (caching/update-cache opts cache resolvable->value)]
-    (impl/recur
-      impl
-      (assoc! state
-              :value       value
-              :cache       cache
-              :batch-count new-batch-count))))
-
-(defn- resolve-and-recur!
-  [{:keys [impl] :as opts}
-   state
-   new-batch-count
-   resolvable-deferred]
-  (impl/chain1
-    impl
-    resolvable-deferred
-    #(apply-and-recur! opts state new-batch-count %)))
-
-(defn- run-step!
-  [{:keys [impl] :as opts} {:keys [value cache batch-count] :as state}]
-  (let [resolvables (inspect-resolvables opts value)]
-    (if (empty? resolvables)
-      value
-      (let [batches (or (select-mutation-batches opts state resolvables)
-                        (select-resolvable-batches opts resolvables))
-            new-batch-count (+ batch-count (count batches))]
-        (assert-batch-count! opts new-batch-count)
+(defn run-step
+  "Run a single resolution step. Return a deferred value with the
+   state after resolution."
+  [state]
+  (let [resolvables (inspect-resolvables state)]
+    (if-not (empty? resolvables)
+      (let [batches (or (select-mutation-batches state resolvables)
+                        (select-resolvable-batches state resolvables))]
         (if (seq batches)
-          (->> (resolve-batches! opts cache batches)
-               (resolve-and-recur! opts state new-batch-count))
-          value)))))
+          (-> state
+              (state/set-batches batches)
+              (resolve-batches-in-state))
+          (state/done state)))
+      (state/done state))))
+
+(defn- run-step-and-recur
+  "Run a single resolution step, return 'recur' value if resolution is not
+   done."
+  [state]
+  (let [impl (state/impl state)
+        state-deferred (run-step state)]
+    (->> (fn [state']
+           (if-not (state/done? state')
+             (impl/recur impl state')
+             state'))
+         (impl/chain1 impl state-deferred))))
+
+(defn run!*
+  "Like [[run!]] but will produce the complete resolution state."
+  [{:keys [impl] :as opts} value]
+  {:pre [(every?
+           (comp fn? opts)
+           [:select-fn :inspect-fn :resolve-fn :apply-fn])]}
+  (->> (state/initialize opts value)
+       (impl/loop impl run-step-and-recur)))
 
 (defn run!
   "Run the resolution engine on the given value. `opts` is a map of:
@@ -80,13 +74,7 @@
 
    Returns a manifold deferred with the resolved result."
   [{:keys [impl] :as opts} value]
-  {:pre [(every?
-           (comp fn? opts)
-           [:select-fn :inspect-fn :resolve-fn :apply-fn])]}
-  (impl/loop
+  (impl/chain1
     impl
-    #(run-step! opts %)
-    (transient
-      {:value value
-       :batch-count 0
-       :cache (caching/init-cache opts)})))
+    (run!* opts value)
+    :value))

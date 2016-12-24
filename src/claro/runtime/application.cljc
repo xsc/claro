@@ -1,5 +1,8 @@
-(ns claro.runtime.application)
+(ns claro.runtime.application
+  (:require [claro.runtime.state :as state]))
 
 (defn apply-resolved-batches
-  [{:keys [apply-fn]} value resolvable->value]
-  (apply-fn value resolvable->value))
+  [state resolvable->value]
+  (let [apply-fn (state/opt state :apply-fn)
+        value    (state/value state)]
+    (apply-fn value resolvable->value)))
