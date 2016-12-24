@@ -68,9 +68,10 @@
    - `:apply-fn`: a function that takes the original value, as well as a map
      of resolvable -> resolved value pairs, and returns a map of `:value` and
      `:resolvables`, where `:value` is the now-more-resolved value for the next
-     iteration and `:resolvables` the new resolvables within,
-   - `:max-batches`: an integer describing the maximum number of batches to
-     resolve before throwing an `IllegalStateException`.
+   - `:cost-fn`: a function that, given a seq of resolvables of the same class,
+     returns a number describing resolution cost,
+   - `:max-cost`: the maximum resolution cost, triggering an
+     `IllegalStateException` when exceeded.
 
    Returns a manifold deferred with the resolved result."
   [{:keys [impl] :as opts} value]

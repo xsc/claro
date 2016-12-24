@@ -12,18 +12,17 @@
           (pr-str mutations)))))
   mutations)
 
-(defn- assert-no-mutations!
+(defn- throw-unexpected-mutations!
   [mutations]
-  (when (seq mutations)
-    (throw
-      (IllegalStateException.
-        (str "can only resolve mutations on the top-level: "
-             (pr-str (vec mutations)))))))
+  (throw
+    (IllegalStateException.
+      (str "can only resolve mutations on the top-level: "
+           (pr-str (vec mutations))))))
 
 (defn select-mutation-batches
   [state resolvables]
   (when-let [mutation? (state/opt state :mutation?)]
-    (let [mutations (seq (distinct (filter mutation? resolvables)))]
+    (when-let [mutations (seq (distinct (filter mutation? resolvables)))]
       (if (state/first-iteration? state)
         [(assert-single-mutation! mutations)]
-        (assert-no-mutations! mutations)))))
+        (throw-unexpected-mutations! mutations)))))

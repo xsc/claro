@@ -46,10 +46,32 @@
 
 ;; ## Batches
 
+(defn assert-cost-limit
+  [{:keys [opts cost] :as state}]
+  (let [{:keys [max-cost] :or {max-cost 256}} opts]
+    (when (> cost max-cost)
+      (throw
+        (IllegalStateException.
+          (format "resolution has exceeded maximum cost: %s > %s"
+                  cost
+                  max-cost)))))
+  state)
+
+(defn- update-cost
+  [{:keys [opts cost batches] :as state}]
+  (let [{:keys [cost-fn] :or {cost-fn count}} opts]
+    (->> (reduce
+           (fn [cost batch]
+             (+ cost (cost-fn batch)))
+           cost batches)
+         (assoc! state :cost)
+         (assert-cost-limit))))
+
 (defn set-batches
   [state batches]
   (-> state
-      (assoc! :batches batches)))
+      (assoc! :batches batches)
+      (update-cost)))
 
 ;; ## Cache
 

@@ -59,6 +59,7 @@
 
 (def ^:private fixed-runtime-opts
   {:mutation?  p/mutation?
+   :cost-fn    #(p/cost (first %) %)
    :inspect-fn p/resolvables
    :apply-fn   p/apply-resolved-values})
 

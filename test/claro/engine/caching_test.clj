@@ -63,7 +63,7 @@
     (every? #(identical? v %) sq)))
 
 (defspec t-caching (test/times 100)
-  (let [run! (make-engine {:max-batches Long/MAX_VALUE})]
+  (let [run! (make-engine)]
     (prop/for-all
       [resolvables gen-identical-resolvables]
       (let [result (is @(run! resolvables))]

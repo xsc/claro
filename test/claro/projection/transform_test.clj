@@ -52,7 +52,7 @@
                     (run!! initial-value initial-template))))))))
 
 (defspec t-transform-without-output-template-but-infinite-tree (test/times 25)
-  (let [run! (make-engine)
+  (let [run! (make-engine {:max-cost 256})
         run!! (comp deref run! projection/apply)]
     (prop/for-all
       [initial-value (g/infinite-seq)
@@ -68,5 +68,5 @@
           (is
             (thrown-with-msg?
               IllegalStateException
-              #"resolution has exceeded maximum batch count"
+              #"resolution has exceeded maximum cost"
               (run!! initial-value transformation))))))))
