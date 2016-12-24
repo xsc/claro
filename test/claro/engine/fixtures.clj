@@ -8,7 +8,7 @@
          (make-engine v nil)))
   ([resolutions more-opts]
    (engine/wrap
-     (engine/engine (merge {:max-batches 256} more-opts))
+     (engine/engine (merge {:max-cost Long/MAX_VALUE} more-opts))
      (fn [f]
        (fn [env batch]
          (swap! resolutions

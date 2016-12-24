@@ -1,4 +1,5 @@
-(ns claro.runtime.selection)
+(ns claro.runtime.selection
+  (:require [claro.runtime.state :as state]))
 
 (defn- assert-class-selected!
   "Make sure at least a single class was selected, otherwise throw
@@ -25,8 +26,9 @@
   "Use the given `select-fn` (seq of classes -> seq of classes) and
    `inspect-fn` (value -> seq of resolvables) to collect batches of
    resolvables. Returns a seq of such batches."
-  [{:keys [select-fn]} resolvables]
-  (let [by-class (group-by class (distinct resolvables))]
+  [state resolvables]
+  (let [select-fn (state/opt state :select-fn)
+        by-class (group-by class (distinct resolvables))]
     (->> (select-fn by-class)
          (assert-class-selected!)
          (assert-classes-valid! by-class)

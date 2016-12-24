@@ -30,7 +30,7 @@
   {:env         {}
    :selector    selector/default-selector
    :adapter     adapter/default-adapter
-   :max-batches 32})
+   :max-cost    32})
 
 (def ^:private default-engine
   "The pre-prepared default engine."
@@ -45,8 +45,9 @@
    `resolve-batch!`,
    - `:selector`: a `claro.engine.selector/Selector` implementation used during
    each iteration to decide what to resolve next,
-   - `:max-batches`: a value describing how many iterations are allowed before
-   the engine will throw an `IllegalStateException` (default: `32`).
+   - `:max-cost`: a value describing the maximum resolution cost for each run,
+   causing  the engine to throw an `IllegalStateException` (default: `32`) if
+   exceeded.
 
    The resulting value's resolution behaviour can be wrapped using
    `claro.engine/wrap`."

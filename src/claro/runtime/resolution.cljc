@@ -1,11 +1,11 @@
 (ns claro.runtime.resolution
   (:require [claro.runtime.impl :as impl]
-            [claro.runtime.caching :as caching]))
+            [claro.runtime.state :as state]))
 
 (defn- assert-deferrable
   "Make sure the given value is a deferrable, throw `IllegalStateException`
    otherwise."
-  [{:keys [impl]} batch value]
+  [impl batch value]
   (when-not (impl/deferrable? impl value)
     (throw
       (IllegalStateException.
@@ -18,11 +18,14 @@
 (defn- generate-deferred
   "Create a function that takes batch of resolvables and generates a deferred
    containing the in-order results."
-  [{:keys [resolve-fn env impl] :as opts} batch]
-  (some->> batch
-           (resolve-fn env)
-           (assert-deferrable opts batch)
-           (impl/->deferred impl)))
+  [state batch]
+  (let [resolve-fn (state/opt state :resolve-fn)
+        env        (state/opt state :env {})
+        impl       (state/impl state)]
+    (some->> batch
+             (resolve-fn env)
+             (assert-deferrable impl batch)
+             (impl/->deferred impl))))
 
 (defn- assert-every-resolution!
   [batch resolved-values]
@@ -44,38 +47,39 @@
   "Returns a deferred representing the resolution of the given batch.
    `resolve-fn` has to return a deferred with the resolution results
    in-order."
-  [{:keys [impl] :as opts} batch]
+  [state batch]
   (impl/chain1
-    impl
-    (generate-deferred opts batch)
+    (state/impl state)
+    (generate-deferred state batch)
     #(assert-every-resolution! batch %)))
 
 (defn- resolve-batches-with-cache-step!
-  [opts cache result batch]
+  [state result batch]
   (loop [batch  batch
          result result
          uncached (transient [])]
     (if (seq batch)
       (let [[h & rst] batch
-            v (caching/read-cache opts cache h ::miss)]
+            v (state/from-cache state h ::miss)]
         (if (not= v ::miss)
           (recur rst (assoc-in result [:cached h] v) uncached)
           (recur rst result (conj! uncached h))))
       (if-let [rs (seq (persistent! uncached))]
-        (update result :ds conj (resolve-batch! opts rs))
+        (update result :ds conj (resolve-batch! state rs))
         result))))
 
 (defn- resolve-batches-with-cache!
-  [opts cache batches]
+  [state]
   (reduce
-    #(resolve-batches-with-cache-step! opts cache %1 %2)
+    #(resolve-batches-with-cache-step! state %1 %2)
     {:cached {}, :ds []}
-    batches))
+    (state/batches state)))
 
 (defn resolve-batches!
   "Resolve the given batches, returning a deferred with a map of
    original value -> resolved value pairs."
-  [{:keys [impl] :as opts} cache batches]
-  (let [{:keys [cached ds]} (resolve-batches-with-cache! opts cache batches)
-        zipped (impl/zip impl ds)]
+  [state]
+  (let [impl                (state/impl state)
+        {:keys [cached ds]} (resolve-batches-with-cache! state)
+        zipped              (impl/zip impl ds)]
     (impl/chain1 impl zipped #(into cached %))))

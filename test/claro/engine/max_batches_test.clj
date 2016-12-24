@@ -15,16 +15,16 @@
     (when (< n max-n)
       {:nested (Nested. (inc n) max-n)})))
 
-(defspec t-max-batches (test/times 100)
+(defspec t-max-cost (test/times 100)
   (prop/for-all
-    [max-n       gen/pos-int
-     max-batches gen/s-pos-int]
-    (let [run! (make-engine (atom []) {:max-batches max-batches})
+    [max-n    gen/pos-int
+     max-cost gen/s-pos-int]
+    (let [run! (make-engine (atom []) {:max-cost max-cost})
           result (run! (Nested. 0 max-n))]
       (cond (= max-n 0)           (is (nil? @result))
-            (< max-n max-batches) (is (map? @result))
+            (< max-n max-cost) (is (map? @result))
             :else (boolean
                     (is (thrown-with-msg?
                           IllegalStateException
-                          #"resolution has exceeded maximum batch count/depth"
+                          #"resolution has exceeded maximum cost"
                           @result)))))))
