@@ -6,22 +6,22 @@
             :year 2015
             :key "mit"}
   :dependencies [[org.clojure/clojure "1.8.0" :scope "provided"]
-                 [org.clojure/core.async "0.2.385" :scope "provided"]
+                 [org.clojure/core.async "0.2.395" :scope "provided"]
                  [potemkin "0.4.3"]
                  [manifold "0.1.5"]]
   :profiles {:dev
              {:dependencies [[org.clojure/test.check "0.9.0"]
                              [com.gfredericks/test.chuck "0.2.7"]
-                             [instaparse "1.4.1"]]}
+                             [instaparse "1.4.5"]]}
              :benchmarks
              {:plugins [[perforate "0.3.4"]]
               :dependencies [[perforate "0.3.4"]
                              [criterium "0.4.4"]
-                             [muse "0.4.0"]
+                             [muse "0.4.3-alpha3" :exclusions [manifold]]
                              [cats "0.4.0"]
-                             [org.clojure/core.async "0.2.385"]
-                             [funcool/urania "0.1.0"]
-                             [funcool/promesa "1.5.0"]]
+                             [org.clojure/core.async "0.2.395"]
+                             [funcool/urania "0.1.1"]
+                             [funcool/promesa "1.7.0"]]
               :source-paths ["benchmarks"]
               :perforate
               {:environments
