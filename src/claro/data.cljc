@@ -5,7 +5,7 @@
 
    [1]: 00-basics.md
    "
-  (:require [claro.data protocols error]
+  (:require [claro.data protocols error transform]
             [potemkin :refer [import-vars]]))
 
 (import-vars
@@ -31,4 +31,7 @@
    error
    error?
    error-message
-   error-data])
+   error-data]
+  [claro.data.transform
+   extend-list-transform
+   extend-transform])
