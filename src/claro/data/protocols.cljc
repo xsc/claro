@@ -32,12 +32,12 @@
   [value]
   (instance? claro.data.protocols.Resolvable value))
 
-(defn batched-resolvable?
+(defn ^{:added "0.2.7"} batched-resolvable?
   "Check whether the given value implements the `Resolvable` protocol."
   [value]
   (instance? claro.data.protocols.BatchedResolvable value))
 
-(defn ^{:added "0.2.6"} pure-resolvable?
+(defn ^{:added "0.2.7"} pure-resolvable?
   "Check whether the given value implements the `PureResolvable` protocol."
   [value]
   (instance? claro.data.protocols.PureResolvable value))
@@ -94,7 +94,7 @@
 
    Do not use with `extend-type` or `extend-protocol`.")
 
-(defn mutation?
+(defn ^{:added "0.2.7"} mutation?
   [value]
   (instance? claro.data.protocols.Mutation value))
 

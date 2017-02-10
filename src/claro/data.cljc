@@ -18,7 +18,10 @@
    Transform
    Parameters
    cost
+   mutation?
    resolvable?
+   batched-resolvable?
+   pure-resolvable?
    resolve!
    resolve-batch!
    set-parameters
