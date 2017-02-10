@@ -13,8 +13,7 @@
      containing more `Resolvable`s."))
 
 (defprotocol+ BatchedResolvable
-  "Interface for values that can be resolved in batches. These must also implement
-   the `Resolvable` interface.
+  "Interface for values that can be resolved in batches.
 
    Do not use with `extend-type` or `extend-protocol`!"
   (resolve-batch! [resolvable env all-resolvables]
@@ -27,11 +26,6 @@
 
    Do not use with `extend-type` or `extend-protocol`!")
 
-(defn resolvable?
-  "Check whether the given value implements the `Resolvable` protocol."
-  [value]
-  (instance? claro.data.protocols.Resolvable value))
-
 (defn ^{:added "0.2.7"} batched-resolvable?
   "Check whether the given value implements the `Resolvable` protocol."
   [value]
@@ -41,6 +35,15 @@
   "Check whether the given value implements the `PureResolvable` protocol."
   [value]
   (instance? claro.data.protocols.PureResolvable value))
+
+(defn resolvable?
+  "Check whether the given value implements the `Resolvable` protocol.
+
+   NOTE: Before version 0.2.7 this did not return true for `BatchedResolvable`
+         records."
+  [value]
+  (or (instance? claro.data.protocols.Resolvable value)
+      (batched-resolvable? value)))
 
 ;; ## Costs
 
