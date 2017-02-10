@@ -47,7 +47,7 @@
   "Implement the [[Transform]] protocol for the given `resolvable-class` by
    transforming/renaming fields according to a given field spec.
 
-  ```clojure
+   ```clojure
    (extend-transform
      Person
      {:pet      [->Pet :pet-id]
@@ -60,7 +60,7 @@
 
    - create `:pet` as `(->Pet (:pet-id result))`,
    - create `:location` as the result of the given function, and
-   - rename `:username` to `:name`.
+   - copy `:username` to `:name`.
 
    All these take the resolution result (!) as input but will not alter `nil`
    values."

@@ -80,8 +80,11 @@ The previous example can thus be rewritten as:
 > __Note:__ `transform` expects a single result as input, even if your
 > `Resolvable` implements the batching mechanisms outlined in the next section.
 
-While this split-up is compeletely optional, it is highly recommended. See the
+While this split-up is completely optional, it is highly recommended. See the
 topic [Testing & Debugging][testing] on how to best leverage it.
+
+Note that there are two helper macros for common transformation types, namely
+[[extend-transform]] and [[extend-list-transform]].
 
 [testing]: 04-testing-and-debugging.md
 
