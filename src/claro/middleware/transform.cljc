@@ -41,7 +41,7 @@
               (engine/impl engine)
               (resolver env batch)
               #(transform! predicate transform-fn %))))
-        (engine/wrap engine))))
+        (engine/wrap-transform engine))))
 
 (defn wrap-transform-by-class
   "Middleware that will pass any `Resolvable` of one of the given
