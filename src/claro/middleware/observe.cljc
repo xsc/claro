@@ -39,7 +39,7 @@
               (engine/impl engine)
               (resolver env batch)
               #(observe! predicate observer-fn %))))
-        (engine/wrap engine))))
+        (engine/wrap-transform engine))))
 
 (defn wrap-observe-by-class
   "Middleware that will pass any `Resolvable` of one of the given
@@ -90,7 +90,7 @@
                 (when (predicate result)
                   (observer-fn result))
                 result))))
-        (engine/wrap engine))))
+        (engine/wrap-transform engine))))
 
 (defn wrap-observe-batches-by-class
   "Middleware that will pass the result of any batch of `classes-to-observe`
@@ -133,4 +133,4 @@
                     (when (predicate result)
                       (observer-fn result delta)))
                   result)))))
-        (engine/wrap engine))))
+        (engine/wrap-transform engine))))
