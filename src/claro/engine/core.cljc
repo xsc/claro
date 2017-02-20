@@ -14,7 +14,16 @@
   "Protocol for a Resolution engine that supports wrapping of the
    resolver fn."
   (wrap [engine wrap-fn]
-    "Wrap the given engine's resolver using the given `wrap-fn`.")
+    "Wrap the engine's complete resolver function using the given `wrap-fn`.
+     The resolution results will be wrapped as trees. See [[wrap-transform]]
+     and [[wrap-pre-transform]] for access to the transformed and raw
+     results.")
+  (^{:added "0.2.8"} wrap-transform [engine wrap-fn]
+    "Wrap the given engine's resolver (after transformation but before tree
+     wrapping) using the given `wrap-fn`.")
+  (^{:added "0.2.8"} wrap-pre-transform [engine wrap-fn]
+    "Wrap the given engine's resolver (before transformation) using the given
+     `wrap-fn`.")
   (run [engine resolvable opts]
     "Resolve the given `resolvable` using the given engine, using `opts` to
      override per-run options:
@@ -28,16 +37,47 @@
 
 ;; ## Type
 
+(defn- attach-resolve-fn
+  [{:keys [wrap-transform wrap-finalize raw-resolve-fn] :as opts}]
+  (->> (concat wrap-transform wrap-finalize)
+       (resolver/build raw-resolve-fn)
+       (assoc opts :resolve-fn)))
+
 (defn- run-via-runtime!
   [opts selector resolvable]
   (runtime/run!
     (assoc opts :select-fn (selector/instantiate selector))
     (wrap-tree resolvable)))
 
+(defn- wrap*
+  [opts wrap-fn]
+  (-> opts
+      (update :wrap-finalize conj wrap-fn)
+      (attach-resolve-fn)))
+
+(defn- wrap-transform*
+  [opts wrap-fn]
+  (-> opts
+      (update :wrap-transform conj wrap-fn)
+      (attach-resolve-fn)))
+
+(defn- wrap-pre-transform*
+  [opts wrap-fn]
+  (-> opts
+      (update :wrap-transform #(into [wrap-fn] %))
+      (attach-resolve-fn)))
+
 (deftype Engine [selector opts]
   IEngine
   (wrap [engine wrap-fn]
-    (Engine. selector (update opts :resolve-fn wrap-fn)))
+    (->> (wrap* opts wrap-fn)
+         (Engine. selector)))
+  (wrap-transform [engine wrap-fn]
+    (->> (wrap-transform* opts wrap-fn)
+         (Engine. selector)))
+  (wrap-pre-transform [engine wrap-fn]
+    (->> (wrap-pre-transform* opts wrap-fn)
+         (Engine. selector)))
   (impl [_]
     (:impl opts))
   (run [_ resolvable {env' :env, selector' :selector}]
@@ -69,8 +109,11 @@
     (-> opts
         (merge fixed-runtime-opts)
         (dissoc :selector)
-        (assoc :impl       impl
-               :resolve-fn (resolver/build impl adapter)))))
+        (assoc :impl           impl
+               :wrap-finalize  [#(resolver/wrap-finalize impl %)]
+               :wrap-transform [#(resolver/wrap-transform impl %)]
+               :raw-resolve-fn (resolver/raw-resolve-fn impl adapter))
+        (attach-resolve-fn))))
 
 ;; ## Builder
 
