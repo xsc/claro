@@ -89,4 +89,6 @@
 (import-vars
   [claro.engine.core
    impl
-   wrap])
+   wrap
+   wrap-transform
+   wrap-pre-transform])
