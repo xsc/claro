@@ -4,50 +4,7 @@
             [claro.data.protocols :as p]
             [claro.runtime.impl :as impl]))
 
-;; ## Mock Wrapper
-
-(deftype Mock [mock-fn original transform?]
-  p/Resolvable
-  (resolve! [_ env]
-    (mock-fn original env))
-
-  p/Transform
-  (transform [_ result]
-    (if transform?
-      (p/transform original result)
-      result)))
-
-(alter-meta! #'->Mock assoc :private true)
-
-(defn- ->mock-with-transform
-  [mock-fn value]
-  (->Mock mock-fn value true))
-
-(defn- ->mock-without-transform
-  [mock-fn value]
-  (->Mock mock-fn value false))
-
 ;; ## Logic
-
-(defn- wrap-mocks
-  [->mock batch]
-  (map ->mock batch))
-
-(defn- unwrap-mocks
-  [engine deferred]
-  (impl/chain1
-    (engine/impl engine)
-    deferred
-    #(->> (for [[^Mock mock resolved] %]
-            [(.-original mock) resolved])
-          (into {}))))
-
-(defn- mock-resolver
-  [->mock engine resolver env batch]
-  (->> batch
-       (wrap-mocks ->mock)
-       (resolver env)
-       (unwrap-mocks engine)))
 
 (defn- make-lookup-fn
   [class mock-fn more]
@@ -59,16 +16,15 @@
     first))
 
 (defn- make-mock-wrapper
-  [engine ->mock lookup-fn]
+  [engine lookup-fn]
   (fn [resolver]
     (fn [env batch]
       (if-let [mock-fn (lookup-fn batch)]
-        (mock-resolver
-          (partial ->mock mock-fn)
-          engine
-          resolver
-          env
-          batch)
+        (impl/value
+          (engine/impl engine)
+          (->> (for [resolvable batch]
+                 [resolvable (mock-fn resolvable env)])
+               (into {})))
         (resolver env batch)))))
 
 ;; ## Middlewares
@@ -97,8 +53,8 @@
    > __Note:__ Multiple class/mock-fn pairs can be given."
   [engine class mock-fn & more]
   (->> (make-lookup-fn class mock-fn more)
-       (make-mock-wrapper engine ->mock-with-transform)
-       (engine/wrap engine)))
+       (make-mock-wrapper engine)
+       (engine/wrap-pre-transform engine)))
 
 (defn wrap-mock-result
   "Middleware that will prevent calling of `resolve!` or `resolve-batch!` for
@@ -125,5 +81,5 @@
    > __Note:__ Multiple class/mock-fn pairs can be given."
   [engine class mock-fn & more]
   (->> (make-lookup-fn class mock-fn more)
-       (make-mock-wrapper engine ->mock-without-transform)
-       (engine/wrap engine)))
+       (make-mock-wrapper engine)
+       (engine/wrap-transform engine)))
