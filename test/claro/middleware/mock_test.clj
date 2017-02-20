@@ -64,24 +64,24 @@
                     :name "Me"
                     :friend-ids []})
                  input)
-               (run-mock Person input)))))
+               (run-mock Person input))))))
 
-    (testing "mocking a `BatchedResolvable`."
-      (let [input (map ->BatchedPerson (range 5))]
-        (testing "actual resolution results."
-          (is (= (map
-                   (fn [{:keys [id]}]
-                     (assoc (fetch-person id) :id id))
-                   input)
-                 (engine/run!! input))))
-        (testing "mocked results."
-          (is (= (map
-                   (fn [{:keys [id]}]
-                     {:id id
-                      :name "Me"
-                      :friend-ids []})
-                   input)
-                 (run-mock BatchedPerson input))))))))
+  (testing "mocking a `BatchedResolvable`."
+    (let [input (map ->BatchedPerson (range 5))]
+      (testing "actual resolution results."
+        (is (= (map
+                 (fn [{:keys [id]}]
+                   (assoc (fetch-person id) :id id))
+                 input)
+               (engine/run!! input))))
+      (testing "mocked results."
+        (is (= (map
+                 (fn [{:keys [id]}]
+                   {:id id
+                    :name "Me"
+                    :friend-ids []})
+                 input)
+               (run-mock BatchedPerson input)))))))
 
 (deftest t-wrap-mock-result
   (testing "mocking a `Resolvable`."
@@ -91,13 +91,13 @@
                  {:name "Me"
                   :friend-ids []})
                input)
-             (run-mock-result Person input))))
+             (run-mock-result Person input)))))
 
-    (testing "mocking a `BatchedResolvable`."
-      (let [input (map ->BatchedPerson (range 5))]
-        (is (= (map
-                 (fn [{:keys [id]}]
-                   {:name "Me"
-                    :friend-ids []})
-                 input)
-               (run-mock-result BatchedPerson input)))))))
+  (testing "mocking a `BatchedResolvable`."
+    (let [input (map ->BatchedPerson (range 5))]
+      (is (= (map
+               (fn [{:keys [id]}]
+                 {:name "Me"
+                  :friend-ids []})
+               input)
+             (run-mock-result BatchedPerson input))))))
