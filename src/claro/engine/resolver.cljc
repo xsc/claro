@@ -1,6 +1,7 @@
 (ns claro.engine.resolver
   (:require [claro.runtime.impl :as impl]
             [claro.data
+             [error :refer [error?]]
              [protocols :as p]
              [tree :refer [wrap-tree]]]))
 
@@ -56,11 +57,15 @@
   "Generate a function to be called after resolution, postprocessing the
    resolved value."
   [impl resolver]
-  (fn [env batch]
-    (impl/chain1
-      impl
-      (resolver env batch)
-      #(map-kv p/transform %))))
+  (let [transform-fn (fn [resolvable value]
+                       (if (error? value)
+                         value
+                         (p/transform resolvable value)))]
+    (fn [env batch]
+      (impl/chain1
+        impl
+        (resolver env batch)
+        #(map-kv transform-fn %)))))
 
 ;; ## Finalisation
 
