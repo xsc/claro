@@ -64,3 +64,20 @@
      (if (error? v#)
        v#
        (do ~@body))))
+
+(defmacro ^{:added "0.2.9"} unless-error->
+  [value & body]
+  (if-let [[f & rst] (seq body)]
+    `(let [v# ~value]
+       (if (error? v#)
+         v#
+         (unless-error-> (-> v# ~f) ~@rst)))
+    value))
+
+(defmacro ^{:added "0.2.9"} unless-error->>
+  [value & body]
+  (if-let [[f & rst] (seq body)]
+    `(let [v# ~value] (if (error? v#)
+         v#
+         (unless-error->> (->> v# ~f) ~@rst)))
+    value))
