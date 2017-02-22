@@ -5,6 +5,7 @@
 
    [1]: 00-basics.md
    "
+  (:refer-clojure :exclude [partition-by])
   (:require [claro.data protocols error transform]
             [potemkin :refer [import-vars]]))
 
@@ -17,6 +18,7 @@
    Resolvable
    Transform
    Parameters
+   Partition
    cost
    mutation?
    resolvable?
@@ -25,6 +27,7 @@
    resolve!
    resolve-batch!
    set-parameters
+   partition-by
    transform]
   [claro.data.error
    collect-errors

@@ -1,4 +1,5 @@
 (ns claro.data.protocols
+  (:refer-clojure :exclude [partition-by])
   (:require [potemkin :refer [defprotocol+ definterface+]]))
 
 ;; ## Resolvables
@@ -66,6 +67,29 @@
     (cond (pure-resolvable? resolvable)    0
           (batched-resolvable? resolvable) 1
           :else (count batch))))
+
+;; ## Partitions
+
+(defprotocol+ ^{:added "0.2.10"} Partition
+  "Protocol enhancing batching capabilities by allowing batches to be
+   partitioned using some per-resolvable-class criterion.
+
+   This is only used for batched resolvables."
+  (partition-by [resolvable]
+    "Calculate a partitioning key for the given resolvable. Resolvables with
+     the same partitioning key will be resolved within the same batch."))
+
+(extend-protocol Partition
+  Object
+  (partition-by [_]
+    nil))
+
+(defn partition-batch
+  "Partition a batch of resolvables using the [[Partition]] protocol"
+  [batch]
+  (->> batch
+       (group-by partition-by)
+       (vals)))
 
 ;; ## Postprocessing
 ;;
