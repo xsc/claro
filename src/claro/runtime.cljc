@@ -70,6 +70,8 @@
      `:resolvables`, where `:value` is the now-more-resolved value for the next
    - `:cost-fn`: a function that, given a seq of resolvables of the same class,
      returns a number describing resolution cost,
+   - `:partition-fn`: a function that, given a seq of same-class resolvables,
+     creates disjunct batches of resolvables to independently resolve,
    - `:max-cost`: the maximum resolution cost, triggering an
      `IllegalStateException` when exceeded.
 

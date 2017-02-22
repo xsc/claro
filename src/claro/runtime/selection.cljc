@@ -28,8 +28,10 @@
    resolvables. Returns a seq of such batches."
   [state resolvables]
   (let [select-fn (state/opt state :select-fn)
+        partition-fn (state/opt state :partition-fn vector)
         by-class (group-by class (distinct resolvables))]
     (->> (select-fn by-class)
          (assert-class-selected!)
          (assert-classes-valid! by-class)
-         (mapv #(get by-class %)))))
+         (mapcat (comp partition-fn by-class))
+         (vec))))
