@@ -98,10 +98,11 @@
 ;; ## Options
 
 (def ^:private fixed-runtime-opts
-  {:mutation?  p/mutation?
-   :cost-fn    #(p/cost (first %) %)
-   :inspect-fn p/resolvables
-   :apply-fn   p/apply-resolved-values})
+  {:mutation?    p/mutation?
+   :cost-fn      #(p/cost (first %) %)
+   :inspect-fn   p/resolvables
+   :partition-fn p/partition-batch
+   :apply-fn     p/apply-resolved-values})
 
 (defn- ->runtime-opts
   [impl {:keys [adapter] :as opts}]
