@@ -138,3 +138,29 @@
         (if (= delta 0)
           (every? nil? result)
           (< delta cost-per-resolvable))))))
+
+;; ## Partitions
+
+(defrecord PartitionResolvable [n modulo]
+  data/Resolvable
+  data/BatchedResolvable
+  (resolve-batch! [_ _ batch]
+    (map :n batch))
+
+  data/Partition
+  (partition-by [_]
+    (mod n modulo)))
+
+(defspec t-partitioned-batch-resolvable-cost (test/times 50)
+  (prop/for-all
+    [values (gen/vector gen/pos-int)
+     modulo gen/s-pos-int]
+    (let [resolvable  (map #(->PartitionResolvable % modulo) values)
+          partitions  (count (group-by #(mod % modulo) values))
+          resolutions (atom [])
+          run!        (make-engine resolutions {:max-cost modulo})
+          result      @(-> (run! resolvable) (d/catch identity))]
+      (and (= (count @resolutions) partitions)
+           (if (> partitions modulo)
+             (instance? Throwable result)
+             (= values result))))))
