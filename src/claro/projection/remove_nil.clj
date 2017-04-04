@@ -25,7 +25,7 @@
     (list* sq)
     (into (empty original) sq)))
 
-(defn- remove-nil-elements
+(defn- remove-nil-elements*
   [original]
   (let [original' (seq original)]
     (-> (p/project marker-seq-projection original')
@@ -43,7 +43,7 @@
   p/Projection
   (project [_ original]
     (with-error? original
-      (let [result (then original remove-nil-elements)]
+      (let [result (then original remove-nil-elements*)]
         (if template
           (p/project template result)
           result)))))
