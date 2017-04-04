@@ -23,6 +23,7 @@
              maybe
              objects
              parameters
+             remove-nil
              sequential
              sets
              transform
@@ -65,6 +66,8 @@
    transform]
   [claro.projection.parameters
    parameters]
+  [claro.projection.remove-nil
+   remove-nil-elements]
   [claro.projection.union
    merge*
    merge
