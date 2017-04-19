@@ -1,4 +1,4 @@
-(defproject claro "0.2.13-SNAPSHOT"
+(defproject claro "0.2.13"
   :description "claro que sí"
   :url "https://github.com/xsc/claro"
   :license {:name "MIT License"
