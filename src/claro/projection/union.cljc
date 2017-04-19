@@ -41,7 +41,7 @@
 
 (defmethod print-method UnionProjection
   [^UnionProjection value ^java.io.Writer w]
-  (.write w "#<union ")
+  (.write w "#<claro/union ")
   (print-method (vec (.-templates value)) w)
   (.write w ">"))
 
@@ -62,7 +62,7 @@
 
 (defmethod print-method MergeProjection
   [^MergeProjection value ^java.io.Writer w]
-  (.write w "#<merge ")
+  (.write w "#<claro/merge ")
   (print-method (vec (.-templates value)) w)
   (.write w ">"))
 

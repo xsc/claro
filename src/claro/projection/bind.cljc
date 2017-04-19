@@ -22,7 +22,7 @@
 
 (defmethod print-method BindProjection
   [^BindProjection value ^java.io.Writer w]
-  (.write w "#<bind ")
+  (.write w "#<claro/bind ")
   (print-method (.-template value) w)
   (.write w ">"))
 

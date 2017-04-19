@@ -14,6 +14,10 @@
     true)
   (processable? [_]
     false)
+  (resolvables* [_]
+    (throw
+      (IllegalStateException.
+        "'ResolvedComposition' should never be inspected. This is a bug.")))
   (unwrap-tree [_]
     (f (p/unwrap-tree value))))
 

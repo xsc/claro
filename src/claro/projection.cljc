@@ -11,13 +11,14 @@
    [1]: 01-projection.md
    [2]: 02-advanced-projection.md
    "
-  (:refer-clojure :exclude [apply alias case let merge])
+  (:refer-clojure :exclude [apply alias case let merge juxt])
   (:require [claro.projection
              [protocols :refer [project]]
              aux
              conditional
              case
              bind
+             juxt
              level
              maps
              maybe
@@ -42,7 +43,8 @@
 
 (import-vars
   [claro.projection.aux
-   extract]
+   extract
+   extract-in]
   [claro.projection.objects
    leaf]
   [claro.projection.conditional
@@ -54,6 +56,9 @@
   [claro.projection.bind
    bind
    let]
+  [claro.projection.juxt
+   juxt*
+   juxt]
   [claro.projection.level
    levels]
   [claro.projection.maps

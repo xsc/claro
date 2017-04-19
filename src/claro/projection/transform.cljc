@@ -19,7 +19,7 @@
 
 (defmethod print-method Preparation
   [^Preparation value ^java.io.Writer w]
-  (.write w "#<prepare ")
+  (.write w "#<claro/prepare ")
   (print-method (.-rest-template value) w)
   (.write w ">"))
 
@@ -44,7 +44,7 @@
 
 (defmethod print-method Transformation
   [^Transformation value ^java.io.Writer w]
-  (.write w "#<transform ")
+  (.write w "#<claro/transform ")
   (print-method (.-input-template value) w)
   (.write w ">"))
 

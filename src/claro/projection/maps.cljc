@@ -76,9 +76,9 @@
 
 (defmethod print-method AliasKey
   [^AliasKey value ^java.io.Writer w]
-  (.write w "#<alias ")
+  (.write w "#<claro/alias ")
   (print-method (.-key value) w)
-  (.write w " -> ")
+  (.write w " => ")
   (print-method (.-alias-key value) w)
   (.write w ">"))
 
