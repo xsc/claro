@@ -47,7 +47,7 @@
 
 (defmethod print-method CaseResolvableProjection
   [^CaseResolvableProjection value ^java.io.Writer w]
-  (.write w "#<case-resolvable ")
+  (.write w "#<claro/case-resolvable ")
   (print-method (.-class->template value) w)
   (.write w ">"))
 
@@ -66,7 +66,7 @@
 
 (defmethod print-method CaseProjection
   [^CaseProjection value ^java.io.Writer w]
-  (.write w "#<case ")
+  (.write w "#<claro/case ")
   (print-method (.-class->template value) w)
   (.write w ">"))
 

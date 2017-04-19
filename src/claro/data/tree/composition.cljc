@@ -78,5 +78,4 @@
   [^ResolvableComposition value ^java.io.Writer writer]
   (.write writer "<< ")
   (print-method (.-tree value) writer)
-  (.write writer (str " -> " (.-f value)))
-  (.write writer " >>"))
+  (.write writer " => ... >>"))

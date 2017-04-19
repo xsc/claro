@@ -20,12 +20,12 @@
 (defmethod print-method ValueProjection
   [^ValueProjection value ^java.io.Writer w]
   (let [t (.-template value)]
-    (.write w "#<")
+    (.write w "#<claro/")
     (.write w (if t "value" "finite-value"))
     (.write w " ")
     (print-method (.-value value) w)
     (when t
-      (.write w " -> ")
+      (.write w " => ")
       (print-method (.-template value) w))
     (.write w ">")))
 

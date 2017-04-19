@@ -21,3 +21,9 @@
       (cond (= tree tree') this
             (p/resolved? tree') (-> tree' f)
             :else (BlockingComposition. tree' f)))))
+
+(defmethod print-method BlockingComposition
+  [^BlockingComposition value ^java.io.Writer writer]
+  (.write writer "<< ")
+  (print-method (.-tree value) writer)
+  (.write writer " => ... >>"))

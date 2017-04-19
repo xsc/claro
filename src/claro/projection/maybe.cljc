@@ -23,7 +23,7 @@
 
 (defmethod print-method MaybeProjection
   [^MaybeProjection value ^java.io.Writer w]
-  (.write w "#<maybe ")
+  (.write w "#<claro/maybe ")
   (print-method (.-template value) w)
   (.write w ">"))
 
@@ -50,7 +50,7 @@
 
 (defmethod print-method DefaultProjection
   [^DefaultProjection value ^java.io.Writer w]
-  (.write w "#<default ")
+  (.write w "#<claro/default ")
   (print-method (.-template value) w)
   (.write w " | ")
   (print-method (.-default-value value) w)

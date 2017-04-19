@@ -59,9 +59,9 @@
 
 (defmethod print-method ParametersProjection
   [^ParametersProjection value ^java.io.Writer w]
-  (.write w "#<parameters ")
+  (.write w "#<claro/parameters ")
   (print-method (.-params value) w)
-  (.write w " -> ")
+  (.write w " => ")
   (print-method (.-rest-template value) w)
   (.write w ">"))
 
