@@ -42,7 +42,8 @@
 
 (import-vars
   [claro.projection.aux
-   extract]
+   extract
+   extract-in]
   [claro.projection.objects
    leaf]
   [claro.projection.conditional
