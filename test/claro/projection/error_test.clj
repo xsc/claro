@@ -36,6 +36,7 @@
                 (gen/hash-map (projection/alias v :nested) g))
               (gen/fmap projection/maybe g)
               (gen/fmap projection/extract gen/keyword)
+              (gen/fmap #(projection/juxt % %) g)
               (gen/fmap #(projection/transform identity % %) g)
               (gen/fmap #(projection/prepare identity %) g)
               (gen/fmap #(projection/parameters {} %) g)

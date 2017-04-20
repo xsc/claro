@@ -1,7 +1,8 @@
 (ns claro.projection.juxt
   (:refer-clojure :exclude [juxt])
   (:require [claro.projection.protocols :as pr]
-            [claro.data.error :refer [with-error?]]))
+            [claro.data.error :refer [with-error?]]
+            [claro.data.ops.chain :as chain]))
 
 ;; ## Record
 
@@ -9,7 +10,11 @@
   pr/Projection
   (project [_ value]
     (with-error? value
-      (mapv #(pr/project % value) templates))))
+      (chain/chain-eager
+        value
+        (fn [result]
+          (with-error? result
+            (mapv #(pr/project % result) templates)))))))
 
 (defmethod print-method JuxtProjection
   [^JuxtProjection value ^java.io.Writer w]
