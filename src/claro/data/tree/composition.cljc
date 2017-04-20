@@ -1,5 +1,6 @@
 (ns claro.data.tree.composition
-  (:require [claro.data.protocols :as p])
+  (:require [claro.data.protocols :as p]
+            [claro.data.error :refer [error?]])
   (:import [claro.data.protocols ResolvableTree]))
 
 ;; ## Helper
@@ -67,12 +68,17 @@
     (p/resolvables* tree))
   (apply-resolved-values [this resolvable->value]
     (let [tree' (p/apply-resolved-values tree resolvable->value)]
-      (if-not (identical? tree tree')
-        (let [value (match-value tree' predicate ::none)]
-          (if (not= value ::none)
-            (f value)
-            (ResolvableComposition. tree' predicate f)))
-        this))))
+      (cond (error? tree')
+            tree'
+
+            (identical? tree tree')
+            this
+
+            :else
+            (let [value (match-value tree' predicate ::none)]
+              (if (not= value ::none)
+                (f value)
+                (ResolvableComposition. tree' predicate f)))))))
 
 (defmethod print-method ResolvableComposition
   [^ResolvableComposition value ^java.io.Writer writer]

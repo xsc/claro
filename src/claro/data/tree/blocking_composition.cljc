@@ -1,5 +1,6 @@
 (ns claro.data.tree.blocking-composition
-  (:require [claro.data.protocols :as p])
+  (:require [claro.data.protocols :as p]
+            [claro.data.error :refer [error?]])
   (:import [claro.data.protocols ResolvableTree ]))
 
 (deftype BlockingComposition [tree f]
@@ -19,6 +20,7 @@
   (apply-resolved-values [this resolvable->value]
     (let [tree' (p/apply-resolved-values tree resolvable->value)]
       (cond (= tree tree') this
+            (error? tree') tree'
             (p/resolved? tree') (-> tree' f)
             :else (BlockingComposition. tree' f)))))
 
