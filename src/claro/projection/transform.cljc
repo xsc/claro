@@ -64,8 +64,36 @@
    ```
 
    If no `output-template` is given, you _have_ to apply projections to
-   potentially infinite subtrees within the transformation function."
+   potentially infinite subtrees within the transformation function.
+
+   If the transformation won't introduce any new resolvables,
+   [[transform-finite]] should be preferred due to its better performance with
+   deeply nested trees."
   ([f input-template]
    (->Transformation f input-template nil))
   ([f input-template output-template]
   (->Transformation f input-template output-template)))
+
+;; ## Transformation to Finite Value
+
+(defrecord FiniteTransformation [f input-template]
+  pr/Projection
+  (project [_ value]
+    (with-error? value
+      (-> (pr/project input-template value)
+          (chain/chain-blocking* f)))))
+
+(defmethod print-method FiniteTransformation
+  [^Transformation value ^java.io.Writer w]
+  (.write w "#<claro/transform ")
+  (print-method (.-input-template value) w)
+  (.write w ">"))
+
+(defn ^{:added "0.2.15"} transform-finite
+  "Like [[transform]] but assuming that `f` produces a finite value, i.e.
+   one without any further resolvables.
+
+   For transformations on deeply nested structures this will perform better
+   than [[transform]] since it avoids re-inspection of the tree."
+  [f input-template]
+  (->FiniteTransformation f input-template))

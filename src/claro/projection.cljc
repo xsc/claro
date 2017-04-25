@@ -68,7 +68,8 @@
    default]
   [claro.projection.transform
    prepare
-   transform]
+   transform
+   transform-finite]
   [claro.projection.parameters
    parameters]
   [claro.projection.remove-nil

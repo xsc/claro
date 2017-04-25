@@ -70,3 +70,18 @@
               IllegalStateException
               #"resolution has exceeded maximum cost"
               (run!! initial-value transformation))))))))
+
+(defspec t-finite-transform-without-output-template-but-infinite-tree (test/times 25)
+  (let [run! (make-engine {:max-cost 256})
+        run!! (comp deref run! projection/apply)]
+    (prop/for-all
+      [initial-value (g/infinite-seq)
+       replacement-value (g/infinite-seq-no-mutation)
+       initial-template (g/valid-template)]
+      (let [observed (promise)
+            transformation (projection/transform-finite
+                             (fn [v]
+                               (deliver observed v)
+                               replacement-value)
+                             initial-template)]
+        (= replacement-value (run!! initial-value transformation))))))

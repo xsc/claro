@@ -59,5 +59,3 @@
    resolution limits.)"
   [value]
   (->ValueProjection value nil))
-
-(finite-value 1)
