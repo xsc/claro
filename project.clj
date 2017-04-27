@@ -41,6 +41,8 @@
                               claro.resolution-with-batching.claro
                               claro.projection-benchmarks.deep
                               claro.projection-benchmarks.union]}
+                {:name :tree
+                 :namespaces [claro.performance-benchmarks.wrap-tree]}
                 {:name :projections
                  :namespaces [claro.projection-benchmarks.deep
                               claro.projection-benchmarks.union]}]}
