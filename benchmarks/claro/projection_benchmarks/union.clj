@@ -23,7 +23,7 @@
              (fn [{:keys [friend-ids] :as person}]
                (assoc person :friends (map ->Person friend-ids))))))))
 (def run!!
-  (comp deref (engine/engine {:max-batches 1024})))
+  (comp deref (engine/engine {:max-cost 1024})))
 
 ;; ## Values
 

@@ -42,7 +42,7 @@
         (make-template depth))))
 
 (def run!!
-  (comp deref (engine/engine {:max-batches 1024})))
+  (comp deref (engine/engine {:max-cost 1024})))
 
 ;; ## Cases
 
