@@ -94,7 +94,7 @@
   (let [apple-gen (->> [(Apple. :red) (Apple. :green)]
                        (gen/elements)
                        (gen/vector)
-                       (gen/tuple (gen/elements [[] () #{}]))
+                       (gen/tuple (gen/elements [[] #{}]))
                        (gen/fmap
                          (fn [[empty-coll apples]]
                            (into empty-coll apples))))]

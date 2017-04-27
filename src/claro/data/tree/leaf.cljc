@@ -22,3 +22,7 @@
 (defmethod print-method ResolvableLeaf
   [^ResolvableLeaf value ^java.io.Writer writer]
   (print-method (.-resolvable value) writer))
+
+(defn make
+  [value]
+  (->ResolvableLeaf value))
