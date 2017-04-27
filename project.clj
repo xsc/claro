@@ -42,7 +42,8 @@
                               claro.projection-benchmarks.deep
                               claro.projection-benchmarks.union]}
                 {:name :tree
-                 :namespaces [claro.performance-benchmarks.wrap-tree]}
+                 :namespaces [claro.performance-benchmarks.wrap-tree
+                              claro.performance-benchmarks.apply-resolved-values]}
                 {:name :projections
                  :namespaces [claro.projection-benchmarks.deep
                               claro.projection-benchmarks.union]}]}
