@@ -43,7 +43,7 @@
            [rs (tree/wrap-tree tree)]))))
 
 (def gen-collection
-  (->> (gen/elements [[] () #{}])
+  (->> (gen/elements [[] #{}])
        (gen/tuple gen-resolvables)
        (gen/fmap
          (fn [[rs empty-coll]]
