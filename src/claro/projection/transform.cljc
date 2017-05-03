@@ -84,7 +84,7 @@
           (chain/chain-blocking* f)))))
 
 (defmethod print-method FiniteTransformation
-  [^Transformation value ^java.io.Writer w]
+  [^FiniteTransformation value ^java.io.Writer w]
   (.write w "#<claro/transform ")
   (print-method (.-input-template value) w)
   (.write w ">"))
