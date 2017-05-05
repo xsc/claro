@@ -130,7 +130,7 @@ subtrees, ...) you can use [[transform]].
 (def sum-counts
   (projection/transform
     #(apply + (map :count %))
-    {{:count projection/leaf}]))
+    [{:count projection/leaf}]))
 ```
 
 Optionally, you can supply an output template, that will be applied to the
