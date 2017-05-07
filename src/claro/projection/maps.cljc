@@ -2,7 +2,7 @@
   (:refer-clojure :exclude [alias])
   (:require [claro.projection.protocols :as pr]
             [claro.projection.value :refer [value?]]
-            [claro.data.ops.then :refer [then]]
+            [claro.data.ops.chain :as chain]
             [claro.data.error :refer [with-error?]]))
 
 ;; ## Assertions
@@ -23,7 +23,7 @@
   value)
 
 (defn- assert-contains!
-  [unresolved-value value k template this]
+  [this unresolved-value value k template]
   (when-not (or (contains? value k)
                 (value? template))
     (throw
@@ -41,7 +41,7 @@
   value)
 
 (defn- assert-no-override!
-  [unresolved-value value k this]
+  [this unresolved-value value k]
   (when (contains? value k)
     (throw
       (IllegalArgumentException.
@@ -59,14 +59,14 @@
 ;; ## Projection Logic
 
 (defn- project-value
-  [unresolved-value value key template this]
-  (assert-contains! unresolved-value value key template this)
+  [this unresolved-value value key template]
+  (assert-contains! this unresolved-value value key template)
   (pr/project template (get value key)))
 
 (defn- project-aliased-value
-  [unresolved-value value alias-key key template this]
-  (assert-no-override! unresolved-value value alias-key this)
-  (project-value unresolved-value value key template this))
+  [this unresolved-value value alias-key key template]
+  (assert-no-override! this unresolved-value value alias-key)
+  (project-value this unresolved-value value key template))
 
 ;; ## Alias Keys
 ;;
@@ -110,28 +110,36 @@
   [this unresolved-value value]
   (with-error? value
     (assert-map! unresolved-value value this)
-    (reduce
-      (fn [result [k template]]
-        (if (instance? AliasKey k)
-          (let [{:keys [key alias-key]} k]
-            (->> this
-                 (project-aliased-value
-                   unresolved-value
-                   value
-                   alias-key
-                   key
-                   template)
-                 (assoc result alias-key)))
-          (->> this
-               (project-value
-                 unresolved-value
-                 value
-                 k
-                 template)
-               (assoc result k))))
-      {} this)))
+    (if-not (empty? this)
+      (let [project-unaliased
+            #(project-value this unresolved-value value %1 %2)
+            project-aliased
+            #(project-aliased-value this unresolved-value value %1 %2 %3)]
+        (loop [template (seq this)
+               keys     (transient [])
+               values   (transient [])]
+          (if template
+            (let [[k value-template] (first template)]
+              (if (instance? AliasKey k)
+                (let [{:keys [key alias-key]} k
+                      value (project-aliased alias-key key value-template)]
+                  (recur
+                    (next template)
+                    (conj! keys alias-key)
+                    (conj! values value)))
+                (let [value (project-unaliased k value-template)]
+                  (recur
+                    (next template)
+                    (conj! keys k)
+                    (conj! values value)))))
+            (let [ks (persistent! keys)
+                  vs (persistent! values)]
+              (chain/chain-blocking* vs #(zipmap ks %))))))
+      {})))
 
 (extend-protocol pr/Projection
   clojure.lang.IPersistentMap
   (pr/project [this value]
-    (then value #(project-keys this value %))))
+    (chain/chain-eager
+      value
+      #(project-keys this value %))))
