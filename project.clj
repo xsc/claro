@@ -46,6 +46,7 @@
                               claro.performance-benchmarks.apply-resolved-values]}
                 {:name :projections
                  :namespaces [claro.projection-benchmarks.deep
+                              claro.projection-benchmarks.sequential
                               claro.projection-benchmarks.union]}]}
               :jvm-opts ^:replace ["-server" "-XX:+TieredCompilation"]}
              :codox
