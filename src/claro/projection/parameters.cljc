@@ -4,16 +4,7 @@
             [claro.data.error :refer [with-error?]]
             [claro.projection.protocols :as pr]))
 
-(defn- assert-resolvable!
-  [value params]
-  (when-not (p/resolvable? value)
-    (throw
-      (IllegalArgumentException.
-        (str
-          "'parameters' projection requires a resolvable.\n"
-          "parameters: " (pr-str params) "\n"
-          "value:      " (pr-str value)))))
-  value)
+;; ## Default Implementation
 
 (defn- assert-allowed-params!
   [value params]
@@ -42,11 +33,29 @@
             (pr-str value))))))
   value)
 
+(extend-protocol p/Parameters
+  clojure.lang.IPersistentMap
+  (set-parameters [resolvable parameters]
+    (-> (assert-allowed-params! resolvable parameters)
+        (into parameters))))
+
+;; ## Parameter Injection
+
+(defn- assert-resolvable!
+  [value params]
+  (when-not (p/resolvable? value)
+    (throw
+      (IllegalArgumentException.
+        (str
+          "'parameters' projection requires a resolvable.\n"
+          "parameters: " (pr-str params) "\n"
+          "value:      " (pr-str value)))))
+  value)
+
 (defn- inject-params
   [value params]
   (-> value
       (assert-resolvable! params)
-      (assert-allowed-params! params)
       (p/set-parameters params)))
 
 (defrecord ParametersProjection [params rest-template]

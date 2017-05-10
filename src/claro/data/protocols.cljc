@@ -135,11 +135,6 @@
 
      This is used by the [[parameters]] projection for injection."))
 
-(extend-protocol Parameters
-  clojure.lang.IPersistentMap
-  (set-parameters [resolvable parameters]
-    (into resolvable parameters)))
-
 ;; ## Trees
 
 (defprotocol+ ResolvableTree
