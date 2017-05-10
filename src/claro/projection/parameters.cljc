@@ -88,3 +88,27 @@
   [params rest-template]
   {:pre [(map? params)]}
   (->ParametersProjection params rest-template))
+
+;; ## Parameter Injection (w/ Null Tolerance)
+
+(defrecord MaybeParametersProjection [params rest-template]
+  pr/Projection
+  (project [_ value]
+    (with-error? value
+      (->> #(some-> % (inject-params params))
+           (tree/transform-partial value)
+           (pr/project rest-template)))))
+
+(defmethod print-method MaybeParametersProjection
+  [^MaybeParametersProjection value ^java.io.Writer w]
+  (.write w "#<claro/maybe-parameters ")
+  (print-method (.-params value) w)
+  (.write w " => ")
+  (print-method (.-rest-template value) w)
+  (.write w ">"))
+
+(defn ^{:added "0.2.18"} maybe-parameters
+  "Like [[parameters]] but will ignore `nil` values."
+  [params rest-template]
+  {:pre [(map? params)]}
+  (->MaybeParametersProjection params rest-template))

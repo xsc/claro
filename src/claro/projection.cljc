@@ -71,6 +71,7 @@
    transform
    transform-finite]
   [claro.projection.parameters
+   maybe-parameters
    parameters]
   [claro.projection.remove-nil
    remove-nil-elements]
