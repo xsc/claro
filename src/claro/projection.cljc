@@ -11,7 +11,7 @@
    [1]: 01-projection.md
    [2]: 02-advanced-projection.md
    "
-  (:refer-clojure :exclude [apply alias case let merge juxt])
+  (:refer-clojure :exclude [apply alias case let merge juxt sort-by])
   (:require [claro.projection
              [protocols :refer [project]]
              aux
@@ -27,6 +27,7 @@
              remove-nil
              sequential
              sets
+             sort
              transform
              union
              value]
@@ -66,6 +67,8 @@
   [claro.projection.maybe
    maybe
    default]
+  [claro.projection.sort
+   sort-by]
   [claro.projection.transform
    prepare
    transform
