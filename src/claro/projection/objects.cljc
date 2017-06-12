@@ -35,8 +35,23 @@
   (project [_ value]
     (chain-eager value assert-leaf)))
 
+(defrecord UnsafeProjection []
+  Projection
+  (project [_ value]
+    value))
+
+(def unsafe
+  "Projection template for any kind of value. If this is used in places
+   where infinite subtrees can occur, engine executions _will_ run forever or
+   exceed the maximum resolution cost."
+  (->UnsafeProjection))
+
 ;; ## Printing
 
 (defmethod print-method LeafProjection
   [value ^java.io.Writer writer]
-  (.write writer "<leaf>"))
+  (.write writer "<claro/leaf>"))
+
+(defmethod print-method UnsafeProjection
+  [value ^java.io.Writer writer]
+  (.write writer "<claro/unsafe>"))

@@ -47,7 +47,8 @@
    extract
    extract-in]
   [claro.projection.objects
-   leaf]
+   leaf
+   unsafe]
   [claro.projection.conditional
    conditional
    conditional-union]
