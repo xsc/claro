@@ -1,7 +1,9 @@
 (ns claro.projection.value
   (:require [claro.projection.protocols :as pr]
             [claro.data.error :refer [with-error?]]
-            [claro.projection.objects :refer [leaf]]))
+            [claro.projection
+             [objects :refer [leaf]]
+             [maps :as maps]]))
 
 ;; ## Record
 
@@ -11,11 +13,15 @@
     (with-error? value'
       (if template
         (pr/project template value)
-        value))))
+        value)))
 
-(defn ^:no-doc value?
-  [v]
-  (instance? ValueProjection v))
+  maps/MapValueProjection
+  (project-value [this value]
+    (pr/project this value))
+  (project-missing-value [this _]
+    (if template
+      (pr/project template value)
+      value)))
 
 (defmethod print-method ValueProjection
   [^ValueProjection value ^java.io.Writer w]
