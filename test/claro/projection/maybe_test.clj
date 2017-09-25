@@ -45,18 +45,12 @@
   (let [run! (make-engine)
         value {:a 0}
         template {:b (projection/maybe projection/leaf)}]
-    (is
-      (thrown-with-msg?
-        IllegalArgumentException
-        #"projection template expects key"
-        @(run! (projection/apply value template))))))
+    (is (= {:b nil}
+           @(run! (projection/apply value template))))))
 
 (deftest t-default-on-missing-key
   (let [run! (make-engine)
         value {:a 0}
         template {:b (projection/default projection/leaf 4)}]
-    (is
-      (thrown-with-msg?
-        IllegalArgumentException
-        #"projection template expects key"
-        @(run! (projection/apply value template))))))
+    (is (= {:b 4}
+           @(run! (projection/apply value template))))))
