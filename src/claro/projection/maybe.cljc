@@ -1,5 +1,6 @@
 (ns claro.projection.maybe
   (:require [claro.projection.protocols :as pr]
+            [claro.projection.maps :as maps]
             [claro.data.ops.then :refer [then]]))
 
 ;; ## Maybe
@@ -8,7 +9,13 @@
   pr/Projection
   (project [_ value]
     (then value
-          #(some->> % (pr/project template)))))
+          #(some->> % (pr/project template))))
+
+  maps/MapValueProjection
+  (project-value [this value]
+    (pr/project this value))
+  (project-missing-value [this _]
+    nil))
 
 (defn maybe
   "Apply projection template if the value is not `nil`, otherwise just keep the
@@ -17,7 +24,9 @@
    ```clojure
    (projection/maybe {:name projection/leaf})
    ```
-   "
+
+   Note that this will cause a `nil` to be injected into a result map even if
+   the respective key is missing."
   [template]
   (->MaybeProjection template))
 
@@ -36,7 +45,13 @@
           #(->> (if (nil? %)
                   default-value
                   %)
-                (pr/project template)))))
+                (pr/project template))))
+
+  maps/MapValueProjection
+  (project-value [this value]
+    (pr/project this value))
+  (project-missing-value [this _]
+    (pr/project template default-value)))
 
 (defn default
   "Apply the given projection to any non-nil value or the given default.
@@ -44,7 +59,9 @@
    ```clojure
    (projection/default {:name projection/leaf} unknown-person)
    ```
-   "
+
+   Note that this will cause the default value to be injected into a result
+   map even if the respective key is missing."
   [template default-value]
   (->DefaultProjection template default-value))
 
