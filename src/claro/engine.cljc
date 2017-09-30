@@ -47,7 +47,8 @@
    each iteration to decide what to resolve next,
    - `:max-cost`: a value describing the maximum resolution cost for each run,
    causing  the engine to throw an `IllegalStateException` (default: `32`) if
-   exceeded.
+   exceeded,
+   - `check-cost?`: a flag enabling/disabling cost protection (default: `true`).
 
    The resulting value's resolution behaviour can be wrapped using
    `claro.engine/wrap`."

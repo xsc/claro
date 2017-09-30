@@ -164,3 +164,27 @@
            (if (> partitions modulo)
              (instance? Throwable result)
              (= values result))))))
+
+;; ## Disabling Cost Protection
+
+(defrecord HighCostResolvable []
+  data/Resolvable
+  (resolve! [_ _]
+    ::done)
+
+  data/Cost
+  (cost [_ _]
+    Long/MAX_VALUE))
+
+(deftest t-check-cost-flag
+  (let [value (->HighCostResolvable)]
+    (testing "with cost protection."
+      (let [run! (make-engine (atom []) {:max-cost 64})]
+        (is
+          (thrown-with-msg?
+            IllegalStateException
+            #"has exceeded maximum cost"
+            @(run! value)))))
+    (testing "with cost protection."
+      (let [run! (make-engine (atom []) {:max-cost 64, :check-cost? false})]
+        (is (= ::done @(run! value)))))))

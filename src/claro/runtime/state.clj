@@ -48,8 +48,9 @@
 
 (defn assert-cost-limit
   [{:keys [opts cost] :as state}]
-  (let [{:keys [max-cost] :or {max-cost 256}} opts]
-    (when (> cost max-cost)
+  (let [{:keys [max-cost check-cost?]
+         :or {max-cost 256, check-cost? true}} opts]
+    (when (and check-cost? (> cost max-cost))
       (throw
         (IllegalStateException.
           (format "resolution has exceeded maximum cost: %s > %s"
