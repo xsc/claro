@@ -65,6 +65,9 @@
                                    claro.engine.adapter
                                    claro.engine.selector
                                    #"^claro\.middleware\..*"
-                                   claro.projection]}}}
-  :aliases {"codox" ["with-profile" "codox,dev" "codox"]}
+                                   claro.projection]}}
+             :coverage {:plugins [[lein-cloverage "1.0.9"]]
+                        :dependencies [[org.clojure/tools.reader "1.1.0"]]}}
+  :aliases {"codox" ["with-profile" "codox,dev" "codox"]
+            "codecov" ["with-profile" "+coverage" "cloverage" "--codecov"]}
   :pedantic? :abort)
