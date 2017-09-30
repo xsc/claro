@@ -6,22 +6,23 @@
             :year 2015
             :key "mit"}
   :dependencies [[org.clojure/clojure "1.8.0" :scope "provided"]
-                 [org.clojure/core.async "0.2.395" :scope "provided"]
-                 [potemkin "0.4.3"]
-                 [manifold "0.1.5"]]
+                 [org.clojure/core.async "0.3.443" :scope "provided"]
+                 [potemkin "0.4.4"]
+                 [manifold "0.1.6"]
+                 [riddley "0.1.14"]]
   :profiles {:dev
              {:dependencies [[org.clojure/test.check "0.9.0"]
-                             [com.gfredericks/test.chuck "0.2.7"]
-                             [instaparse "1.4.5"]]}
+                             [com.gfredericks/test.chuck "0.2.8"]
+                             [instaparse "1.4.8"]]}
              :benchmarks
              {:plugins [[perforate "0.3.4"]]
               :dependencies [[perforate "0.3.4"]
                              [criterium "0.4.4"]
                              [muse "0.4.3-alpha3" :exclusions [manifold]]
                              [cats "0.4.0"]
-                             [org.clojure/core.async "0.2.395"]
+                             [org.clojure/core.async "0.3.443"]
                              [funcool/urania "0.1.1"]
-                             [funcool/promesa "1.7.0"]]
+                             [funcool/promesa "1.9.0"]]
               :source-paths ["benchmarks"]
               :perforate
               {:environments
@@ -50,8 +51,8 @@
                               claro.projection-benchmarks.union]}]}
               :jvm-opts ^:replace ["-server" "-XX:+TieredCompilation"]}
              :codox
-             {:dependencies [[org.clojure/tools.reader "1.0.0-beta2"]
-                             [codox-theme-rdash "0.1.1"]]
+             {:dependencies [[org.clojure/tools.reader "1.1.0"]
+                             [codox-theme-rdash "0.1.2"]]
               :plugins [[lein-codox "0.10.3"]]
               :codox {:project {:name "claro"}
                       :metadata {:doc/format :markdown}
