@@ -7,6 +7,7 @@ powerful optimisations and abstractions along the way.
 
 [![Build Status](https://travis-ci.org/xsc/claro.svg?branch=master)](https://travis-ci.org/xsc/claro)
 [![Clojars Artifact](https://img.shields.io/clojars/v/claro.svg)](https://clojars.org/claro)
+[![codecov](https://codecov.io/gh/xsc/claro/branch/master/graph/badge.svg)](https://codecov.io/gh/xsc/claro)
 
 It is inspired by [muse][muse] and heavily influenced by [GraphQL][graphql].
 

@@ -1,3 +1,6 @@
 language: clojure
 jdk:
   - oraclejdk8
+after_success:
+- lein codecov
+- bash <(curl -s https://codecov.io/bash) -f target/coverage/codecov.json
