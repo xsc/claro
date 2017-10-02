@@ -95,9 +95,10 @@
   pr/Projection
   (project [_ value]
     (with-error? value
-      (->> #(some-> % (inject-params params))
-           (tree/transform-partial value)
-           (pr/project rest-template)))))
+      (->> #(some-> %
+                    (inject-params params)
+                    (->> (pr/project rest-template)))
+           (tree/transform-partial value)))))
 
 (defmethod print-method MaybeParametersProjection
   [^MaybeParametersProjection value ^java.io.Writer w]
