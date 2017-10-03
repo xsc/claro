@@ -87,7 +87,7 @@
               (engine/impl engine)
               (resolver env batch)
               (fn [result]
-                (when (predicate result)
+                (when (predicate batch)
                   (observer-fn result))
                 result))))
         (engine/wrap-transform engine))))

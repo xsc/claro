@@ -31,10 +31,16 @@
         (map? value)        (project-map value current-level)
         :else               (project-coll value current-level)))
 
-(defrecord LevelProjection [n]
+(deftype LevelProjection [n]
   pr/Projection
   (project [_ value]
     (then value #(project-level % n))))
+
+(defmethod print-method LevelProjection
+  [^LevelProjection value ^java.io.Writer w]
+  (.write w "#<claro/level")
+  (print-method (.-n value) w)
+  (.write w ">"))
 
 ;; ## Constructor
 

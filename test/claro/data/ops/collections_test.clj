@@ -45,3 +45,39 @@
       [{nums1 :nums, r1 :resolvable} gen-collection
        {nums2 :nums, r2 :resolvable} gen-collection]
       (= (map + nums1 nums2) (run!! (ops/map + r1 r2))))))
+
+(defspec t-first (test/times 50)
+  (let [run!! (comp deref (make-engine))]
+    (prop/for-all
+      [{:keys [nums resolvable]} gen-collection]
+      (= (first nums) (run!! (ops/first resolvable))))))
+
+(defspec t-nth (test/times 50)
+  (let [run!! (comp deref (make-engine))]
+    (prop/for-all
+      [{:keys [nums resolvable]} gen-collection
+       n       gen/pos-int
+       wrapper (gen/elements [identity ->Identity])]
+      (let [value (ops/nth resolvable (wrapper n))]
+        (if (< n (count nums))
+          (= (nth nums n) (run!! value))
+          (boolean
+            (is
+              (thrown-with-msg?
+                java.lang.IllegalArgumentException
+                #"index \d+ out of bounds when calling 'nth'"
+                (run!! value)))))))))
+
+(defspec t-take (test/times 50)
+  (let [run!! (comp deref (make-engine))]
+    (prop/for-all
+      [{:keys [nums resolvable]} gen-collection
+       n gen/pos-int]
+      (= (take n nums) (run!! (ops/take n resolvable))))))
+
+(defspec t-drop (test/times 50)
+  (let [run!! (comp deref (make-engine))]
+    (prop/for-all
+      [{:keys [nums resolvable]} gen-collection
+       n gen/pos-int]
+      (= (drop n nums) (run!! (ops/drop n resolvable))))))

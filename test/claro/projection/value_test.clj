@@ -14,11 +14,12 @@
     (prop/for-all
       [template        (g/valid-template)
        value           (g/infinite-seq)
-       value-to-inject gen/simple-type-printable]
+       value-to-inject gen/simple-type-printable
+       value-op        (gen/elements [projection/value projection/finite-value])]
       (let [template-with-injection
             (assoc template
                    :extra-value
-                   (projection/value value-to-inject))
+                   (value-op value-to-inject))
             projected-value
             (projection/apply value template)
             projected-value-with-injection
@@ -31,8 +32,9 @@
   (let [run! (make-engine)]
     (prop/for-all
       [value           (g/infinite-seq)
-       value-to-inject gen/simple-type-printable]
-      (let [template {:next (projection/value value-to-inject)}
+       value-to-inject gen/simple-type-printable
+       value-op        (gen/elements [projection/value projection/finite-value])]
+      (let [template {:next (value-op value-to-inject)}
             projected-value (projection/apply value template)]
         (= {:next value-to-inject}
            @(run! projected-value))))))

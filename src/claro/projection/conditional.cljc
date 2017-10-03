@@ -19,15 +19,21 @@
         (if else-template
           [:done (pr/project else-template value)]))))
 
-(defrecord ConditionalProjection [template
-                                  condition->template
-                                  else-template]
+(deftype ConditionalProjection [template
+                                condition->template
+                                else-template]
   pr/Projection
   (project [_ value]
     (with-error? value
       (-> (pr/project template value)
           (then!
             #(project-match condition->template else-template value %))))))
+
+(defmethod print-method ConditionalProjection
+  [^ConditionalProjection value ^java.io.Writer w]
+  (.write w "#<claro/conditional ")
+  (print-method (.-template value) w)
+  (.write w " => ...>"))
 
 ;; ## Constructors
 

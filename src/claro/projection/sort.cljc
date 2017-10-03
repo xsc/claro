@@ -7,7 +7,7 @@
              [error :refer [with-error?]]
              [ops :as ops]]))
 
-(defrecord SortProjection [sort-template output-template]
+(deftype SortProjection [sort-template output-template]
   p/Projection
   (project [_ original]
     (with-error? original

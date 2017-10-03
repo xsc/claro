@@ -64,7 +64,19 @@
     p/every-processable?
     (wrap-assert-coll
       (fn [[v n]]
-        (core/nth v n))
+        (try
+          (core/nth v n)
+          (catch java.lang.IndexOutOfBoundsException e
+            (throw
+              (IllegalArgumentException.
+                (format
+                  (str "index %d out of bounds when calling 'nth'.%n"
+                       "resolvable: %s%n"
+                       "collection: %s")
+                  n
+                  (pr-str value)
+                  (pr-str v))
+                e)))))
       sequential?
       "can only apply 'nth' to sequentials, given:")))
 

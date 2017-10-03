@@ -112,7 +112,7 @@
 ;;
 ;; This can be used directly in maps to indicate a renamed/copied key.
 
-(defrecord AliasKey [alias-key key]
+(deftype AliasKey [alias-key key]
   MapKeyProjection
   (target-key [this value]
     (assert-no-override! this value alias-key)

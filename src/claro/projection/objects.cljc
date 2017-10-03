@@ -20,7 +20,7 @@
 
 ;; ## Templates
 
-(defrecord LeafProjection []
+(deftype LeafProjection []
   Projection
   (project [_ value]
     (chain-eager value assert-leaf)))
@@ -35,7 +35,7 @@
   (project [_ value]
     (chain-eager value assert-leaf)))
 
-(defrecord UnsafeProjection []
+(deftype UnsafeProjection []
   Projection
   (project [_ value]
     value))
@@ -50,8 +50,8 @@
 
 (defmethod print-method LeafProjection
   [value ^java.io.Writer writer]
-  (.write writer "<claro/leaf>"))
+  (.write writer "#<claro/leaf>"))
 
 (defmethod print-method UnsafeProjection
   [value ^java.io.Writer writer]
-  (.write writer "<claro/unsafe>"))
+  (.write writer "#<claro/unsafe>"))

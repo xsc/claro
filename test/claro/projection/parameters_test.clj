@@ -152,3 +152,20 @@
                           (projection/parameters {:value value} projection/leaf))
                         (run!))]
         (is (data/error? result))))))
+
+(defspec t-maybe-parameters (test/times 50)
+  (let [run! (make-engine)]
+    (prop/for-all
+      [template (g/valid-template)
+       initial-value (gen/elements
+                       [(->ParameterizableSeq)
+                        {:infinite-seq nil}])
+       n        gen/int]
+      (let [{:keys [infinite-seq] :or {infinite-seq ::missing}}
+            @(-> initial-value
+                 (projection/apply
+                   {:infinite-seq
+                    (projection/maybe-parameters {:n n} template)})
+                 (run!))]
+        (is (or (nil? infinite-seq)
+                (g/compare-to-template infinite-seq template n)))))))

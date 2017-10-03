@@ -116,3 +116,67 @@
            (= (:value value) expected-value))
        (or (not (contains? template :next))
            (recur (:next value) (:next template) (inc expected-value)))))
+
+(defn key-set
+  [v]
+  (if (map? v)
+    (set (keys v))))
+
+;; ## Projection Generator
+
+(defn gen-distinct
+  [g]
+  (gen/such-that
+    #(or (not-any? map? %)
+         (empty?
+           (clojure.set/intersection
+             (key-set (first %))
+             (key-set (second %)))))
+    (gen/vector g 2)))
+
+(def gen-projection
+  (let [leaf-gen (gen/elements
+                   [(projection/default projection/leaf ::default)
+                    (projection/levels 1)
+                    (projection/value ::value)
+                    (projection/value {:a 1} {:a projection/leaf})
+                    (projection/finite-value ::value)
+                    projection/leaf
+                    projection/unsafe])]
+    (gen/one-of
+      [(gen/recursive-gen
+         (fn [g]
+           (gen/one-of
+             [(gen/fmap vector g)
+              (gen/fmap hash-set g)
+              (gen/let [v gen/string-alpha-numeric]
+                (gen/hash-map v g))
+
+              (gen/let [v gen/string-alpha-numeric]
+                (gen/hash-map (projection/alias v :nested) g))
+              (gen/fmap projection/maybe g)
+              (gen/fmap projection/extract gen/keyword)
+              (gen/fmap #(projection/juxt % %) g)
+              (gen/fmap #(projection/transform identity % %) g)
+              (gen/fmap #(projection/transform-finite identity %) g)
+              (gen/fmap #(projection/prepare identity %) g)
+              (gen/fmap #(projection/parameters {} %) g)
+              (gen/fmap #(projection/maybe-parameters {} %) g)
+              (gen/fmap #(projection/conditional % some? %) g)
+              (gen/fmap #(projection/case Object %) g)
+              (gen/fmap #(projection/case-resolvable Object %) g)
+              (gen/fmap #(projection/sort-by % %) g)
+              (gen/fmap #(projection/bind (constantly %) %) g)
+              (gen/fmap projection/remove-nil-elements g)
+              (gen/fmap projection/union* (gen-distinct g))
+              (gen/fmap projection/merge* (gen-distinct g))]))
+         leaf-gen)
+       leaf-gen])))
+
+(def gen-error
+  (->> (gen/tuple
+         gen/string-ascii
+         (gen/one-of
+           [(gen/return nil)
+            (gen/map gen/string-ascii gen/string-ascii)]))
+       (gen/fmap #(apply data/error %))))

@@ -58,7 +58,7 @@
       (assert-resolvable! params)
       (p/set-parameters params)))
 
-(defrecord ParametersProjection [params rest-template]
+(deftype ParametersProjection [params rest-template]
   pr/Projection
   (project [_ value]
     (with-error? value
@@ -91,13 +91,14 @@
 
 ;; ## Parameter Injection (w/ Null Tolerance)
 
-(defrecord MaybeParametersProjection [params rest-template]
+(deftype MaybeParametersProjection [params rest-template]
   pr/Projection
   (project [_ value]
     (with-error? value
-      (->> #(some-> % (inject-params params))
-           (tree/transform-partial value)
-           (pr/project rest-template)))))
+      (->> #(some-> %
+                    (inject-params params)
+                    (->> (pr/project rest-template)))
+           (tree/transform-partial value)))))
 
 (defmethod print-method MaybeParametersProjection
   [^MaybeParametersProjection value ^java.io.Writer w]

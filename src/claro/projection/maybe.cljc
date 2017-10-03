@@ -5,7 +5,7 @@
 
 ;; ## Maybe
 
-(defrecord MaybeProjection [template]
+(deftype MaybeProjection [template]
   pr/Projection
   (project [_ value]
     (then value
@@ -38,7 +38,7 @@
 
 ;; ## Default
 
-(defrecord DefaultProjection [template default-value]
+(deftype DefaultProjection [template default-value]
   pr/Projection
   (project [_ value]
     (then value
