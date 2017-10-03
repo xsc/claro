@@ -6,7 +6,7 @@
 
 ;; ## Record
 
-(defrecord JuxtProjection [templates]
+(deftype JuxtProjection [templates]
   pr/Projection
   (project [_ value]
     (with-error? value

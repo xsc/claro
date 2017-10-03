@@ -12,7 +12,7 @@
     (->> (tree/transform-partial value f)
          (pr/project rest-template))))
 
-(defrecord Preparation [f rest-template]
+(deftype Preparation [f rest-template]
   pr/Projection
   (project [_ value]
     (apply-preparation value f rest-template)))
@@ -32,7 +32,7 @@
 
 ;; ## Transformation (after Resolution)
 
-(defrecord Transformation [f input-template output-template]
+(deftype Transformation [f input-template output-template]
   pr/Projection
   (project [_ value]
     (with-error? value
@@ -76,7 +76,7 @@
 
 ;; ## Transformation to Finite Value
 
-(defrecord FiniteTransformation [f input-template]
+(deftype FiniteTransformation [f input-template]
   pr/Projection
   (project [_ value]
     (with-error? value

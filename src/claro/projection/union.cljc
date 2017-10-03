@@ -32,7 +32,7 @@
       (into {} maps))
     (first maps)))
 
-(defrecord UnionProjection [templates]
+(deftype UnionProjection [templates]
   pr/Projection
   (project [_ value]
     (with-error? value
@@ -53,7 +53,7 @@
     (into {} maps)
     (first maps)))
 
-(defrecord MergeProjection [templates]
+(deftype MergeProjection [templates]
   pr/Projection
   (project [_ value]
     (with-error? value

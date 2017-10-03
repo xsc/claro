@@ -58,7 +58,7 @@
       (assert-resolvable! params)
       (p/set-parameters params)))
 
-(defrecord ParametersProjection [params rest-template]
+(deftype ParametersProjection [params rest-template]
   pr/Projection
   (project [_ value]
     (with-error? value
@@ -91,7 +91,7 @@
 
 ;; ## Parameter Injection (w/ Null Tolerance)
 
-(defrecord MaybeParametersProjection [params rest-template]
+(deftype MaybeParametersProjection [params rest-template]
   pr/Projection
   (project [_ value]
     (with-error? value

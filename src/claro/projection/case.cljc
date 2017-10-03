@@ -33,7 +33,7 @@
 
 ;; ## Records
 
-(defrecord CaseResolvableProjection [class->template]
+(deftype CaseResolvableProjection [class->template]
   pr/Projection
   (project [_ value]
     (with-error? value
@@ -51,7 +51,7 @@
   (print-method (.-class->template value) w)
   (.write w ">"))
 
-(defrecord CaseProjection [class->template]
+(deftype CaseProjection [class->template]
   pr/Projection
   (project [_ value]
     (with-error? value

@@ -39,7 +39,7 @@
 
 ;; ## Implementation
 
-(defrecord RemoveNilProjection [template]
+(deftype RemoveNilProjection [template]
   p/Projection
   (project [_ original]
     (with-error? original
@@ -47,6 +47,14 @@
         (if template
           (p/project template result)
           result)))))
+
+(defmethod print-method RemoveNilProjection
+  [^RemoveNilProjection value ^java.io.Writer w]
+  (.write w "#<claro/remove-nil-elements")
+  (when-let [template (.-template value)]
+    (.write w " ")
+    (print-method template w))
+  (.write w ">"))
 
 ;; ## Wrappers
 

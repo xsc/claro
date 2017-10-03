@@ -7,7 +7,7 @@
 
 ;; ## Record
 
-(defrecord ValueProjection [value template]
+(deftype ValueProjection [value template]
   pr/Projection
   (project [_ value']
     (with-error? value'

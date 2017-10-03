@@ -15,7 +15,7 @@
             [template' (bind-fn partial-value)]
             (pr/project template' value))))))
 
-(defrecord BindProjection [template bind-fn]
+(deftype BindProjection [template bind-fn]
   pr/Projection
   (project [_ value]
     (then value #(bind-template % template bind-fn))))

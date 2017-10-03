@@ -20,7 +20,7 @@
 
 (defmethod print-method ResolutionError
   [^ResolutionError value ^java.io.Writer writer]
-  (.write writer "<error ")
+  (.write writer "#<claro/error ")
   (print-method (.-message value) writer)
   (when-let [data (.-data value)]
     (.write writer ", ")
