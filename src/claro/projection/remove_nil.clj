@@ -45,7 +45,7 @@
     (with-error? original
       (let [result (then original remove-nil-elements*)]
         (if template
-          (p/project template result)
+          (then result #(p/project template %))
           result)))))
 
 (defmethod print-method RemoveNilProjection
