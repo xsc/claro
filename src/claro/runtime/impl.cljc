@@ -23,6 +23,7 @@
            ->deferred
            value
            chain
+           catch
            zip
            run
            loop-fn
@@ -32,6 +33,7 @@
          (fn? ->deferred)
          (fn? value)
          (fn? chain)
+         (fn? catch)
          (fn? zip)
          (fn? run)
          (fn? loop-fn)
@@ -77,3 +79,7 @@
 (defn recur
   [{:keys [recur-fn]} new-state]
   (recur-fn new-state))
+
+(defn catch
+  [{:keys [catch]} value f]
+  (catch value f))

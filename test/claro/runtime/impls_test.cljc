@@ -59,12 +59,36 @@
           (is (deferred? l))
           (chain l (fn [v] (is (= 10 v)))))))))
 
+(defn test-catch
+  [impl]
+  (let [chain #(apply impl/chain impl %&)
+        catch #(apply impl/catch impl %&)
+        value #(impl/value impl %)]
+    (testing "catch."
+      (-> (value ::no-error)
+          (chain
+            (fn [_]
+              (throw (Exception. "WHAT"))))
+          (catch
+            (fn [^Throwable t]
+              (is (= (.getMessage t) "WHAT"))
+              ::error))
+          (chain
+            (fn [v]
+              (is (= ::error v))))))))
+
 ;; ## Tests (Clojure)
 
 #?(:clj
     (deftest t-manifold
-      (test-impl manifold/impl)))
+      (test-impl manifold/impl)
+      (test-catch manifold/impl)))
 
 ;; ## Tests (Clojure + ClojureScript)
 (deftest t-core-async
-  (test-impl core-async/impl))
+  (test-impl core-async/impl)
+  (is
+    (thrown-with-msg?
+      Exception
+      #"'catch' not supported"
+      (test-catch core-async/impl))))

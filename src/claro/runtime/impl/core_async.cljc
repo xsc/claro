@@ -30,6 +30,12 @@
           (<! (chain next-ch rst)))))
     (->channel ch)))
 
+(defn- catch-exceptions
+  [ch f]
+  (throw
+    (Exception.
+      "'catch' not supported for core.async deferrables.")))
+
 (defn- zip
   [chs]
   (async/go-loop
@@ -66,6 +72,7 @@
    :->deferred  ->channel
    :value       #(async/go %)
    :chain       chain
+   :catch       catch-exceptions
    :zip         zip
    :run         #(async/thread (%))
    :loop-fn     async-loop
