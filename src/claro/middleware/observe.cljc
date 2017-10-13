@@ -14,6 +14,21 @@
 
 ;; ## Middlewares
 
+(defn ^{:added "0.2.20"} wrap-observe*
+  "Middleware that will pass the environment, the batch and the full resolution
+   result (a map of resolvable to value) to the given function."
+  ([engine observer-fn]
+   (wrap-observe* engine engine/wrap-transform observer-fn))
+  ([engine wrap-fn observer-fn]
+   {:pre [(ifn? observer-fn)]}
+   (->> (fn [resolver]
+          (fn [env batch]
+            (impl/chain1
+              (engine/impl engine)
+              (resolver env batch)
+              #(do (observer-fn env batch %) %))))
+        (wrap-fn engine))))
+
 (defn wrap-observe
   "Middleware that will pass any `Resolvable` that matches `predicate` – as well
    as the resolved result – to `observer-fn`.
@@ -33,13 +48,10 @@
    (wrap-observe engine (constantly true) observer-fn))
   ([engine predicate observer-fn]
    {:pre [(ifn? predicate) (ifn? observer-fn)]}
-   (->> (fn [resolver]
-          (fn [env batch]
-            (impl/chain1
-              (engine/impl engine)
-              (resolver env batch)
-              #(observe! predicate observer-fn %))))
-        (engine/wrap-transform engine))))
+   (wrap-observe*
+     engine
+     (fn [env batch resolvable->result]
+       (observe! predicate observer-fn resolvable->result)))))
 
 (defn wrap-observe-by-class
   "Middleware that will pass any `Resolvable` of one of the given
@@ -81,16 +93,12 @@
   ([engine observer-fn]
    (wrap-observe-batches engine (constantly true) observer-fn))
   ([engine predicate observer-fn]
-   (->> (fn [resolver]
-          (fn [env batch]
-            (impl/chain1
-              (engine/impl engine)
-              (resolver env batch)
-              (fn [result]
-                (when (predicate batch)
-                  (observer-fn result))
-                result))))
-        (engine/wrap-transform engine))))
+   {:pre [(ifn? predicate) (ifn? observer-fn)]}
+   (wrap-observe*
+     engine
+     (fn [env batch resolvable->result]
+       (when (predicate batch)
+         (observer-fn resolvable->result))))))
 
 (defn wrap-observe-batches-by-class
   "Middleware that will pass the result of any batch of `classes-to-observe`
