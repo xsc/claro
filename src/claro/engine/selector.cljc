@@ -5,11 +5,12 @@
    See the [Engine][1] documentation.
 
    [1]: 03-engine.md
-   ")
+   "
+  (:require [potemkin :refer [defprotocol+]]))
 
 ;; ## Protocol
 
-(defprotocol Selector
+(defprotocol+ Selector
   (instantiate [selector]
     "Generate a selector instance, i.e. a function taking a map of
      classes/resolvables and returning a seq of classes to resolve during
