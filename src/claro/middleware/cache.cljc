@@ -24,13 +24,9 @@
 
 (defn- cache-writer
   [cache]
-  (fn [env batch resolvable->result]
-    (let [cacheable (->> (for [[resolvable result :as e] resolvable->result
-                               :when (not (p/pure-resolvable? resolvable))]
-                           e)
-                         (into {}))]
-      (when-not (empty? cacheable)
-        (cache-put cache env cacheable)))))
+  (fn [env [resolvable] resolvable->result]
+    (when-not (p/pure-resolvable? resolvable)
+      (cache-put cache env resolvable->result))))
 
 (defn- cache-reader
   [cache]
