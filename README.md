@@ -76,6 +76,10 @@ And here we go:
 ;; => {:id 1, :name "Sherlock Holmes", :friends ["Dr. Watson", "Ms. Hudson"]}
 ```
 
+## Middlewares
+
+- [claro.circuit-breaker](https://github.com/xsc/claro.circuit-breaker)
+
 ## Documentation
 
 1. [Basic Resolution](doc/00-basics.md)
