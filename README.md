@@ -76,9 +76,18 @@ And here we go:
 ;; => {:id 1, :name "Sherlock Holmes", :friends ["Dr. Watson", "Ms. Hudson"]}
 ```
 
-## Middlewares
+## Related Projects
 
-- [claro.circuit-breaker](https://github.com/xsc/claro.circuit-breaker)
+| Library | Description |
+|:------- |:----------- |
+|[alumbra][alumbra]|GraphQL implementation on top of claro|
+|[claro.circuit-breaker][claro-cb]|Circuit-breaker middleware based on [resilience4j][r4j]|
+
+Feel free to open a pull request to add your project to this table.
+
+[alumbra]: https://github.com/alumbra/alumbra
+[claro-cb]:https://github.com/xsc/claro.circuit-breaker
+[r4j]: https://github.com/resilience4j/resilience4j
 
 ## Documentation
 
