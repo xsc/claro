@@ -3,20 +3,7 @@
 
 ;; ## Record
 
-(deftype ResolutionError [message data]
-  p/ResolvableTree
-  (wrapped? [_]
-    false)
-  (processable? [_]
-    true)
-  (unwrap-tree [this]
-    this)
-  (resolved? [_]
-    true)
-  (resolvables* [_]
-    [])
-  (apply-resolved-values [this _]
-    this))
+(deftype ResolutionError [message data])
 
 (defmethod print-method ResolutionError
   [^ResolutionError value ^java.io.Writer writer]
