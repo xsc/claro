@@ -9,7 +9,8 @@
                  [org.clojure/core.async "0.3.443" :scope "provided"]
                  [potemkin "0.4.4"]
                  [manifold "0.1.6"]
-                 [riddley "0.1.14"]]
+                 [riddley "0.1.14"]
+                 [com.rpl/specter "1.0.5"]]
   :profiles {:dev
              {:dependencies [[org.clojure/test.check "0.9.0"]
                              [com.gfredericks/test.chuck "0.2.8"]
@@ -51,7 +52,7 @@
                               claro.projection-benchmarks.union]}]}
               :jvm-opts ^:replace ["-server" "-XX:+TieredCompilation"]}
              :codox
-             {:dependencies [[org.clojure/tools.reader "1.1.0"]
+             {:dependencies [[org.clojure/tools.reader "1.1.1"]
                              [codox-theme-rdash "0.1.2"]]
               :plugins [[lein-codox "0.10.3"]]
               :codox {:project {:name "claro"}
@@ -67,7 +68,7 @@
                                    #"^claro\.middleware\..*"
                                    claro.projection]}}
              :coverage {:plugins [[lein-cloverage "1.0.9"]]
-                        :dependencies [[org.clojure/tools.reader "1.1.0"]]}}
+                        :dependencies [[org.clojure/tools.reader "1.1.1"]]}}
   :aliases {"codox" ["with-profile" "codox,dev" "codox"]
             "codecov" ["with-profile" "+coverage" "cloverage" "--codecov"]}
   :pedantic? :abort)
