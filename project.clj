@@ -45,7 +45,7 @@
                               claro.projection-benchmarks.union]}
                 {:name :tree
                  :namespaces [claro.performance-benchmarks.wrap-tree
-                              claro.performance-benchmarks.apply-resolved-values]}
+                              claro.performance-benchmarks.fold]}
                 {:name :projections
                  :namespaces [claro.projection-benchmarks.deep
                               claro.projection-benchmarks.sequential
@@ -69,6 +69,7 @@
                                    claro.projection]}}
              :coverage {:plugins [[lein-cloverage "1.0.9"]]
                         :dependencies [[org.clojure/tools.reader "1.1.1"]]}}
-  :aliases {"codox" ["with-profile" "codox,dev" "codox"]
-            "codecov" ["with-profile" "+coverage" "cloverage" "--codecov"]}
+  :aliases {"codox"     ["with-profile" "codox,dev" "codox"]
+            "codecov"   ["with-profile" "+coverage" "cloverage" "--codecov"]
+            "perforate" ["with-profile" "+benchmarks" "perforate"]}
   :pedantic? :abort)

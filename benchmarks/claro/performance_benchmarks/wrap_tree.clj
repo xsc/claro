@@ -1,6 +1,6 @@
 (ns claro.performance-benchmarks.wrap-tree
   (:require [perforate.core :refer [defgoal defcase]]
-            [claro.data.tree :as tree]
+            [claro.tree :as tree]
             [claro.data :as data]))
 
 (defgoal wrap-tree
@@ -18,25 +18,25 @@
               elements)]
   (defcase wrap-tree :map
     []
-    (tree/wrap-tree value)))
+    (tree/wrap value)))
 
 (let [value (vec elements)]
   (defcase wrap-tree :vector
     []
-    (tree/wrap-tree value)))
+    (tree/wrap value)))
 
 (let [value (list* elements)]
   (defcase wrap-tree :list
     []
-    (tree/wrap-tree value)))
+    (tree/wrap value)))
 
 (let [value (set elements)]
   (defcase wrap-tree :set
     []
-    (tree/wrap-tree value)))
+    (tree/wrap value)))
 
 (let [value (-> (iterate #(hash-map :value %) (first elements))
                 (nth 100))]
   (defcase wrap-tree :deep
     []
-    (tree/wrap-tree value)))
+    (tree/wrap value)))
